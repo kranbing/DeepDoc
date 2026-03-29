@@ -30,6 +30,109 @@ const state = {
 
 let suppressScrollSync = false;
 
+function reorderPdfSections(pagesWrap, start, end) {
+  const frag = document.createDocumentFragment();
+  for (let p = start; p <= end; p++) {
+    const el = pagesWrap.querySelector(`.pdf-page-section[data-page-no="${p}"]`);
+    if (el) frag.appendChild(el);
+  }
+  pagesWrap.appendChild(frag);
+}
+
+function pdfImageSectionNeedsRebuild(section, filename, viewKind) {
+  return section.dataset.imgFile !== filename || section.dataset.viewKind !== viewKind;
+}
+
+/** 与后端同源；file:// 打开时默认连本机 8765 */
+const API_BASE = (() => {
+  if (typeof window !== "undefined") {
+    const p = window.location;
+    if (p.protocol === "http:" || p.protocol === "https:") {
+      return `${p.protocol}//${p.host}`;
+    }
+  }
+  return "http://127.0.0.1:8765";
+})();
+
+/** 磁盘项目内 PDF 文档的某一页 PNG */
+function buildPdfPageImageUrl(doc, filename) {
+  if (!doc?.isPdf || !filename || !state.currentProjectId) return null;
+  return `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/files/pdf-pages/${encodeURIComponent(doc.id)}/${encodeURIComponent(filename)}`;
+}
+
+function rebuildPdfDocDerivedFields() {
+  for (const d of state.docs) {
+    if (d.isPdf && Array.isArray(d.pdfPageImages)) {
+      d.pdfNumPages = d.pdfPageImages.length;
+    }
+    if (d.isPdf && d.ocrParsed && d.pdfViewMode !== "parsed" && d.pdfViewMode !== "original") {
+      d.pdfViewMode = "parsed";
+    }
+  }
+}
+
+function flattenOcrBlockList(doc) {
+  const out = [];
+  for (const pg of doc.ocrBlocksByPage || []) {
+    const pn = pg.pageNo;
+    for (const f of pg.files || []) {
+      out.push({ pageNo: pn, filename: f });
+    }
+  }
+  return out;
+}
+
+function buildOcrBlockImageUrl(doc, filename) {
+  if (!doc?.isPdf || !filename || !state.currentProjectId) return null;
+  return `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/files/ocr-blocks/${encodeURIComponent(doc.id)}/${encodeURIComponent(filename)}`;
+}
+
+function getPdfNavTotal(doc) {
+  if (!doc?.isPdf) return 1;
+  if (doc.ocrParsed && doc.pdfViewMode === "parsed" && doc.ocrBlocksByPage?.length) {
+    const n = flattenOcrBlockList(doc).length;
+    return n > 0 ? n : 1;
+  }
+  return doc.pdfNumPages || doc.pdfPageImages?.length || 1;
+}
+
+function isPdfParsedView(doc) {
+  return !!(
+    doc?.isPdf &&
+    doc.ocrParsed &&
+    doc.pdfViewMode === "parsed" &&
+    doc.ocrBlocksByPage?.length &&
+    flattenOcrBlockList(doc).length > 0
+  );
+}
+
+function updateParseOcrButton() {
+  const btn = $("#btnParseOcr");
+  if (!btn) return;
+  const doc = getSelectedDoc();
+  const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
+  const disk = proj?.storage === "disk" && state.appPhase === "workspace";
+  if (!doc?.isPdf || !disk) {
+    btn.disabled = true;
+    btn.textContent = "解析";
+    btn.title = "请先选择本地项目中的 PDF 文档";
+    return;
+  }
+  btn.disabled = false;
+  if (!doc.ocrParsed) {
+    btn.textContent = "解析";
+    btn.title = "GLM-OCR 解析（首次），每页生成版面可视化（框+标签）";
+    return;
+  }
+  if (doc.pdfViewMode === "parsed") {
+    btn.textContent = "原文";
+    btn.title = "切换为整页原图";
+  } else {
+    btn.textContent = "解析";
+    btn.title = "切换为版面可视化";
+  }
+}
+
 // 兜底示例数据：即使你直接双击打开 index.html（没有跑本地 server）也能正常展示。
 const fallbackData = {
   docs: [
@@ -248,6 +351,7 @@ function setViewMode(mode) {
     renderFileList();
     renderChat();
     renderDocumentContinuous();
+    updateParseOcrButton();
   }
 }
 
@@ -529,19 +633,151 @@ function renderFileList() {
 
     const sub = document.createElement("div");
     sub.className = "file-sub";
-    sub.textContent = `Created: ${formatDate(doc.createdAt)} • Pages: ${doc.pages?.length ?? 0}`;
+    sub.textContent = doc.isPdf
+      ? doc.pdfNumPages
+        ? `Created: ${formatDate(doc.createdAt)} • Pages: ${doc.pdfNumPages}`
+        : `Created: ${formatDate(doc.createdAt)} • PDF`
+      : `Created: ${formatDate(doc.createdAt)} • Pages: ${doc.pages?.length ?? 0}`;
 
     main.appendChild(name);
     main.appendChild(sub);
 
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "file-item-delete";
+    del.title = "删除";
+    del.setAttribute("aria-label", `删除 ${doc.name}`);
+    del.textContent = "×";
+
     li.appendChild(icon);
     li.appendChild(main);
+    li.appendChild(del);
     list.appendChild(li);
   });
 }
 
 function getSelectedDoc() {
   return state.docs.find((d) => d.id === state.selectedDocId) || null;
+}
+
+async function handleParseOcrClick() {
+  const doc = getSelectedDoc();
+  const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
+  if (!doc?.isPdf || proj?.storage !== "disk" || state.appPhase !== "workspace") return;
+
+  if (doc.ocrParsed) {
+    doc.pdfViewMode = doc.pdfViewMode === "parsed" ? "original" : "parsed";
+    state.currentPage = 1;
+    renderDocHeader();
+    renderDocumentContinuous();
+    updateParseOcrButton();
+    await saveWorkspaceToDisk();
+    return;
+  }
+
+  const btn = $("#btnParseOcr");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "解析中…";
+  }
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(doc.id)}/ocr-parse`,
+      { method: "POST" }
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(typeof err.detail === "string" ? err.detail : `解析失败 (${res.status})`);
+      return;
+    }
+    const data = await res.json();
+    const updated = data.doc;
+    if (updated) {
+      const idx = state.docs.findIndex((d) => d.id === doc.id);
+      if (idx >= 0) {
+        state.docs[idx] = { ...state.docs[idx], ...updated };
+      }
+    }
+    state.currentPage = 1;
+    renderDocHeader();
+    renderDocumentContinuous();
+    renderFileList();
+    updateParseOcrButton();
+  } catch (e) {
+    console.warn(e);
+    alert("解析失败，请确认后端已启动。");
+  } finally {
+    updateParseOcrButton();
+  }
+}
+
+async function deleteDocument(docId) {
+  const doc = state.docs.find((d) => d.id === docId);
+  if (!doc) return;
+  if (!confirm(`确定删除「${doc.name}」？此操作不可恢复。`)) return;
+
+  const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
+  const useApi =
+    state.currentProjectId &&
+    proj?.storage === "disk" &&
+    state.appPhase === "workspace";
+
+  if (useApi) {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const detail = err.detail;
+        alert(typeof detail === "string" ? detail : `删除失败 (${res.status})`);
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      state.docs = state.docs.filter((d) => d.id !== docId);
+      delete state.threads[docId];
+      if (Object.prototype.hasOwnProperty.call(data, "selectedDocId")) {
+        state.selectedDocId = data.selectedDocId;
+      } else if (state.selectedDocId === docId) {
+        state.selectedDocId = state.docs[0]?.id ?? null;
+      }
+    } catch (e) {
+      console.warn(e);
+      alert("删除失败，请确认后端已启动。");
+      return;
+    }
+  } else {
+    state.docs = state.docs.filter((d) => d.id !== docId);
+    delete state.threads[docId];
+    if (state.selectedDocId === docId) {
+      state.selectedDocId = null;
+    }
+  }
+
+  const q = ($("#fileSearch") && $("#fileSearch").value.trim().toLowerCase()) || "";
+  if (!q) state.filteredDocs = state.docs.slice();
+  else state.filteredDocs = state.docs.filter((d) => d.name.toLowerCase().includes(q));
+
+  if (state.docs.length && !state.selectedDocId) {
+    initThreadSelection();
+  }
+  if (
+    state.selectedDocId &&
+    !state.filteredDocs.some((d) => d.id === state.selectedDocId)
+  ) {
+    const next = state.filteredDocs[0] || state.docs[0];
+    state.selectedDocId = next ? next.id : null;
+  }
+
+  renderFileList();
+  if (state.viewMode === "document") {
+    renderDocHeader();
+    renderDocumentContinuous();
+    renderChat();
+  } else {
+    renderCenterHeader();
+  }
 }
 
 function setSelectedDoc(docId, { keepMessages = false } = {}) {
@@ -568,18 +804,42 @@ function renderDocHeader() {
     $("#docSubmeta").textContent = "-";
     $("#pageTotal").textContent = "/ 1";
     $("#viewerHint").style.display = "block";
+    updateParseOcrButton();
     return;
   }
 
   $("#viewerHint").style.display = "none";
   $("#docName").textContent = doc.name;
-  $("#docSubmeta").textContent = doc.docSummary || `Created: ${formatDate(doc.createdAt)}`;
+  if (doc.isPdf && doc.ocrParsed) {
+    $("#docSubmeta").textContent =
+      (doc.pdfViewMode === "parsed" ? "解析视图 · " : "原文视图 · ") +
+      (doc.docSummary || `Created: ${formatDate(doc.createdAt)}`);
+  } else {
+    $("#docSubmeta").textContent = doc.docSummary || `Created: ${formatDate(doc.createdAt)}`;
+  }
+
+  if (doc.isPdf) {
+    const total = getPdfNavTotal(doc);
+    if (total) {
+      $("#pageTotal").textContent = `/ ${total}`;
+      $("#pageNum").max = String(total);
+      if (state.currentPage > total) state.currentPage = 1;
+      $("#pageNum").value = String(state.currentPage);
+    } else {
+      $("#pageTotal").textContent = "/ …";
+      $("#pageNum").max = "9999";
+      $("#pageNum").value = String(state.currentPage);
+    }
+    updateParseOcrButton();
+    return;
+  }
 
   const total = doc.pages?.length ?? 1;
   $("#pageTotal").textContent = `/ ${total}`;
   $("#pageNum").max = String(total);
   if (state.currentPage > total) state.currentPage = 1;
   $("#pageNum").value = String(state.currentPage);
+  updateParseOcrButton();
 }
 
 function scrollToPage(pageNo) {
@@ -596,13 +856,137 @@ function scrollToPage(pageNo) {
 function renderDocumentContinuous() {
   const doc = getSelectedDoc();
   const pagesWrap = $("#pages");
+
+  document.documentElement.style.setProperty("--zoom", String(state.zoom));
+
+  if (doc && doc.isPdf) {
+    const images = doc.pdfPageImages;
+    const pageCount =
+      doc.pdfNumPages ||
+      (Array.isArray(images) ? images.length : 0) ||
+      0;
+    const parsedView = isPdfParsedView(doc);
+    const flatBlocks = parsedView ? flattenOcrBlockList(doc) : [];
+
+    if (parsedView && flatBlocks.length === 0) {
+      pagesWrap.innerHTML = "";
+      delete pagesWrap.dataset.pdfDocId;
+      delete pagesWrap.dataset.pdfViewKey;
+      const hint = document.createElement("div");
+      hint.className = "viewer-hint";
+      hint.textContent = "解析数据为空，请重新解析或切换为原文。";
+      pagesWrap.appendChild(hint);
+      return;
+    }
+
+    if (
+      !parsedView &&
+      (!state.currentProjectId ||
+        !Array.isArray(images) ||
+        images.length === 0 ||
+        !pageCount)
+    ) {
+      pagesWrap.innerHTML = "";
+      delete pagesWrap.dataset.pdfDocId;
+      delete pagesWrap.dataset.pdfViewKey;
+      const hint = document.createElement("div");
+      hint.className = "viewer-hint";
+      hint.textContent =
+        "无法展示页面图片：缺少项目数据或本地未生成页面图。请在服务端打开项目后重新上传 PDF。";
+      pagesWrap.appendChild(hint);
+      return;
+    }
+    $("#viewerHint").style.display = "none";
+
+    doc.pdfNumPages = pageCount;
+    const numPages = parsedView ? flatBlocks.length : pageCount;
+    renderDocHeader();
+    const cur = clamp(state.currentPage, 1, numPages);
+    state.currentPage = cur;
+    $("#pageNum").value = String(cur);
+    $("#pageTotal").textContent = `/ ${numPages}`;
+    $("#pageNum").max = String(numPages);
+
+    const viewKey = `${doc.id}|${parsedView ? "p" : "o"}`;
+    if (pagesWrap.dataset.pdfViewKey !== viewKey) {
+      pagesWrap.innerHTML = "";
+      pagesWrap.dataset.pdfViewKey = viewKey;
+      pagesWrap.dataset.pdfDocId = doc.id;
+    } else if (String(pagesWrap.dataset.pdfDocId || "") !== doc.id) {
+      pagesWrap.innerHTML = "";
+      pagesWrap.dataset.pdfDocId = doc.id;
+      pagesWrap.dataset.pdfViewKey = viewKey;
+    }
+
+    const start = 1;
+    const end = numPages;
+
+    pagesWrap.querySelectorAll(".pdf-page-section[data-page-no]").forEach((el) => {
+      const pn = Number(el.dataset.pageNo);
+      if (pn > numPages || pn < 1) el.remove();
+    });
+
+    const viewKind = parsedView ? "parsed" : "original";
+
+    for (let p = start; p <= end; p++) {
+      let fn;
+      let src;
+      let alt;
+      if (parsedView) {
+        const b = flatBlocks[p - 1];
+        fn = b.filename;
+        src = buildOcrBlockImageUrl(doc, fn);
+        alt = `第 ${b.pageNo} 页 · 版面可视化`;
+      } else {
+        fn = images[p - 1];
+        src = buildPdfPageImageUrl(doc, fn);
+        alt = `第 ${p} 页`;
+      }
+      if (!src) continue;
+
+      const existing = pagesWrap.querySelector(`.pdf-page-section[data-page-no="${p}"]`);
+      if (existing && !pdfImageSectionNeedsRebuild(existing, fn, viewKind)) {
+        continue;
+      }
+      if (existing) existing.remove();
+
+      const section = document.createElement("div");
+      section.className = "page-section pdf-page-section";
+      section.dataset.pageNo = String(p);
+      section.dataset.imgFile = fn;
+      section.dataset.viewKind = viewKind;
+
+      const wrap = document.createElement("div");
+      wrap.className = "pdf-page-img-wrap";
+
+      const img = document.createElement("img");
+      img.className = "pdf-page-img";
+      img.alt = alt;
+      img.decoding = "sync";
+      img.src = src;
+
+      wrap.appendChild(img);
+      section.appendChild(wrap);
+      pagesWrap.appendChild(section);
+    }
+
+    reorderPdfSections(pagesWrap, start, end);
+    renderFileList();
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollToPage(cur);
+      });
+    });
+    return;
+  }
+
   pagesWrap.innerHTML = "";
+  delete pagesWrap.dataset.pdfDocId;
+  delete pagesWrap.dataset.pdfViewKey;
 
   const total = doc?.pages?.length ?? 0;
   if (!doc || total === 0) return;
-
-  // 文档缩放通过 CSS 变量完成，不改动布局滚动高度。
-  document.documentElement.style.setProperty("--zoom", String(state.zoom));
 
   for (const p of doc.pages) {
     const section = document.createElement("div");
@@ -720,6 +1104,17 @@ function clamp(n, min, max) {
 function setCurrentPage(pageNo, { withRender = false } = {}) {
   const doc = getSelectedDoc();
   if (!doc) return;
+  if (doc.isPdf) {
+    const total = getPdfNavTotal(doc);
+    if (total) {
+      state.currentPage = clamp(Number(pageNo) || 1, 1, total);
+    } else {
+      state.currentPage = 1;
+    }
+    $("#pageNum").value = String(state.currentPage);
+    if (total) renderDocumentContinuous();
+    return;
+  }
   const total = doc.pages?.length ?? 1;
   state.currentPage = clamp(Number(pageNo) || 1, 1, total);
   $("#pageNum").value = String(state.currentPage);
@@ -745,7 +1140,7 @@ function simulateAssistantReply(doc, userText) {
   }
 
   if (lower.includes("下一步") || lower.includes("next") || lower.includes("recommend")) {
-    return `下一步建议（演示版）：\n1) 接入真实 PDF 解析（如 PDF.js）替换示例文本。\n2) 将“文档搜索”改为对解析文本建立索引。\n3) 聊天回复对接你的后端/LLM，并把对话状态持久化到服务端。`;
+    return `下一步建议（演示版）：\n1) 上传的 PDF 已在服务端转为页面图片；可将“文档搜索”接到全文索引。\n2) 聊天回复对接你的后端/LLM，并把对话状态持久化到服务端。`;
   }
 
   if (lower.includes("第") || lower.includes("page") || lower.includes("页")) {
@@ -812,7 +1207,47 @@ function setupEventHandlers() {
   $("#projectGrid")?.addEventListener("click", (e) => {
     const card = e.target.closest(".project-card");
     if (!card?.dataset.projectId) return;
-    enterWorkspace(card.dataset.projectId);
+    void enterWorkspace(card.dataset.projectId).catch((err) => console.warn("[app] enter workspace", err));
+  });
+
+  const modal = $("#createProjectModal");
+  const openCreate = () => {
+    if (modal) modal.hidden = false;
+    $("#inputProjectName")?.focus();
+  };
+  const closeCreate = () => {
+    if (modal) modal.hidden = true;
+    const inp = $("#inputProjectName");
+    if (inp) inp.value = "";
+  };
+  $("#btnCreateProject")?.addEventListener("click", openCreate);
+  modal?.addEventListener("click", (e) => {
+    if (e.target?.dataset?.close === "modal") closeCreate();
+  });
+  $("#btnCancelCreate")?.addEventListener("click", closeCreate);
+  $("#btnSubmitCreate")?.addEventListener("click", () => void submitCreateProject(closeCreate));
+
+  window.addEventListener("beforeunload", () => {
+    if (state.appPhase !== "workspace") return;
+    const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
+    if (!proj || proj.storage !== "disk") return;
+    const body = JSON.stringify({
+      threads: state.threads,
+      dbThreads: state.dbThreads,
+      docs: state.docs,
+      databases: state.databases,
+      artifacts: state.artifacts,
+      selectedDocId: state.selectedDocId,
+      selectedDbId: state.selectedDbId,
+      selectedArtifactId: state.selectedArtifactId,
+      viewMode: state.viewMode,
+    });
+    fetch(`${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/workspace`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
   });
 
   $("#fileSearch").addEventListener("input", () => {
@@ -828,6 +1263,13 @@ function setupEventHandlers() {
   });
 
   $("#fileList").addEventListener("click", (e) => {
+    if (e.target.closest(".file-item-delete")) {
+      e.preventDefault();
+      e.stopPropagation();
+      const row = e.target.closest(".file-item");
+      if (row?.dataset.docId) void deleteDocument(row.dataset.docId);
+      return;
+    }
     const item = e.target.closest(".file-item");
     if (!item) return;
     const docId = item.dataset.docId;
@@ -913,10 +1355,14 @@ function setupEventHandlers() {
     const q = e.target.value.trim();
     state.docSearchQuery = q;
 
-    // 如果有关键词，就自动跳转到包含关键词的第一页（演示行为）
     const doc = getSelectedDoc();
+    if (doc?.isPdf) {
+      return;
+    }
     if (doc && q) {
-      const first = doc.pages?.find((p) => p.text.toLowerCase().includes(q.toLowerCase()));
+      const first = doc.pages?.find((p) =>
+        String(p.text ?? "").toLowerCase().includes(q.toLowerCase())
+      );
       if (first) {
         state.currentPage = clamp(first.pageNo, 1, doc.pages?.length ?? 1);
         $("#pageNum").value = String(state.currentPage);
@@ -934,11 +1380,92 @@ function setupEventHandlers() {
     await handleSendMessage(text);
   });
 
+  const btnParseOcr = $("#btnParseOcr");
+  if (btnParseOcr) {
+    btnParseOcr.addEventListener("click", () => void handleParseOcrClick());
+  }
+
   $("#btnUpload").addEventListener("click", () => $("#fileInput").click());
 
-  $("#fileInput").addEventListener("change", (e) => {
+  $("#fileInput").addEventListener("change", async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
+
+    if (!f.name.toLowerCase().endsWith(".pdf")) {
+      alert("请选择 PDF 文件");
+      $("#fileInput").value = "";
+      return;
+    }
+
+    const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
+    if (
+      state.currentProjectId &&
+      proj?.storage === "disk" &&
+      state.appPhase === "workspace"
+    ) {
+      try {
+        const fd = new FormData();
+        fd.append("file", f, f.name);
+        const res = await fetch(
+          `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/upload/pdf`,
+          { method: "POST", body: fd }
+        );
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          const detail = err.detail;
+          alert(
+            typeof detail === "string"
+              ? detail
+              : Array.isArray(detail)
+                ? detail.map((x) => x.msg || JSON.stringify(x)).join("\n")
+                : `上传失败 (${res.status})`
+          );
+          $("#fileInput").value = "";
+          return;
+        }
+        const data = await res.json();
+        const pdfFileName = data.savedFilename;
+        const newDocId = data.docId;
+        const pageImages = Array.isArray(data.pageImages) ? data.pageImages : [];
+        const pageCount = Number(data.pageCount) || pageImages.length;
+        const uploadedDoc = {
+          id: newDocId,
+          name: f.name,
+          createdAt: new Date().toISOString().slice(0, 10),
+          isPdf: true,
+          pdfFileName,
+          pdfPageImages: pageImages,
+          pdfNumPages: pageCount,
+          pdfViewMode: "original",
+          pages: [],
+          docSummary: "已上传 PDF，服务端已转为页面图片并保存在项目目录。"
+        };
+
+        state.docs.unshift(uploadedDoc);
+        state.filteredDocs = state.docs.slice();
+
+        state.threads[newDocId] = {
+          meta: "ready",
+          suggestions: ["总结这份文档", "列出要点", "下一步建议是什么？"],
+          messages: [
+            {
+              role: "assistant",
+              text: `已上传并保存《${f.name}》，已生成 ${pageCount} 张页面图，中间区域按页展示。`
+            }
+          ]
+        };
+
+        $("#fileInput").value = "";
+        setSelectedDoc(newDocId);
+        await saveWorkspaceToDisk();
+        return;
+      } catch (err) {
+        console.warn(err);
+        alert("上传失败，请确认后端已启动且当前为本地项目。");
+        $("#fileInput").value = "";
+        return;
+      }
+    }
 
     const newDocId = `upload_${Date.now()}`;
     const uploadedDoc = {
@@ -961,7 +1488,6 @@ function setupEventHandlers() {
     state.docs.unshift(uploadedDoc);
     state.filteredDocs = state.docs.slice();
 
-    // 初始化线程
     state.threads[newDocId] = {
       meta: "ready",
       suggestions: ["总结这份文档", "列出要点", "下一步建议是什么？"],
@@ -1041,14 +1567,31 @@ function legacyProjectBundle(json) {
 }
 
 function normalizeProject(p) {
+  const isDisk = p.storage === "disk";
+  const databases = Array.isArray(p.databases)
+    ? p.databases
+    : isDisk
+      ? []
+      : fallbackDatabases.slice();
+  const artifacts = Array.isArray(p.artifacts)
+    ? p.artifacts
+    : isDisk
+      ? []
+      : fallbackArtifacts.slice();
   return {
     id: p.id,
     name: p.name,
     summary: p.summary || "",
     docs: p.docs?.length ? p.docs : [],
     threads: p.threads && typeof p.threads === "object" ? p.threads : {},
-    databases: p.databases?.length ? p.databases : fallbackDatabases.slice(),
-    artifacts: p.artifacts?.length ? p.artifacts : fallbackArtifacts.slice(),
+    databases,
+    artifacts,
+    storage: p.storage,
+    dbThreads: p.dbThreads && typeof p.dbThreads === "object" ? p.dbThreads : undefined,
+    selectedDocId: p.selectedDocId,
+    selectedDbId: p.selectedDbId,
+    selectedArtifactId: p.selectedArtifactId,
+    viewMode: p.viewMode,
   };
 }
 
@@ -1059,14 +1602,35 @@ function applyProjectBundle(proj) {
   } catch {
     state.threads = {};
   }
+  try {
+    state.dbThreads = proj.dbThreads ? JSON.parse(JSON.stringify(proj.dbThreads)) : {};
+  } catch {
+    state.dbThreads = {};
+  }
   state.filteredDocs = state.docs.slice();
-  state.databases = proj.databases?.length ? proj.databases.slice() : fallbackDatabases.slice();
+  const isDisk = proj.storage === "disk";
+  state.databases = proj.databases?.length
+    ? proj.databases.slice()
+    : isDisk
+      ? []
+      : fallbackDatabases.slice();
   state.filteredDatabases = state.databases.slice();
-  state.selectedDbId = state.databases[0]?.id ?? null;
-  state.dbThreads = {};
-  state.artifacts = proj.artifacts?.length ? proj.artifacts.slice() : fallbackArtifacts.slice();
+  state.artifacts = proj.artifacts?.length
+    ? proj.artifacts.slice()
+    : isDisk
+      ? []
+      : fallbackArtifacts.slice();
   state.filteredArtifacts = state.artifacts.slice();
-  state.selectedArtifactId = state.artifacts[0]?.id ?? null;
+
+  state.selectedDbId =
+    proj.selectedDbId !== undefined && proj.selectedDbId !== null
+      ? proj.selectedDbId
+      : state.databases[0]?.id ?? null;
+  state.selectedArtifactId =
+    proj.selectedArtifactId !== undefined && proj.selectedArtifactId !== null
+      ? proj.selectedArtifactId
+      : state.artifacts[0]?.id ?? null;
+
   state.selectedDocId = null;
   state.currentPage = 1;
   state.zoom = 1;
@@ -1076,7 +1640,19 @@ function applyProjectBundle(proj) {
   state.docSearchQuery = "";
   const ds = $("#docSearch");
   if (ds) ds.value = "";
-  initThreadSelection();
+
+  if (proj.selectedDocId !== undefined && proj.selectedDocId !== null) {
+    state.selectedDocId = proj.selectedDocId;
+  } else {
+    initThreadSelection();
+  }
+  if (!state.docs.length) state.selectedDocId = null;
+
+  if (proj.viewMode && ["document", "database", "results"].includes(proj.viewMode)) {
+    state.viewMode = proj.viewMode;
+  }
+
+  if (proj.storage === "disk") rebuildPdfDocDerivedFields();
 }
 
 function renderLandingUser() {
@@ -1092,6 +1668,13 @@ function renderLandingProjects() {
   const grid = $("#projectGrid");
   if (!grid) return;
   grid.innerHTML = "";
+  if (!state.projectsCatalog.length) {
+    const empty = document.createElement("p");
+    empty.className = "landing-empty-hint";
+    empty.textContent = "暂无项目，请点击「新建项目」创建。";
+    grid.appendChild(empty);
+    return;
+  }
   state.projectsCatalog.forEach((p) => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -1110,12 +1693,83 @@ function renderLandingProjects() {
   });
 }
 
-function enterWorkspace(projectId) {
+async function fetchWorkspaceFromApi(projectId) {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/projects/${encodeURIComponent(projectId)}/workspace`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function saveWorkspaceToDisk() {
+  const id = state.currentProjectId;
+  const proj = state.projectsCatalog.find((p) => p.id === id);
+  if (!id || !proj || proj.storage !== "disk") return;
+  const docsForSave = state.docs.map((d) => {
+    const c = { ...d };
+    if (c.isPdf) {
+      delete c.pdfUrl;
+    }
+    return c;
+  });
+  const body = {
+    threads: state.threads,
+    dbThreads: state.dbThreads,
+    docs: docsForSave,
+    databases: state.databases,
+    artifacts: state.artifacts,
+    selectedDocId: state.selectedDocId,
+    selectedDbId: state.selectedDbId,
+    selectedArtifactId: state.selectedArtifactId,
+    viewMode: state.viewMode,
+  };
+  try {
+    await fetch(`${API_BASE}/api/projects/${encodeURIComponent(id)}/workspace`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    console.warn("[app] save workspace failed", e);
+  }
+}
+
+async function enterWorkspace(projectId) {
   const proj = state.projectsCatalog.find((p) => p.id === projectId);
   if (!proj) return;
   state.currentProjectId = projectId;
   state.appPhase = "workspace";
-  applyProjectBundle(proj);
+
+  let bundle = proj;
+  if (proj.storage === "disk") {
+    const data = await fetchWorkspaceFromApi(projectId);
+    if (data) {
+      const ws = data.workspace || {};
+      const meta = data.meta || {};
+      bundle = normalizeProject({
+        id: meta.id || proj.id,
+        name: meta.name || proj.name,
+        summary: meta.summary ?? proj.summary,
+        docs: ws.docs,
+        threads: ws.threads,
+        dbThreads: ws.dbThreads,
+        databases: ws.databases,
+        artifacts: ws.artifacts,
+        selectedDocId: ws.selectedDocId,
+        selectedDbId: ws.selectedDbId,
+        selectedArtifactId: ws.selectedArtifactId,
+        viewMode: ws.viewMode,
+        storage: "disk",
+      });
+    }
+  }
+
+  applyProjectBundle(bundle);
 
   const landing = $("#landingView");
   const ws = $("#workspace");
@@ -1126,30 +1780,38 @@ function enterWorkspace(projectId) {
   stopLandingMesh();
 
   const sub = $("#brandSubtitle");
-  if (sub) sub.textContent = proj.name;
+  if (sub) sub.textContent = bundle.name;
 
-  state.viewMode = "document";
-  setViewMode("document");
+  const vm =
+    state.viewMode && ["document", "database", "results"].includes(state.viewMode)
+      ? state.viewMode
+      : "document";
+  setViewMode(vm);
 
   const doc = getSelectedDoc();
   if (doc) setCurrentPage(1, { withRender: false });
+  updateParseOcrButton();
 }
 
 function exitToLanding() {
-  state.appPhase = "landing";
-  state.currentProjectId = null;
+  void (async () => {
+    await saveWorkspaceToDisk();
 
-  const landing = $("#landingView");
-  const ws = $("#workspace");
-  if (landing) landing.hidden = false;
-  if (ws) ws.hidden = true;
-  $("#app")?.classList.add("app--landing");
+    state.appPhase = "landing";
+    state.currentProjectId = null;
 
-  const sub = $("#brandSubtitle");
-  if (sub) sub.textContent = "PDF · 数据库 · 交付物（演示）";
+    const landing = $("#landingView");
+    const ws = $("#workspace");
+    if (landing) landing.hidden = false;
+    if (ws) ws.hidden = true;
+    $("#app")?.classList.add("app--landing");
 
-  landingMeshResize();
-  startLandingMesh();
+    const sub = $("#brandSubtitle");
+    if (sub) sub.textContent = "PDF · 数据库 · 交付物（演示）";
+
+    landingMeshResize();
+    startLandingMesh();
+  })();
 }
 
 /** 落地页：动态网状背景（canvas） */
@@ -1290,7 +1952,82 @@ function initLandingMesh() {
   });
 }
 
+async function tryFetchProjectsFromApi() {
+  try {
+    const res = await fetch(`${API_BASE}/api/projects`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const list = await res.json();
+    if (!Array.isArray(list)) return null;
+    return list.map((m) =>
+      normalizeProject({
+        ...m,
+        storage: "disk",
+        summary: m.summary || "本地项目 · 数据保存在 data/projects",
+      })
+    );
+  } catch {
+    return null;
+  }
+}
+
+async function submitCreateProject(closeModal) {
+  const inp = $("#inputProjectName");
+  const name = inp?.value?.trim() || "";
+  if (!name) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/projects`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) {
+      let detail = `创建失败（HTTP ${res.status}）`;
+      try {
+        const j = await res.json();
+        if (j.detail !== undefined) {
+          if (typeof j.detail === "string") {
+            detail = j.detail;
+          } else if (Array.isArray(j.detail)) {
+            detail = j.detail.map((x) => x.msg || JSON.stringify(x)).join("；");
+          } else {
+            detail = JSON.stringify(j.detail);
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+      alert(detail);
+      return;
+    }
+    const meta = await res.json();
+    const p = normalizeProject({
+      ...meta,
+      storage: "disk",
+      summary: meta.summary || "本地项目 · 数据保存在 data/projects",
+    });
+    state.projectsCatalog.push(p);
+    closeModal();
+    renderLandingProjects();
+  } catch (e) {
+    console.warn(e);
+    alert(
+      "无法连接后端。请确认：\n\n" +
+        "1）在仓库根目录已激活 .venv 并启动：\n" +
+        "   python -m uvicorn backend.main:app --host 127.0.0.1 --port 8765\n\n" +
+        "2）用浏览器打开 http://127.0.0.1:8765 （不要双击本地 index.html，否则可能无法访问 API）"
+    );
+  }
+}
+
 async function loadData() {
+  const apiProjects = await tryFetchProjectsFromApi();
+  if (apiProjects !== null) {
+    return {
+      user: fallbackUser,
+      projects: apiProjects,
+    };
+  }
+
   try {
     const res = await fetch("./data/sampleData.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
@@ -1329,7 +2066,7 @@ function initThreadSelection() {
 async function main() {
   const data = await loadData();
   state.user = data.user || fallbackUser;
-  state.projectsCatalog = data.projects?.length ? data.projects : fallbackProjects;
+  state.projectsCatalog = Array.isArray(data.projects) ? data.projects : fallbackProjects;
 
   renderLandingUser();
   renderLandingProjects();

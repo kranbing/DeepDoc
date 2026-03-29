@@ -22,8 +22,33 @@
         <div class="landing-main">
           <aside class="landing-user" id="landingUser" aria-label="用户信息"></aside>
           <div class="landing-projects-column">
-            <h2 class="landing-section-title">项目</h2>
+            <div class="landing-projects-header">
+              <h2 class="landing-section-title">项目</h2>
+              <button type="button" id="btnCreateProject" class="btn btn-primary btn-create-project">
+                新建项目
+              </button>
+            </div>
             <div id="projectGrid" class="project-grid" role="list"></div>
+          </div>
+
+          <div id="createProjectModal" class="modal" hidden>
+            <div class="modal-backdrop" data-close="modal" aria-hidden="true"></div>
+            <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalCreateTitle">
+              <h3 id="modalCreateTitle" class="modal-title">新建项目</h3>
+              <label class="modal-label" for="inputProjectName">项目名称</label>
+              <input
+                id="inputProjectName"
+                class="input modal-input"
+                type="text"
+                placeholder="例如：论文检索实验"
+                maxlength="200"
+                autocomplete="off"
+              />
+              <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" id="btnCancelCreate">取消</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitCreate">创建</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -44,7 +69,10 @@
           </div>
 
           <div class="topbar-actions">
-            <button id="btnUpload" class="btn btn-ghost" type="button" title="模拟上传">
+            <button id="btnParseOcr" class="btn btn-ghost" type="button" disabled title="请先选择 PDF">
+              解析
+            </button>
+            <button id="btnUpload" class="btn btn-ghost" type="button" title="上传 PDF">
               Upload
             </button>
             <input id="fileInput" type="file" accept="application/pdf" hidden />

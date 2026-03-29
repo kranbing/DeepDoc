@@ -1,0 +1,9 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.9
+pymupdf>=1.24.0
+pillow>=12.1.0
+# PP-DocLayoutV3 post_process (selfhosted layout mode) needs cv2
+opencv-python-headless>=4.8.0
+# GLM-OCR SDK (selfhosted extra: local Docker vLLM + layout). From repo root: pip install -r backend/requirements.txt
+-e ./GLM-OCR-0.1.4[selfhosted]

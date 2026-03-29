@@ -414,6 +414,35 @@ body {
   font-weight: 500;
 }
 
+.file-item-delete {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: flex-start;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+.file-item-delete:hover {
+  background: rgba(220, 80, 80, 0.12);
+  color: #c53030;
+}
+
+.file-item-delete:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 /* 左侧栏底部：中间区域视图切换 */
 .left-view-nav {
   flex-shrink: 0;
@@ -704,6 +733,39 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.pdf-viewer-loading {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.pdf-page-section {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 16px;
+}
+
+.pdf-page-section .page-section-head {
+  display: none;
+}
+
+.pdf-page-img-wrap {
+  width: calc(100% / var(--zoom));
+  margin: 0 auto;
+  transform: scale(var(--zoom));
+  transform-origin: top center;
+}
+
+.pdf-page-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-float);
+  background: #fff;
 }
 
 .page-section {
@@ -1042,13 +1104,36 @@ body {
   min-width: 0;
 }
 
+.landing-projects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
 .landing-section-title {
-  margin: 0 0 14px;
+  margin: 0;
   font-size: 13px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+.btn-create-project {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.landing-empty-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  grid-column: 1 / -1;
 }
 
 .landing-user {
@@ -1147,6 +1232,68 @@ body {
   padding: 8px 12px;
   font-size: 12px;
   font-weight: 600;
+}
+
+/* 新建项目弹层 */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.modal[hidden] {
+  display: none !important;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 18, 24, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  box-shadow: var(--shadow-float-hover);
+}
+
+.modal-title {
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-title);
+  letter-spacing: -0.02em;
+}
+
+.modal-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.modal-input {
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 @media (max-width: 720px) {

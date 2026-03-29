@@ -37,3 +37,7 @@ Thumbs.db
 *.log
 npm-debug.log*
 .cache/
+
+# 用户项目数据（后端 data/projects/<uuid>/）
+data/projects/**/*
+!data/projects/.gitkeep
