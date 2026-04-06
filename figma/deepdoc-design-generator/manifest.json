@@ -1,0 +1,8 @@
+{
+  "name": "DeepDOC Design Generator",
+  "id": "deepdoc-design-generator",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"]
+}
+
