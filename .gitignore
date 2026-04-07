@@ -41,3 +41,6 @@ npm-debug.log*
 # 用户项目数据（后端 data/projects/<uuid>/）
 data/projects/**/*
 !data/projects/.gitkeep
+
+test/example
+test/output

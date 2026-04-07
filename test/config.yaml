@@ -1,0 +1,4 @@
+pipeline:
+  maas:
+    enabled: true # 启用 MaaS 模式
+    api_key: ${MAAS_API_KEY} # 必填
