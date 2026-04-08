@@ -181,6 +181,14 @@
             <div id="centerViewDocument" class="center-view is-active">
               <div id="viewerHint" class="viewer-hint">从左侧选择文件后，这里会显示示例页面内容。</div>
               <div id="pages" class="pages" aria-live="polite"></div>
+              <aside id="chunkInspector" class="chunk-inspector" hidden aria-live="polite">
+                <div class="chunk-inspector-head">
+                  <div class="chunk-inspector-title">Chunk Detail</div>
+                  <div id="chunkInspectorMeta" class="chunk-inspector-meta">Click a chunk box</div>
+                </div>
+                <div id="chunkInspectorPosition" class="chunk-inspector-position"></div>
+                <pre id="chunkInspectorContent" class="chunk-inspector-content"></pre>
+              </aside>
             </div>
 
             <div id="centerViewDatabase" class="center-view">
@@ -215,13 +223,21 @@
         <aside id="panelRight" class="panel panel-right" data-viewmode="document">
           <div class="panel-header">
             <div class="panel-title" id="rightPanelTitle">Chat</div>
-            <div class="panel-meta" id="threadMeta">ready</div>
+            <div class="panel-header-actions">
+              <div class="panel-meta" id="threadMeta">ready</div>
+              <button id="btnNewConversation" class="btn btn-ghost btn-header-action" type="button">NEW</button>
+            </div>
           </div>
 
           <div class="chat-messages" id="chatMessages" role="log" aria-label="聊天消息列表"></div>
 
           <div class="chat-suggestions" id="suggestions">
             <div class="suggest-title" id="suggestTitle">Follow up</div>
+          </div>
+
+          <div id="chatHistoryPanel" class="chat-history" hidden>
+            <div class="chat-history-title">History</div>
+            <div id="chatHistoryList" class="chat-history-list" aria-label="聊天历史"></div>
           </div>
 
           <form id="chatForm" class="chat-input" autocomplete="off">
@@ -231,7 +247,10 @@
               rows="2"
               placeholder="Type a question...（例如：总结这份文档、给出要点、下一步建议）"
             ></textarea>
-            <button class="btn btn-primary" type="submit">Send</button>
+            <div class="chat-actions">
+              <button id="btnToggleHistory" class="btn btn-ghost" type="button">History</button>
+              <button class="btn btn-primary" type="submit">Send</button>
+            </div>
           </form>
         </aside>
       </main>
@@ -241,4 +260,3 @@
     <script src="./app.js"></script>
   </body>
 </html>
-

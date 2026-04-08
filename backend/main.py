@@ -21,15 +21,30 @@ import shutil
 import sys
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
+from urllib import error as urlerror
+from urllib import request as urlrequest
 
 from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+
+from backend.ocr_quality import evaluate_ocr_quality
+from backend.services.overview_service import ensure_document_overview, upsert_document_overview
+from backend.services.project_store import (
+    delete_document_directory,
+    default_documents_index,
+    documents_index_path,
+    read_document_overview,
+    remove_document_from_index,
+    write_document_quality_report,
+    write_json as write_data_json,
+    write_documents_index,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_PROJECTS = ROOT / "data" / "projects"
@@ -45,6 +60,8 @@ def ensure_project_layout(project_id: str) -> Path:
     """创建项目目录：对话、上传 PDF/数据库、输出等。"""
     p = DATA_PROJECTS / project_id
     (p / "conversations").mkdir(parents=True, exist_ok=True)
+    (p / "conversations" / "sessions").mkdir(parents=True, exist_ok=True)
+    (p / "documents").mkdir(parents=True, exist_ok=True)
     (p / "uploads" / "pdfs").mkdir(parents=True, exist_ok=True)
     (p / "uploads" / "pdf_pages").mkdir(parents=True, exist_ok=True)
     (p / "uploads" / "ocr_blocks").mkdir(parents=True, exist_ok=True)
@@ -65,6 +82,111 @@ def default_workspace_state() -> Dict[str, Any]:
         "selectedArtifactId": None,
         "viewMode": "document",
     }
+
+
+def default_now_conversation_state() -> Dict[str, Any]:
+    return {
+        "selectedItems": [],
+        "activeDocId": None,
+        "activeSessionId": None,
+        "updatedAt": _utc_now(),
+    }
+
+
+def default_qa_sessions_state() -> Dict[str, Any]:
+    return {
+        "sessions": [],
+        "updatedAt": _utc_now(),
+    }
+
+
+def default_qa_compactions_state() -> Dict[str, Any]:
+    return {
+        "sessions": {},
+        "updatedAt": _utc_now(),
+    }
+
+
+def _conversations_dir(project_dir: Path) -> Path:
+    return project_dir / "conversations"
+
+
+def _sessions_root(project_dir: Path) -> Path:
+    return _conversations_dir(project_dir) / "sessions"
+
+
+def _session_dir(project_dir: Path, session_id: str) -> Path:
+    return _sessions_root(project_dir) / session_id
+
+
+def _session_file(project_dir: Path, session_id: str) -> Path:
+    return _session_dir(project_dir, session_id) / "session.json"
+
+
+def _summary_file(project_dir: Path, session_id: str) -> Path:
+    return _session_dir(project_dir, session_id) / "summary.json"
+
+
+def _session_index_file(project_dir: Path) -> Path:
+    return _sessions_root(project_dir) / "index.json"
+
+
+def _session_index_entry(session: Dict[str, Any]) -> Dict[str, Any]:
+    turns = session.get("turns") if isinstance(session.get("turns"), list) else []
+    return {
+        "id": str(session.get("id") or ""),
+        "docId": session.get("docId"),
+        "docName": session.get("docName"),
+        "startedAt": session.get("startedAt"),
+        "updatedAt": session.get("updatedAt"),
+        "turnCount": len(turns),
+    }
+
+
+def _read_json_file(path: Path, default: Any) -> Any:
+    if not path.is_file():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return default
+
+
+def _write_json_file(path: Path, payload: Any) -> None:
+    write_data_json(path, payload)
+
+
+def _migrate_legacy_session_storage(project_dir: Path) -> None:
+    sessions_root = _sessions_root(project_dir)
+    index_path = _session_index_file(project_dir)
+    legacy_sessions_path = _conversations_dir(project_dir) / "qa_sessions.json"
+    legacy_compactions_path = _conversations_dir(project_dir) / "qa_compactions.json"
+    if index_path.is_file() or not legacy_sessions_path.is_file():
+        sessions_root.mkdir(parents=True, exist_ok=True)
+        return
+
+    legacy_store = _read_json_file(legacy_sessions_path, default_qa_sessions_state())
+    legacy_sessions = legacy_store.get("sessions") if isinstance(legacy_store.get("sessions"), list) else []
+    compaction_store = _read_json_file(legacy_compactions_path, default_qa_compactions_state())
+    legacy_compactions = compaction_store.get("sessions") if isinstance(compaction_store.get("sessions"), dict) else {}
+    migrated_entries: List[Dict[str, Any]] = []
+    sessions_root.mkdir(parents=True, exist_ok=True)
+    for raw_session in legacy_sessions:
+        if not isinstance(raw_session, dict):
+            continue
+        session = dict(raw_session)
+        session_id = str(session.get("id") or "").strip() or f"qa_{uuid.uuid4().hex[:12]}"
+        session["id"] = session_id
+        _write_json_file(_session_file(project_dir, session_id), session)
+        summary = legacy_compactions.get(session_id)
+        if isinstance(summary, dict):
+            _write_json_file(_summary_file(project_dir, session_id), summary)
+        migrated_entries.append(_session_index_entry(session))
+    migrated_entries.sort(key=lambda item: str(item.get("updatedAt") or item.get("startedAt") or ""), reverse=True)
+    _write_json_file(index_path, {"sessions": migrated_entries, "updatedAt": _utc_now()})
+    legacy_sessions_path.rename(legacy_sessions_path.with_suffix(".legacy.json"))
+    if legacy_compactions_path.is_file():
+        legacy_compactions_path.rename(legacy_compactions_path.with_suffix(".legacy.json"))
 
 
 def read_meta(project_dir: Path) -> Optional[Dict[str, Any]]:
@@ -92,8 +214,790 @@ def read_workspace(project_dir: Path) -> Dict[str, Any]:
 
 def write_workspace(project_dir: Path, state: Dict[str, Any]) -> None:
     path = project_dir / "conversations" / "workspace_state.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_data_json(path, state)
+
+
+def read_now_conversation(project_dir: Path) -> Dict[str, Any]:
+    path = project_dir / "conversations" / "now_conversation.json"
+    if not path.is_file():
+        return default_now_conversation_state()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        base = default_now_conversation_state()
+        if isinstance(data, dict):
+            if isinstance(data.get("selected"), dict) and not isinstance(data.get("selectedItems"), list):
+                data["selectedItems"] = [data["selected"]]
+            base.update(data)
+        return base
+    except json.JSONDecodeError:
+        return default_now_conversation_state()
+
+
+def write_now_conversation(project_dir: Path, state: Dict[str, Any]) -> None:
+    path = project_dir / "conversations" / "now_conversation.json"
+    state = dict(state)
+    state["updatedAt"] = _utc_now()
+    write_data_json(path, state)
+
+
+def read_qa_sessions(project_dir: Path) -> Dict[str, Any]:
+    _migrate_legacy_session_storage(project_dir)
+    index = _read_json_file(_session_index_file(project_dir), default_qa_sessions_state())
+    base = default_qa_sessions_state()
+    if isinstance(index, dict):
+        base.update(index)
+    entries = base.get("sessions") if isinstance(base.get("sessions"), list) else []
+    sessions: List[Dict[str, Any]] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        session_id = str(entry.get("id") or "").strip()
+        if not session_id:
+            continue
+        session = _read_json_file(_session_file(project_dir, session_id), {})
+        if isinstance(session, dict) and session:
+            sessions.append(session)
+    base["sessions"] = sessions
+    return base
+
+
+def write_qa_sessions(project_dir: Path, state: Dict[str, Any]) -> None:
+    sessions_root = _sessions_root(project_dir)
+    sessions_root.mkdir(parents=True, exist_ok=True)
+    state = dict(state)
+    state["updatedAt"] = _utc_now()
+    sessions = state.get("sessions") if isinstance(state.get("sessions"), list) else []
+    index_entries: List[Dict[str, Any]] = []
+    active_ids: Set[str] = set()
+    for session in sessions:
+        if not isinstance(session, dict):
+            continue
+        session_id = str(session.get("id") or "").strip()
+        if not session_id:
+            continue
+        active_ids.add(session_id)
+        _write_json_file(_session_file(project_dir, session_id), session)
+        index_entries.append(_session_index_entry(session))
+    for child in sessions_root.iterdir():
+        if child.is_dir() and child.name not in active_ids:
+            shutil.rmtree(child, ignore_errors=True)
+    index_entries.sort(key=lambda item: str(item.get("updatedAt") or item.get("startedAt") or ""), reverse=True)
+    _write_json_file(_session_index_file(project_dir), {"sessions": index_entries, "updatedAt": state["updatedAt"]})
+
+
+def read_qa_compactions(project_dir: Path) -> Dict[str, Any]:
+    _migrate_legacy_session_storage(project_dir)
+    base = default_qa_compactions_state()
+    sessions: Dict[str, Any] = {}
+    sessions_root = _sessions_root(project_dir)
+    if sessions_root.is_dir():
+        for child in sessions_root.iterdir():
+            if not child.is_dir():
+                continue
+            summary = _read_json_file(child / "summary.json", None)
+            if isinstance(summary, dict):
+                sessions[child.name] = summary
+    base["sessions"] = sessions
+    return base
+
+
+def write_qa_compactions(project_dir: Path, state: Dict[str, Any]) -> None:
+    sessions_root = _sessions_root(project_dir)
+    sessions_root.mkdir(parents=True, exist_ok=True)
+    state = dict(state)
+    state["updatedAt"] = _utc_now()
+    sessions_map = state.get("sessions") if isinstance(state.get("sessions"), dict) else {}
+    for session_id, summary in sessions_map.items():
+        if not isinstance(summary, dict):
+            continue
+        _write_json_file(_summary_file(project_dir, str(session_id)), summary)
+
+
+def _deepseek_api_key() -> Optional[str]:
+    key = (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
+    if key:
+        return key
+    local = ROOT / "backend" / ".deepseek_api_key"
+    if local.is_file():
+        try:
+            txt = local.read_text(encoding="utf-8").strip()
+            return txt or None
+        except OSError:
+            return None
+    return None
+
+
+def _extract_json_object(text: str) -> Dict[str, Any]:
+    text = (text or "").strip()
+    if not text:
+        raise ValueError("empty response")
+    try:
+        data = json.loads(text)
+        if isinstance(data, dict):
+            return data
+    except json.JSONDecodeError:
+        pass
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        data = json.loads(text[start : end + 1])
+        if isinstance(data, dict):
+            return data
+    raise ValueError("no valid json object found")
+
+
+def _normalize_qa_response(payload: Dict[str, Any], allowed_ids: List[str]) -> Dict[str, Any]:
+    cited = payload.get("cited_chunk_ids")
+    if not isinstance(cited, list):
+        cited = []
+    cited_ids = [str(x) for x in cited if str(x) in allowed_ids]
+    answer = str(payload.get("answer") or "").strip()
+    follow = payload.get("follow_up_questions")
+    if not isinstance(follow, list):
+        follow = []
+    follow = [str(x).strip() for x in follow if str(x).strip()][:2]
+    while len(follow) < 2:
+        follow.append("继续追问这部分")
+    if not answer:
+        raise ValueError("empty answer")
+    return {
+        "cited_chunk_ids": cited_ids,
+        "answer": answer,
+        "follow_up_questions": follow,
+    }
+
+
+def ask_deepseek_with_selection(selected_items: List[Dict[str, Any]], question: str, doc_name: str) -> Dict[str, Any]:
+    api_key = _deepseek_api_key()
+    if not api_key:
+        raise HTTPException(status_code=503, detail="未配置 DEEPSEEK_API_KEY 或 backend/.deepseek_api_key")
+    chunk_lines: List[str] = []
+    allowed_ids: List[str] = []
+    for item in selected_items:
+        cid = str(item.get("chunkKey") or item.get("chunkId") or "").strip()
+        if not cid:
+            continue
+        allowed_ids.append(cid)
+        content = str(item.get("content") or "").strip()
+        page_no = item.get("pageNo")
+        chunk_lines.append(f"[{cid}] page={page_no}\n{content}")
+    if not chunk_lines:
+        raise HTTPException(status_code=400, detail="当前没有可用的选中块")
+
+    system_prompt = (
+        "你是文档问答助手。只能基于用户提供的选中块回答。"
+        "必须输出一个 JSON 对象，包含 cited_chunk_ids, answer, follow_up_questions。"
+        "follow_up_questions 必须是两个简短问题。answer 要简洁。"
+        "如果证据不足，要明确说证据不足，但仍返回合法 JSON。"
+    )
+    user_prompt = (
+        f"文档: {doc_name}\n"
+        f"用户问题: {question}\n\n"
+        "可引用块如下：\n"
+        + "\n\n".join(chunk_lines)
+        + "\n\n请只返回 JSON。"
+    )
+    body = {
+        "model": "deepseek-chat",
+        "temperature": 0.2,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    }
+    req = urlrequest.Request(
+        "https://api.deepseek.com/chat/completions",
+        data=json.dumps(body).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        method="POST",
+    )
+    try:
+        with urlrequest.urlopen(req, timeout=120) as resp:
+            raw = json.loads(resp.read().decode("utf-8"))
+    except urlerror.HTTPError as e:
+        detail = e.read().decode("utf-8", errors="ignore")
+        raise HTTPException(status_code=502, detail=f"DeepSeek API 错误: {detail[:400]}") from e
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"DeepSeek 请求失败: {e!s}") from e
+
+    try:
+        message = raw["choices"][0]["message"]["content"]
+        payload = _extract_json_object(str(message))
+        return _normalize_qa_response(payload, allowed_ids)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"DeepSeek 返回解析失败: {e!s}") from e
+
+
+def _deepseek_chat_json(
+    system_prompt: str,
+    user_prompt: str,
+    *,
+    temperature: float = 0.2,
+) -> Dict[str, Any]:
+    api_key = _deepseek_api_key()
+    if not api_key:
+        raise HTTPException(status_code=503, detail="鏈厤缃?DEEPSEEK_API_KEY 鎴?backend/.deepseek_api_key")
+    body = {
+        "model": "deepseek-chat",
+        "temperature": temperature,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    }
+    req = urlrequest.Request(
+        "https://api.deepseek.com/chat/completions",
+        data=json.dumps(body).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        method="POST",
+    )
+    try:
+        with urlrequest.urlopen(req, timeout=120) as resp:
+            raw = json.loads(resp.read().decode("utf-8"))
+    except urlerror.HTTPError as e:
+        detail = e.read().decode("utf-8", errors="ignore")
+        raise HTTPException(status_code=502, detail=f"DeepSeek API 閿欒: {detail[:400]}") from e
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"DeepSeek 璇锋眰澶辫触: {e!s}") from e
+
+    try:
+        message = raw["choices"][0]["message"]["content"]
+        return _extract_json_object(str(message))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"DeepSeek 杩斿洖瑙ｆ瀽澶辫触: {e!s}") from e
+
+
+def _chunk_key(item: Dict[str, Any]) -> str:
+    return str(item.get("chunkKey") or item.get("chunkId") or "").strip()
+
+
+def _normalize_selected_item(item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    cid = _chunk_key(item)
+    if not cid:
+        return None
+    return {
+        "chunkKey": cid,
+        "chunkId": str(item.get("chunkId") or cid),
+        "pageNo": int(item.get("pageNo") or 0),
+        "index": int(item.get("index") or 0),
+        "label": str(item.get("label") or "chunk"),
+        "content": str(item.get("content") or "").strip(),
+        "bboxPx": item.get("bboxPx") if isinstance(item.get("bboxPx"), dict) else {},
+        "bboxNorm": item.get("bboxNorm") if isinstance(item.get("bboxNorm"), dict) else {},
+        "sourceLabels": item.get("sourceLabels") if isinstance(item.get("sourceLabels"), list) else [],
+        "sourceChunkCount": int(item.get("sourceChunkCount") or 0),
+    }
+
+
+def _build_page_bands(page: Dict[str, Any]) -> List[Dict[str, Any]]:
+    chunks = page.get("chunks") if isinstance(page.get("chunks"), list) else []
+    page_no = int(page.get("pageNo") or 0)
+    image_size = page.get("imageSize") if isinstance(page.get("imageSize"), dict) else {}
+    page_width = int(image_size.get("width") or 0)
+    ranges: List[Dict[str, Any]] = []
+    for idx, chunk in enumerate(chunks):
+        if not isinstance(chunk, dict):
+            continue
+        norm = chunk.get("bboxNorm") if isinstance(chunk.get("bboxNorm"), dict) else {}
+        px = chunk.get("bboxPx") if isinstance(chunk.get("bboxPx"), dict) else {}
+        try:
+            y1 = float(norm.get("y1"))
+            y2 = float(norm.get("y2"))
+        except (TypeError, ValueError):
+            continue
+        if y2 <= y1:
+            continue
+        ranges.append(
+            {
+                "chunk": chunk,
+                "idx": idx,
+                "y1": y1,
+                "y2": y2,
+                "y1Px": px.get("y1"),
+                "y2Px": px.get("y2"),
+            }
+        )
+    ranges.sort(key=lambda item: (float(item["y1"]), float(item["y2"])))
+    groups: List[Dict[str, Any]] = []
+    for item in ranges:
+        last = groups[-1] if groups else None
+        if not last or float(item["y1"]) > float(last["y2"]):
+            groups.append({"items": [item], "y1": float(item["y1"]), "y2": float(item["y2"])})
+            continue
+        last["items"].append(item)
+        last["y1"] = min(float(last["y1"]), float(item["y1"]))
+        last["y2"] = max(float(last["y2"]), float(item["y2"]))
+
+    bands: List[Dict[str, Any]] = []
+    for idx, group in enumerate(groups):
+        items = group["items"]
+        y1_px_list = [int(v) for v in (it.get("y1Px") for it in items) if isinstance(v, (int, float))]
+        y2_px_list = [int(v) for v in (it.get("y2Px") for it in items) if isinstance(v, (int, float))]
+        labels = sorted({str(it["chunk"].get("label") or "text") for it in items})
+        bands.append(
+            {
+                "chunkKey": f"p{page_no:04d}_band_{idx:03d}",
+                "chunkId": f"p{page_no:04d}_band_{idx:03d}",
+                "pageNo": page_no,
+                "index": idx,
+                "label": "band",
+                "bboxNorm": {
+                    "x1": 0,
+                    "y1": round(float(group["y1"]), 6),
+                    "x2": 1,
+                    "y2": round(float(group["y2"]), 6),
+                },
+                "bboxPx": {
+                    "x1": 0,
+                    "y1": min(y1_px_list) if y1_px_list else None,
+                    "x2": page_width or None,
+                    "y2": max(y2_px_list) if y2_px_list else None,
+                },
+                "content": "\n\n".join(
+                    str(it["chunk"].get("content") or "").strip()
+                    for it in items
+                    if str(it["chunk"].get("content") or "").strip()
+                ),
+                "sourceLabels": labels,
+                "sourceChunkCount": len(items),
+            }
+        )
+    return bands
+
+
+def _flatten_doc_bands(doc: Dict[str, Any]) -> List[Dict[str, Any]]:
+    pages = doc.get("ocrBlocksByPage") if isinstance(doc.get("ocrBlocksByPage"), list) else []
+    bands: List[Dict[str, Any]] = []
+    for page in pages:
+        if isinstance(page, dict):
+            bands.extend(_build_page_bands(page))
+    bands.sort(key=lambda item: (int(item.get("pageNo") or 0), int(item.get("index") or 0)))
+    return bands
+
+
+def _expand_selected_with_neighbors(
+    doc: Dict[str, Any], selected_items: List[Dict[str, Any]]
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    all_bands = _flatten_doc_bands(doc)
+    if not all_bands:
+        selected = []
+        for item in selected_items:
+            normalized = _normalize_selected_item(item)
+            if normalized:
+                selected.append(normalized)
+        return selected, []
+    key_to_pos = {_chunk_key(item): idx for idx, item in enumerate(all_bands)}
+    selected_map: Dict[str, Dict[str, Any]] = {}
+    positions: List[int] = []
+    for item in selected_items:
+        normalized = _normalize_selected_item(item)
+        if not normalized:
+            continue
+        key = _chunk_key(normalized)
+        selected_map[key] = normalized
+        pos = key_to_pos.get(key)
+        if pos is not None:
+            positions.append(pos)
+    if not selected_map:
+        return [], []
+    positions = sorted(set(positions))
+    neighbor_keys: Set[str] = set()
+    if positions:
+        run_start = positions[0]
+        run_prev = positions[0]
+        for pos in positions[1:] + [None]:
+            if pos is not None and pos == run_prev + 1:
+                run_prev = pos
+                continue
+            if run_start - 1 >= 0:
+                neighbor_keys.add(_chunk_key(all_bands[run_start - 1]))
+            if run_prev + 1 < len(all_bands):
+                neighbor_keys.add(_chunk_key(all_bands[run_prev + 1]))
+            if pos is None:
+                break
+            run_start = pos
+            run_prev = pos
+    neighbors = [
+        band
+        for band in all_bands
+        if _chunk_key(band) in neighbor_keys and _chunk_key(band) not in selected_map
+    ]
+    selected = [selected_map[k] for k in sorted(selected_map, key=lambda key: key_to_pos.get(key, 10**9))]
+    return selected, neighbors
+
+
+def _format_chunks_for_prompt(items: List[Dict[str, Any]], heading: str) -> str:
+    if not items:
+        return f"{heading}\n(无)\n"
+    lines = [heading]
+    for item in items:
+        cid = _chunk_key(item)
+        page_no = item.get("pageNo")
+        label = str(item.get("label") or "chunk")
+        content = str(item.get("content") or "").strip() or "(empty chunk)"
+        lines.append(f"[{cid}] page={page_no} label={label}\n{content}")
+    return "\n\n".join(lines) + "\n"
+
+
+def _session_context_summary(compaction: Optional[Dict[str, Any]]) -> str:
+    if not isinstance(compaction, dict):
+        return ""
+    summary = str(compaction.get("summary") or "").strip()
+    if not summary:
+        return ""
+    parts = [f"摘要: {summary}"]
+    recent_focus = compaction.get("recentFocus")
+    if isinstance(recent_focus, list):
+        focus_text = " | ".join(str(x).strip() for x in recent_focus if str(x).strip())
+        if focus_text:
+            parts.append(f"近期重点: {focus_text}")
+    open_questions = compaction.get("openQuestions")
+    if isinstance(open_questions, list):
+        question_text = " | ".join(str(x).strip() for x in open_questions if str(x).strip())
+        if question_text:
+            parts.append(f"未解决问题: {question_text}")
+    return "\n".join(parts)
+
+
+def _format_overview_for_prompt(overview: Optional[Dict[str, Any]]) -> str:
+    if not isinstance(overview, dict):
+        return ""
+    parts: List[str] = []
+    title = str(overview.get("title") or "").strip()
+    if title:
+        parts.append(f"title: {title}")
+    doc_type = str(overview.get("docTypeGuess") or "").strip()
+    if doc_type:
+        parts.append(f"doc_type: {doc_type}")
+    short = str(overview.get("overviewShort") or "").strip()
+    if short:
+        parts.append(f"overview_short: {short}")
+    long_text = str(overview.get("overviewLong") or "").strip()
+    if long_text:
+        parts.append(f"overview_long: {long_text}")
+    keywords = overview.get("keywords")
+    if isinstance(keywords, list):
+        joined = ", ".join(str(item).strip() for item in keywords if str(item).strip())
+        if joined:
+            parts.append(f"keywords: {joined}")
+    topics = overview.get("topics")
+    if isinstance(topics, list):
+        joined = ", ".join(str(item).strip() for item in topics if str(item).strip())
+        if joined:
+            parts.append(f"topics: {joined}")
+    quality = overview.get("qualityContext")
+    if isinstance(quality, dict):
+        parts.append(
+            "quality_context: "
+            f"avgFinalScore={float(quality.get('avgFinalScore') or 0.0):.3f}, "
+            f"avgLayoutScore={float(quality.get('avgLayoutScore') or 0.0):.3f}, "
+            f"pagesWithIssues={int(quality.get('pagesWithIssues') or 0)}, "
+            f"pagesWithLayoutIssues={int(quality.get('pagesWithLayoutIssues') or 0)}"
+        )
+    if not parts:
+        return ""
+    return "document_overview:\n" + "\n".join(parts)
+
+
+def ask_deepseek_with_selection_v2(
+    selected_items: List[Dict[str, Any]],
+    neighbor_items: List[Dict[str, Any]],
+    question: str,
+    doc_name: str,
+    *,
+    doc_overview: Optional[Dict[str, Any]] = None,
+    compacted_context: str = "",
+    recent_turns: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    allowed_ids: List[str] = []
+    for group in (selected_items, neighbor_items):
+        for item in group:
+            cid = _chunk_key(item)
+            if cid and cid not in allowed_ids:
+                allowed_ids.append(cid)
+    has_selected_context = bool(allowed_ids)
+
+    history_lines: List[str] = []
+    for turn in recent_turns or []:
+        role = str(turn.get("role") or "").strip()
+        text = str(turn.get("text") or "").strip()
+        if role and text:
+            history_lines.append(f"{role}: {text}")
+
+    if has_selected_context:
+        system_prompt = (
+            "You are a document QA assistant. Answer primarily from selected_chunks, and only use neighbor_chunks as supporting context. "
+            "The provided document_overview is only background context and must not override selected evidence. "
+            "Return exactly one JSON object with cited_chunk_ids, answer, and follow_up_questions. "
+            "Only cite chunk ids that were provided. If evidence is insufficient, say so clearly but still return valid JSON."
+        )
+    else:
+        system_prompt = (
+            "You are a document QA assistant. No chunks were selected, so answer from the provided document_overview and conversation context only. "
+            "Do not fabricate page numbers or chunk citations. "
+            "Return exactly one JSON object with cited_chunk_ids, answer, and follow_up_questions."
+        )
+    prompt_parts = [
+        f"Document: {doc_name}",
+        f"Question: {question}",
+    ]
+    overview_text = _format_overview_for_prompt(doc_overview)
+    if overview_text:
+        prompt_parts.append(overview_text)
+    if compacted_context.strip():
+        prompt_parts.append("Compacted context:\n" + compacted_context.strip())
+    if history_lines:
+        prompt_parts.append("Recent turns:\n" + "\n".join(history_lines[-8:]))
+    if has_selected_context:
+        prompt_parts.append(_format_chunks_for_prompt(selected_items, "selected_chunks"))
+        prompt_parts.append(_format_chunks_for_prompt(neighbor_items, "neighbor_chunks"))
+    else:
+        prompt_parts.append("No selected chunks were provided.")
+    prompt_parts.append("Return JSON only.")
+    payload = _deepseek_chat_json(system_prompt, "\n\n".join(prompt_parts), temperature=0.2)
+    try:
+        return _normalize_qa_response(payload, allowed_ids)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"DeepSeek response parse failed: {e!s}") from e
+
+def append_qa_turn(
+    project_dir: Path,
+    session_id: str,
+    doc_id: str,
+    doc_name: str,
+    question: str,
+    result: Dict[str, Any],
+) -> Dict[str, Any]:
+    store = read_qa_sessions(project_dir)
+    sessions = store.get("sessions") if isinstance(store.get("sessions"), list) else []
+    now_iso = _utc_now()
+    turn = {
+        "askedAt": now_iso,
+        "docId": doc_id,
+        "docName": doc_name,
+        "question": question,
+        "answer": result.get("answer", ""),
+        "citedChunkIds": result.get("cited_chunk_ids", []),
+        "followUpQuestions": result.get("follow_up_questions", []),
+    }
+    target: Optional[Dict[str, Any]] = None
+    for session in sessions:
+        if isinstance(session, dict) and str(session.get("id") or "") == session_id:
+            target = session
+            break
+    if target is None:
+        target = {
+            "id": session_id,
+            "startedAt": now_iso,
+            "updatedAt": now_iso,
+            "docId": doc_id,
+            "docName": doc_name,
+            "turns": [],
+            "suggestions": [],
+        }
+        sessions.append(target)
+    turns = target.get("turns") if isinstance(target.get("turns"), list) else []
+    turns.append(turn)
+    target["turns"] = turns
+    target["updatedAt"] = now_iso
+    target["docId"] = doc_id
+    target["docName"] = doc_name
+    target["suggestions"] = result.get("follow_up_questions", [])
+    store["sessions"] = sessions
+    write_qa_sessions(project_dir, store)
+    return target
+
+
+def _session_messages(session: Dict[str, Any]) -> List[Dict[str, Any]]:
+    turns = session.get("turns") if isinstance(session.get("turns"), list) else []
+    messages: List[Dict[str, Any]] = []
+    for idx, turn in enumerate(turns):
+        if not isinstance(turn, dict):
+            continue
+        asked_at = str(turn.get("askedAt") or session.get("updatedAt") or "")
+        question = str(turn.get("question") or "").strip()
+        answer = str(turn.get("answer") or "").strip()
+        if question:
+            messages.append(
+                {
+                    "id": f"{session.get('id', 'session')}_u_{idx}",
+                    "role": "user",
+                    "text": question,
+                    "timestamp": asked_at,
+                }
+            )
+        if answer:
+            messages.append(
+                {
+                    "id": f"{session.get('id', 'session')}_a_{idx}",
+                    "role": "assistant",
+                    "text": answer,
+                    "timestamp": asked_at,
+                    "citedChunkIds": turn.get("citedChunkIds", []),
+                }
+            )
+    return messages
+
+
+def _session_title(session: Dict[str, Any]) -> str:
+    turns = session.get("turns") if isinstance(session.get("turns"), list) else []
+    for idx, turn in enumerate(turns):
+        if not isinstance(turn, dict):
+            continue
+        question = str(turn.get("question") or "").strip()
+        if question:
+            short = question.replace("\n", " ").strip()
+            return short[:28] + ("..." if len(short) > 28 else "")
+    return f"新对话 {str(session.get('startedAt') or '')[:10] or '未命名'}"
+
+
+def _session_recent_turns(session: Dict[str, Any], limit: int = 4) -> List[Dict[str, Any]]:
+    turns = session.get("turns") if isinstance(session.get("turns"), list) else []
+    out: List[Dict[str, Any]] = []
+    for turn in turns[-limit:]:
+        if not isinstance(turn, dict):
+            continue
+        question = str(turn.get("question") or "").strip()
+        answer = str(turn.get("answer") or "").strip()
+        if question:
+            out.append({"role": "user", "text": question})
+        if answer:
+            out.append({"role": "assistant", "text": answer})
+    return out
+
+
+def _serialize_session(session: Dict[str, Any], compaction: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    return {
+        "id": str(session.get("id") or ""),
+        "docId": session.get("docId"),
+        "docName": session.get("docName"),
+        "startedAt": session.get("startedAt"),
+        "updatedAt": session.get("updatedAt"),
+        "title": _session_title(session),
+        "messages": _session_messages(session),
+        "suggestions": session.get("suggestions") if isinstance(session.get("suggestions"), list) else [],
+        "turnCount": len(session.get("turns") if isinstance(session.get("turns"), list) else []),
+        "compaction": compaction if isinstance(compaction, dict) else None,
+    }
+
+
+def _list_doc_sessions(project_dir: Path, doc_id: str) -> List[Dict[str, Any]]:
+    store = read_qa_sessions(project_dir)
+    sessions = store.get("sessions") if isinstance(store.get("sessions"), list) else []
+    compactions = read_qa_compactions(project_dir).get("sessions")
+    compaction_map = compactions if isinstance(compactions, dict) else {}
+    filtered = [
+        session
+        for session in sessions
+        if isinstance(session, dict) and str(session.get("docId") or "") == doc_id
+    ]
+    filtered.sort(key=lambda item: str(item.get("updatedAt") or item.get("startedAt") or ""), reverse=True)
+    return [
+        _serialize_session(session, compaction_map.get(str(session.get("id") or "")))
+        for session in filtered
+    ]
+
+
+def _create_session(project_dir: Path, doc_id: str, doc_name: str) -> Dict[str, Any]:
+    store = read_qa_sessions(project_dir)
+    sessions = store.get("sessions") if isinstance(store.get("sessions"), list) else []
+    session = {
+        "id": f"qa_{uuid.uuid4().hex[:12]}",
+        "startedAt": _utc_now(),
+        "updatedAt": _utc_now(),
+        "docId": doc_id,
+        "docName": doc_name,
+        "turns": [],
+        "suggestions": [],
+    }
+    sessions.append(session)
+    store["sessions"] = sessions
+    write_qa_sessions(project_dir, store)
+    now_state = read_now_conversation(project_dir)
+    now_state["activeDocId"] = doc_id
+    now_state["activeSessionId"] = session["id"]
+    write_now_conversation(project_dir, now_state)
+    return session
+
+
+def _get_session(project_dir: Path, session_id: str) -> Optional[Dict[str, Any]]:
+    store = read_qa_sessions(project_dir)
+    sessions = store.get("sessions") if isinstance(store.get("sessions"), list) else []
+    for session in sessions:
+        if isinstance(session, dict) and str(session.get("id") or "") == session_id:
+            return session
+    return None
+
+
+def _ensure_active_session(project_dir: Path, doc_id: str, doc_name: str) -> Dict[str, Any]:
+    now_state = read_now_conversation(project_dir)
+    active_doc_id = str(now_state.get("activeDocId") or "")
+    active_session_id = str(now_state.get("activeSessionId") or "")
+    session = _get_session(project_dir, active_session_id) if active_session_id else None
+    if (
+        isinstance(session, dict)
+        and str(session.get("docId") or "") == doc_id
+        and active_doc_id == doc_id
+    ):
+        return session
+    session = _create_session(project_dir, doc_id, doc_name)
+    return session
+
+
+def _compact_session_if_needed(project_dir: Path, session: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    turns = session.get("turns") if isinstance(session.get("turns"), list) else []
+    if len(turns) < 8:
+        return None
+    raw_chars = sum(len(str(turn.get("question") or "")) + len(str(turn.get("answer") or "")) for turn in turns if isinstance(turn, dict))
+    if raw_chars < 12000 and len(turns) < 10:
+        return None
+    store = read_qa_compactions(project_dir)
+    sessions_map = store.get("sessions") if isinstance(store.get("sessions"), dict) else {}
+    if not isinstance(sessions_map, dict):
+        sessions_map = {}
+    session_id = str(session.get("id") or "")
+    existing = sessions_map.get(session_id)
+    if isinstance(existing, dict) and int(existing.get("sourceTurnCount") or 0) >= len(turns):
+        return existing
+
+    transcript_parts: List[str] = []
+    for turn in turns:
+        if not isinstance(turn, dict):
+            continue
+        q = str(turn.get("question") or "").strip()
+        a = str(turn.get("answer") or "").strip()
+        if q:
+            transcript_parts.append(f"user: {q}")
+        if a:
+            transcript_parts.append(f"assistant: {a}")
+    system_prompt = (
+        "你是对话压缩助手。请压缩长对话，保留最近问题的优先级更高。"
+        "输出 JSON，字段必须包含 summary, userGoal, keyPoints, recentFocus, openQuestions。"
+        "summary 要可直接作为后续问答上下文。recentFocus 和 openQuestions 控制在 3 条以内。"
+    )
+    payload = _deepseek_chat_json(system_prompt, "\n".join(transcript_parts[-40:]), temperature=0.1)
+    compacted = {
+        "summary": str(payload.get("summary") or "").strip(),
+        "userGoal": str(payload.get("userGoal") or "").strip(),
+        "keyPoints": payload.get("keyPoints") if isinstance(payload.get("keyPoints"), list) else [],
+        "recentFocus": payload.get("recentFocus") if isinstance(payload.get("recentFocus"), list) else [],
+        "openQuestions": payload.get("openQuestions") if isinstance(payload.get("openQuestions"), list) else [],
+        "sourceTurnCount": len(turns),
+        "rawCharCount": raw_chars,
+        "updatedAt": _utc_now(),
+    }
+    sessions_map[session_id] = compacted
+    store["sessions"] = sessions_map
+    write_qa_compactions(project_dir, store)
+    return compacted
 
 
 def _safe_pdf_doc_id(doc_id: str) -> bool:
@@ -136,6 +1040,23 @@ def _ensure_glmocr_importable() -> None:
     import glmocr  # noqa: F401
 
 
+def _glmocr_api_key() -> Optional[str]:
+    key = (os.environ.get("ZHIPU_API_KEY") or os.environ.get("GLMOCR_API_KEY") or "").strip()
+    if key:
+        return key
+    for filename in (".glmocr_api_key", ".zhipu_api_key"):
+        local = ROOT / "backend" / filename
+        if not local.is_file():
+            continue
+        try:
+            txt = local.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if txt:
+            return txt
+    return None
+
+
 def get_glm_ocr_parser() -> Any:
     """懒加载 GlmOcr。
 
@@ -144,13 +1065,11 @@ def get_glm_ocr_parser() -> Any:
     - ``GLMOCR_MODE=maas``：使用智谱云端，需 ``ZHIPU_API_KEY`` 或 ``GLMOCR_API_KEY``。
     """
     global _glm_ocr_parser, _glm_ocr_parser_mode
-    use_maas = _glm_ocr_use_maas()
-    if use_maas and not (
-        os.environ.get("ZHIPU_API_KEY") or os.environ.get("GLMOCR_API_KEY")
-    ):
+    api_key = _glmocr_api_key()
+    if not api_key:
         raise HTTPException(
             status_code=503,
-            detail="已启用云端解析（GLMOCR_MODE=maas），请设置 ZHIPU_API_KEY 或 GLMOCR_API_KEY。",
+            detail="缺少 GLM-OCR API Key，请设置 ZHIPU_API_KEY / GLMOCR_API_KEY，或写入 backend/.glmocr_api_key。",
         )
     try:
         _ensure_glmocr_importable()
@@ -161,7 +1080,7 @@ def get_glm_ocr_parser() -> Any:
             detail="未安装 GLM-OCR SDK：在仓库根目录执行 pip install -r backend/requirements.txt",
         ) from e
 
-    mode_key = "maas" if use_maas else "selfhosted"
+    mode_key = "maas"
     if _glm_ocr_parser is None or _glm_ocr_parser_mode != mode_key:
         if _glm_ocr_parser is not None:
             try:
@@ -169,7 +1088,7 @@ def get_glm_ocr_parser() -> Any:
             except Exception:
                 pass
             _glm_ocr_parser = None
-        _glm_ocr_parser = GlmOcr(mode="selfhosted" if not use_maas else "maas")
+        _glm_ocr_parser = GlmOcr(mode="maas", api_key=api_key)
         _glm_ocr_parser_mode = mode_key
     return _glm_ocr_parser
 
@@ -202,6 +1121,57 @@ def _json_regions_to_vis_boxes(
             }
         )
     return boxes
+
+
+def _json_regions_to_chunks(
+    regions: List[Dict[str, Any]], width: int, height: int, page_no: int
+) -> List[Dict[str, Any]]:
+    """将 ``json_result`` 单页 region 转成前端可直接叠加的 chunk 数据。"""
+    chunks: List[Dict[str, Any]] = []
+    for fallback_index, region in enumerate(regions):
+        bb = region.get("bbox_2d")
+        if not bb or len(bb) != 4:
+            continue
+        try:
+            x1, y1, x2, y2 = (float(t) for t in bb)
+        except (TypeError, ValueError):
+            continue
+
+        x1 = max(0.0, min(1000.0, x1))
+        y1 = max(0.0, min(1000.0, y1))
+        x2 = max(0.0, min(1000.0, x2))
+        y2 = max(0.0, min(1000.0, y2))
+        if x2 <= x1 or y2 <= y1:
+            continue
+
+        index = region.get("index")
+        if not isinstance(index, int):
+            index = fallback_index
+
+        px_box = {
+            "x1": int(round(x1 * width / 1000.0)),
+            "y1": int(round(y1 * height / 1000.0)),
+            "x2": int(round(x2 * width / 1000.0)),
+            "y2": int(round(y2 * height / 1000.0)),
+        }
+        chunks.append(
+            {
+                "chunkId": f"p{page_no:04d}_c{index:03d}",
+                "index": index,
+                "pageNo": page_no,
+                "label": str(region.get("label", "text")),
+                "content": str(region.get("content") or "").strip(),
+                "bboxNorm": {
+                    "x1": round(x1 / 1000.0, 6),
+                    "y1": round(y1 / 1000.0, 6),
+                    "x2": round(x2 / 1000.0, 6),
+                    "y2": round(y2 / 1000.0, 6),
+                },
+                "bboxPx": px_box,
+            }
+        )
+    chunks.sort(key=lambda item: (int(item.get("pageNo", 0)), int(item.get("index", 0))))
+    return chunks
 
 
 def glm_ocr_parse_to_layout_vis_pages(
@@ -288,6 +1258,8 @@ def glm_ocr_parse_to_layout_vis_pages(
         if not m:
             continue
         page_no = int(m.group(1))
+        with Image.open(page_png_path) as page_img:
+            w, h = page_img.size
         done = False
         out_name = f"page_{page_no:04d}.jpg"
         out_path = out_dir / out_name
@@ -313,17 +1285,25 @@ def glm_ocr_parse_to_layout_vis_pages(
                 out_name = f"page_{page_no:04d}.jpg"
                 out_path = out_dir / out_name
 
+        page_chunks: List[Dict[str, Any]] = []
+        if page_idx < len(json_pages):
+            jp = json_pages[page_idx]
+            if isinstance(jp, list):
+                page_chunks = _json_regions_to_chunks(
+                    [r for r in jp if isinstance(r, dict)], w, h, page_no
+                )
+
         if not done:
             img = Image.open(page_png_path)
             if img.mode != "RGB":
                 img = img.convert("RGB")
-            w, h = img.size
             regions: List[Dict[str, Any]] = []
             if page_idx < len(json_pages):
                 jp = json_pages[page_idx]
                 if isinstance(jp, list):
                     regions = [r for r in jp if isinstance(r, dict)]
             boxes = _json_regions_to_vis_boxes(regions, w, h)
+            page_chunks = _json_regions_to_chunks(regions, w, h, page_no)
             arr = np.array(img)
             if boxes:
                 save_layout_visualization(
@@ -337,11 +1317,105 @@ def glm_ocr_parse_to_layout_vis_pages(
             else:
                 img.save(out_path, quality=95)
 
-        ocr_blocks_by_page.append({"pageNo": page_no, "files": [out_name]})
+        ocr_blocks_by_page.append(
+            {
+                "pageNo": page_no,
+                "files": [out_name],
+                "imageSize": {"width": w, "height": h},
+                "chunks": page_chunks,
+            }
+        )
 
     if not ocr_blocks_by_page:
         raise RuntimeError("未生成任何版面可视化图。")
     return ocr_blocks_by_page
+
+
+def attach_ocr_quality_report(doc: Dict[str, Any]) -> Dict[str, Any]:
+    pages = doc.get("ocrBlocksByPage")
+    if not isinstance(pages, list):
+        raise HTTPException(status_code=400, detail="当前文档没有可评估的 OCR 页面数据")
+    report = evaluate_ocr_quality(pages)
+    doc["ocrQualityReport"] = report
+    page_reports = {
+        int(page.get("pageNo", 0)): page
+        for page in report.get("pages", [])
+        if isinstance(page, dict)
+    }
+    updated_pages: List[Dict[str, Any]] = []
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        page_copy = dict(page)
+        page_no = int(page_copy.get("pageNo", 0))
+        if page_no in page_reports:
+            page_copy["qualityReport"] = page_reports[page_no]
+        updated_pages.append(page_copy)
+    doc["ocrBlocksByPage"] = updated_pages
+    return report
+
+
+def persist_document_quality_report(project_id: str, project_dir: Path, doc: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    report = doc.get("ocrQualityReport")
+    doc_id = str(doc.get("id") or "").strip()
+    if not isinstance(report, dict) or not doc_id:
+        return None
+    payload = {
+        "docId": doc_id,
+        "docName": doc.get("name"),
+        "generatedAt": _utc_now(),
+        "summary": {
+            "avgQualityScore": float(report.get("avgQualityScore") or 0.0),
+            "avgStructureScore": float(report.get("avgStructureScore") or 0.0),
+            "avgLayoutScore": float(report.get("avgLayoutScore") or 0.0),
+            "avgFinalScore": float(report.get("avgFinalScore") or 0.0),
+            "pagesWithIssues": int(report.get("pagesWithIssues") or 0),
+            "pagesWithLayoutIssues": int(report.get("pagesWithLayoutIssues") or 0),
+        },
+        "layoutSummary": report.get("layoutSummary") if isinstance(report.get("layoutSummary"), dict) else {},
+        "retry": report.get("retry") if isinstance(report.get("retry"), dict) else {},
+        "pages": report.get("pages") if isinstance(report.get("pages"), list) else [],
+    }
+    write_document_quality_report(project_dir, doc_id, payload)
+    doc["qualityReportPath"] = f"data/projects/{project_id}/documents/{doc_id}/quality_report.json"
+    return payload
+
+
+def _parse_pdf_with_quality_retry(
+    pdf_path: Path,
+    page_dir: Path,
+    out_dir: Path,
+    parser: Any,
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    pages = glm_ocr_parse_to_layout_vis_pages(pdf_path, page_dir, out_dir, parser)
+    report = evaluate_ocr_quality(pages)
+    retry_info = {
+        "triggered": False,
+        "attempts": 1,
+        "threshold": 0.6,
+        "initialScore": float(report.get("avgFinalScore") or 0.0),
+        "finalScore": float(report.get("avgFinalScore") or 0.0),
+    }
+    if float(report.get("avgFinalScore") or 0.0) >= 0.6:
+        report["retry"] = retry_info
+        return pages, report
+
+    retry_info["triggered"] = True
+    retry_info["attempts"] = 2
+    retry_pages = glm_ocr_parse_to_layout_vis_pages(pdf_path, page_dir, out_dir, parser)
+    retry_report = evaluate_ocr_quality(retry_pages)
+    initial_score = float(report.get("avgFinalScore") or 0.0)
+    retry_score = float(retry_report.get("avgFinalScore") or 0.0)
+    if retry_score >= initial_score:
+        retry_info["finalScore"] = retry_score
+        retry_info["selectedAttempt"] = 2
+        retry_report["retry"] = retry_info
+        return retry_pages, retry_report
+
+    retry_info["finalScore"] = initial_score
+    retry_info["selectedAttempt"] = 1
+    report["retry"] = retry_info
+    return pages, report
 
 
 @asynccontextmanager
@@ -395,6 +1469,10 @@ class CreateProjectBody(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
 
 
+class AskSelectionBody(BaseModel):
+    question: str = Field(..., min_length=1, max_length=4000)
+
+
 @app.get("/api/health")
 def health() -> Dict[str, str]:
     return {"status": "ok"}
@@ -438,8 +1516,12 @@ def create_project(body: CreateProjectBody) -> Dict[str, Any]:
         "summary": "",
         "storage": "disk",
     }
-    (pdir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_data_json(pdir / "meta.json", meta)
     write_workspace(pdir, default_workspace_state())
+    write_now_conversation(pdir, default_now_conversation_state())
+    write_qa_sessions(pdir, default_qa_sessions_state())
+    write_qa_compactions(pdir, default_qa_compactions_state())
+    write_documents_index(pdir, default_documents_index())
     return meta
 
 
@@ -460,6 +1542,129 @@ def put_workspace(project_id: str, body: Dict[str, Any] = Body(...)) -> Dict[str
         raise HTTPException(status_code=404, detail="项目不存在")
     write_workspace(pdir, body)
     return {"status": "saved"}
+
+
+@app.get("/api/projects/{project_id}/now-conversation")
+def get_now_conversation(project_id: str) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    return read_now_conversation(pdir)
+
+
+@app.put("/api/projects/{project_id}/now-conversation")
+def put_now_conversation(project_id: str, body: Dict[str, Any] = Body(...)) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    payload = read_now_conversation(pdir)
+    selected_items = body.get("selectedItems")
+    if isinstance(selected_items, list):
+        payload["selectedItems"] = selected_items
+    if "activeDocId" in body:
+        payload["activeDocId"] = body.get("activeDocId")
+    if "activeSessionId" in body:
+        payload["activeSessionId"] = body.get("activeSessionId")
+    write_now_conversation(pdir, payload)
+    return payload
+
+
+@app.get("/api/projects/{project_id}/docs/{doc_id}/conversations")
+def list_doc_conversations(project_id: str, doc_id: str) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    sessions = _list_doc_sessions(pdir, doc_id)
+    now_state = read_now_conversation(pdir)
+    active_session_id = str(now_state.get("activeSessionId") or "")
+    if not active_session_id and sessions:
+        active_session_id = str(sessions[0].get("id") or "")
+    return {"sessions": sessions, "activeSessionId": active_session_id}
+
+
+@app.post("/api/projects/{project_id}/docs/{doc_id}/conversations")
+def create_doc_conversation(project_id: str, doc_id: str) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    ws = read_workspace(pdir)
+    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
+    doc = next((d for d in docs if isinstance(d, dict) and d.get("id") == doc_id), None)
+    if not doc:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    session = _create_session(pdir, doc_id, str(doc.get("name") or doc_id))
+    compaction_map = read_qa_compactions(pdir).get("sessions")
+    compaction = compaction_map.get(session["id"]) if isinstance(compaction_map, dict) else None
+    return {"session": _serialize_session(session, compaction), "activeSessionId": session["id"]}
+
+
+@app.put("/api/projects/{project_id}/docs/{doc_id}/conversations/{session_id}/activate")
+def activate_doc_conversation(project_id: str, doc_id: str, session_id: str) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    session = _get_session(pdir, session_id)
+    if not isinstance(session, dict) or str(session.get("docId") or "") != doc_id:
+        raise HTTPException(status_code=404, detail="对话不存在")
+    now_state = read_now_conversation(pdir)
+    now_state["activeDocId"] = doc_id
+    now_state["activeSessionId"] = session_id
+    write_now_conversation(pdir, now_state)
+    compaction_map = read_qa_compactions(pdir).get("sessions")
+    compaction = compaction_map.get(session_id) if isinstance(compaction_map, dict) else None
+    return {"session": _serialize_session(session, compaction), "activeSessionId": session_id}
+
+
+@app.post("/api/projects/{project_id}/docs/{doc_id}/ask-selection")
+def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    ws = read_workspace(pdir)
+    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
+    doc = next((d for d in docs if isinstance(d, dict) and d.get("id") == doc_id), None)
+    if not doc:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    now_conv = read_now_conversation(pdir)
+    selected_items = now_conv.get("selectedItems") if isinstance(now_conv.get("selectedItems"), list) else []
+    selected_items = [item for item in selected_items if isinstance(item, dict) and item.get("docId") == doc_id]
+    session = _ensure_active_session(pdir, doc_id, str(doc.get("name") or doc_id))
+    compaction_map = read_qa_compactions(pdir).get("sessions")
+    compaction = compaction_map.get(str(session.get("id") or "")) if isinstance(compaction_map, dict) else None
+    expanded_selected: List[Dict[str, Any]] = []
+    neighbor_items: List[Dict[str, Any]] = []
+    if selected_items:
+        expanded_selected, neighbor_items = _expand_selected_with_neighbors(doc, selected_items)
+    doc_overview = read_document_overview(pdir, doc_id)
+    if not isinstance(doc_overview, dict) or str(doc_overview.get("status") or "") != "ready":
+        doc_overview = ensure_document_overview(ROOT, pdir, doc)
+    result = ask_deepseek_with_selection_v2(
+        expanded_selected,
+        neighbor_items,
+        body.question.strip(),
+        str(doc.get("name") or doc_id),
+        doc_overview=doc_overview,
+        compacted_context=_session_context_summary(compaction),
+        recent_turns=_session_recent_turns(session),
+    )
+    session = append_qa_turn(
+        pdir,
+        str(session.get("id") or ""),
+        doc_id,
+        str(doc.get("name") or doc_id),
+        body.question.strip(),
+        result,
+    )
+    compacted = _compact_session_if_needed(pdir, session)
+    now_conv["activeDocId"] = doc_id
+    now_conv["activeSessionId"] = str(session.get("id") or "")
+    write_now_conversation(pdir, now_conv)
+    return {
+        **result,
+        "selected_chunks": expanded_selected,
+        "neighbor_chunks": neighbor_items,
+        "session": _serialize_session(session, compacted or compaction),
+    }
 
 
 def _safe_workspace_doc_id(doc_id: str) -> bool:
@@ -499,6 +1704,28 @@ def delete_project_doc(project_id: str, doc_id: str) -> Dict[str, Any]:
             ocr_dir = pdir / "uploads" / "ocr_blocks" / doc_id
             if ocr_dir.exists():
                 shutil.rmtree(ocr_dir, ignore_errors=True)
+    delete_document_directory(pdir, doc_id)
+    remove_document_from_index(pdir, doc_id)
+
+    session_store = read_qa_sessions(pdir)
+    sessions = session_store.get("sessions") if isinstance(session_store.get("sessions"), list) else []
+    remaining_sessions = [
+        session
+        for session in sessions
+        if not (isinstance(session, dict) and str(session.get("docId") or "") == doc_id)
+    ]
+    if len(remaining_sessions) != len(sessions):
+        session_store["sessions"] = remaining_sessions
+        write_qa_sessions(pdir, session_store)
+
+    compaction_store = read_qa_compactions(pdir)
+    compactions = compaction_store.get("sessions") if isinstance(compaction_store.get("sessions"), dict) else {}
+    if isinstance(compactions, dict) and remaining_sessions is not sessions:
+        active_ids = {str(session.get("id") or "") for session in remaining_sessions if isinstance(session, dict)}
+        compaction_store["sessions"] = {
+            sid: summary for sid, summary in compactions.items() if sid in active_ids
+        }
+        write_qa_compactions(pdir, compaction_store)
 
     new_docs = [d for d in docs if isinstance(d, dict) and d.get("id") != doc_id]
     threads = ws.get("threads")
@@ -510,6 +1737,14 @@ def delete_project_doc(project_id: str, doc_id: str) -> Dict[str, Any]:
         sel = new_docs[0].get("id") if new_docs else None
     ws["docs"] = new_docs
     ws["selectedDocId"] = sel
+    nc = read_now_conversation(pdir)
+    selected_items = nc.get("selectedItems") if isinstance(nc, dict) else []
+    if isinstance(selected_items, list) and any(
+        isinstance(item, dict) and item.get("docId") == doc_id for item in selected_items
+    ):
+        write_now_conversation(pdir, default_now_conversation_state())
+    elif str(nc.get("activeDocId") or "") == doc_id:
+        write_now_conversation(pdir, default_now_conversation_state())
     write_workspace(pdir, ws)
     return {"status": "deleted", "selectedDocId": sel}
 
@@ -529,7 +1764,33 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail="文档不存在")
     if not doc.get("isPdf"):
         raise HTTPException(status_code=400, detail="仅支持 PDF 文档")
-    if doc.get("ocrParsed"):
+    existing_pages = doc.get("ocrBlocksByPage")
+    has_chunk_payload = (
+        isinstance(existing_pages, list)
+        and len(existing_pages) > 0
+        and all(
+            isinstance(page, dict) and isinstance(page.get("chunks"), list)
+            for page in existing_pages
+        )
+    )
+    if doc.get("ocrParsed") and has_chunk_payload:
+        changed = False
+        if not isinstance(doc.get("ocrQualityReport"), dict):
+            attach_ocr_quality_report(doc)
+            changed = True
+        persist_document_quality_report(project_id, pdir, doc)
+        overview = ensure_document_overview(ROOT, pdir, doc)
+        doc["hasOverview"] = True
+        doc["overviewGeneratedAt"] = overview.get("generatedAt")
+        doc["overviewPath"] = f"data/projects/{project_id}/documents/{doc_id}/overview.json"
+        changed = True
+        if changed:
+            for i, d in enumerate(docs):
+                if isinstance(d, dict) and d.get("id") == doc_id:
+                    docs[i] = doc
+                    break
+            ws["docs"] = docs
+            write_workspace(pdir, ws)
         return {"status": "already_parsed", "doc": doc}
 
     fn = doc.get("pdfFileName")
@@ -551,7 +1812,7 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
     out_dir = pdir / "uploads" / "ocr_blocks" / doc_id
     try:
         parser = get_glm_ocr_parser()
-        ocr_blocks_by_page = glm_ocr_parse_to_layout_vis_pages(
+        ocr_blocks_by_page, quality_report = _parse_pdf_with_quality_retry(
             pdf_path, page_dir, out_dir, parser
         )
     except HTTPException:
@@ -568,6 +1829,13 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
     doc["ocrParsed"] = True
     doc["ocrBlocksByPage"] = ocr_blocks_by_page
     doc["pdfViewMode"] = "parsed"
+    attach_ocr_quality_report(doc)
+    doc["ocrQualityReport"]["retry"] = quality_report.get("retry", {})
+    persist_document_quality_report(project_id, pdir, doc)
+    overview = upsert_document_overview(ROOT, pdir, doc)
+    doc["hasOverview"] = True
+    doc["overviewGeneratedAt"] = overview.get("generatedAt")
+    doc["overviewPath"] = f"data/projects/{project_id}/documents/{doc_id}/overview.json"
     for i, d in enumerate(docs):
         if isinstance(d, dict) and d.get("id") == doc_id:
             docs[i] = doc
@@ -575,6 +1843,45 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
     ws["docs"] = docs
     write_workspace(pdir, ws)
     return {"status": "ok", "doc": doc}
+
+
+@app.post("/api/projects/{project_id}/docs/{doc_id}/ocr-evaluate")
+def evaluate_ocr_document(project_id: str, doc_id: str) -> Dict[str, Any]:
+    if not _safe_workspace_doc_id(doc_id):
+        raise HTTPException(status_code=400, detail="非法文档 ID")
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    ws = read_workspace(pdir)
+    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
+    doc = next((d for d in docs if isinstance(d, dict) and d.get("id") == doc_id), None)
+    if not doc:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    report = attach_ocr_quality_report(doc)
+    if float(report.get("avgFinalScore") or 0.0) < 0.6 and doc.get("isPdf"):
+        fn = doc.get("pdfFileName")
+        if isinstance(fn, str) and re.match(r"^[\w.\-]+$", fn):
+            pdf_path = (pdir / "uploads" / "pdfs" / fn).resolve()
+            page_dir = pdir / "uploads" / "pdf_pages" / doc_id
+            out_dir = pdir / "uploads" / "ocr_blocks" / doc_id
+            if pdf_path.is_file() and page_dir.is_dir():
+                parser = get_glm_ocr_parser()
+                retry_pages, retry_report = _parse_pdf_with_quality_retry(pdf_path, page_dir, out_dir, parser)
+                doc["ocrBlocksByPage"] = retry_pages
+                report = attach_ocr_quality_report(doc)
+                doc["ocrQualityReport"]["retry"] = retry_report.get("retry", {})
+    persist_document_quality_report(project_id, pdir, doc)
+    overview = upsert_document_overview(ROOT, pdir, doc)
+    doc["hasOverview"] = True
+    doc["overviewGeneratedAt"] = overview.get("generatedAt")
+    doc["overviewPath"] = f"data/projects/{project_id}/documents/{doc_id}/overview.json"
+    for i, d in enumerate(docs):
+        if isinstance(d, dict) and d.get("id") == doc_id:
+            docs[i] = doc
+            break
+    ws["docs"] = docs
+    write_workspace(pdir, ws)
+    return {"status": "ok", "report": report, "doc": doc}
 
 
 @app.post("/api/projects/{project_id}/upload/pdf")
