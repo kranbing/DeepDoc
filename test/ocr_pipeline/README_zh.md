@@ -15,8 +15,26 @@
 在 test 目录下执行：
 
 ```powershell
-python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode maas --api-key <YOUR_KEY>
+# maas 本地测试入口（默认从 config.yaml/.env 读取 MaaS API 配置，不需要 --api-key）
+python .\run_ocr_pipeline_maas.py --input .\example\ocr_demo.png
+
+# selfhosted 本地测试入口
+python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png
+
+# 若本地 OCR 服务暂不可用，可开启 mock 回退保证流程可跑通
+python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png --enable-mock-fallback
 ```
+
+说明：
+
+- maas 入口读取 `pipeline.maas`（如 `api_key/api_url/model`）配置。
+- selfhosted 入口读取 `pipeline.ocr_api`（如 `api_host/api_port/model`）配置。
+- 两个入口均默认不需要传 `--api-key`。
+- 程序会按顺序查找配置文件：当前目录 `config.yaml` -> `test/config.yaml` -> `GLM-OCR-0.1.4/glmocr/config.yaml`。
+
+兼容说明：
+
+- `run_ocr_pipeline.py` 仍可继续使用（通用入口，支持 `--mode` 选择）。
 
 ## 主要模块
 

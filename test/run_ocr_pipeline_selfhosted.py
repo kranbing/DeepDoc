@@ -3,21 +3,23 @@ from __future__ import annotations
 import argparse
 import json
 
-from ocr_pipeline.runner import run_pipeline
+from ocr_pipeline.runner import run_selfhosted_pipeline
 
 
 def build_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="OCR test and quality-evaluation pipeline")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Run OCR quality pipeline in selfhosted mode. "
+            "API host/port are read from local config.yaml by default."
+        )
+    )
     parser.add_argument("--input", required=True, help="Input image or PDF path")
     parser.add_argument("--output-dir", default="./output/pipeline", help="Output directory")
     parser.add_argument("--doc-id", default=None, help="Optional document id")
-
-    parser.add_argument("--mode", default="maas", choices=["maas", "selfhosted", "mock"], help="OCR backend mode")
-    parser.add_argument("--api-key", default=None, help="API key for cloud mode")
-    parser.add_argument("--config-path", default=None, help="glmocr config path")
+    parser.add_argument("--config-path", default=None, help="Optional config path; defaults to local config.yaml")
     parser.add_argument("--env-file", default=None, help="Path to .env")
-    parser.add_argument("--enable-mock-fallback", action="store_true", help="Use mock adapter when primary OCR fails")
-    parser.add_argument("--mock-noisy", action="store_true", help="Generate noisy mock OCR output for robustness testing")
+    parser.add_argument("--enable-mock-fallback", action="store_true", help="Fallback to mock OCR when selfhosted OCR fails")
+    parser.add_argument("--mock-noisy", action="store_true", help="Generate noisy mock OCR output for fallback testing")
 
     parser.add_argument("--score-threshold", type=float, default=0.7, help="Retry trigger threshold")
     parser.add_argument("--final-score-threshold", type=float, default=0.85, help="Final score retry threshold")
@@ -34,13 +36,10 @@ def build_args() -> argparse.Namespace:
 
 def main() -> int:
     args = build_args()
-
-    result = run_pipeline(
+    result = run_selfhosted_pipeline(
         input_path=args.input,
         output_dir=args.output_dir,
         doc_id=args.doc_id,
-        mode=args.mode,
-        api_key=args.api_key,
         config_path=args.config_path,
         env_file=args.env_file,
         enable_mock_fallback=args.enable_mock_fallback,
@@ -56,7 +55,6 @@ def main() -> int:
         no_viz=args.no_viz,
     )
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
-
     return 0
 
 

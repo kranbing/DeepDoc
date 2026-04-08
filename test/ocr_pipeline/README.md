@@ -17,7 +17,14 @@ This folder contains a runnable OCR test pipeline with:
 From `test` directory:
 
 ```powershell
-python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode maas --api-key <YOUR_KEY>
+# maas sibling entrypoint (reads MaaS API settings from config.yaml/.env; no --api-key required)
+python .\run_ocr_pipeline_maas.py --input .\example\ocr_demo.png
+
+# selfhosted local test entry (reads API host/port from local config.yaml)
+python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png
+
+# keep pipeline runnable when local OCR service is temporarily unavailable
+python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png --enable-mock-fallback
 
 # fully local mock mode (no OCR service required)
 python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode mock --mock-noisy
@@ -25,6 +32,17 @@ python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode mock --mock-n
 # use real OCR first, fall back to mock when OCR fails
 python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode selfhosted --enable-mock-fallback
 ```
+
+Notes:
+
+- The maas entry reads `pipeline.maas` (`api_key/api_url/model`).
+- The selfhosted entry reads `pipeline.ocr_api` (`api_host/api_port/model`).
+- Both sibling entrypoints do not require passing `--api-key`.
+- Config lookup order: current `config.yaml` -> `test/config.yaml` -> `GLM-OCR-0.1.4/glmocr/config.yaml`.
+
+Compatibility:
+
+- `run_ocr_pipeline.py` remains available as a generic `--mode` entrypoint.
 
 ## Scoring
 
