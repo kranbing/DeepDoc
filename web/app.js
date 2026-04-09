@@ -26,6 +26,19 @@ const state = {
   /** 来自 sampleData 的完整项目包（点击后注入 state） */
   projectsCatalog: [],
   currentProjectId: null,
+  docConversations: {},
+  hoveredChunkKey: null,
+  selectedChunkKeys: [],
+  selectedChunkItems: [],
+  chatHistoryVisible: false,
+  chunkPress: {
+    timer: null,
+    active: false,
+    moved: false,
+    anchorKey: null,
+    pointerId: null,
+    mode: null,
+  },
 };
 
 let suppressScrollSync = false;
@@ -71,26 +84,505 @@ function rebuildPdfDocDerivedFields() {
   }
 }
 
-function flattenOcrBlockList(doc) {
-  const out = [];
-  for (const pg of doc.ocrBlocksByPage || []) {
-    const pn = pg.pageNo;
-    for (const f of pg.files || []) {
-      out.push({ pageNo: pn, filename: f });
-    }
-  }
-  return out;
-}
-
 function buildOcrBlockImageUrl(doc, filename) {
   if (!doc?.isPdf || !filename || !state.currentProjectId) return null;
   return `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/files/ocr-blocks/${encodeURIComponent(doc.id)}/${encodeURIComponent(filename)}`;
 }
 
+function getParsedPdfPages(doc) {
+  if (!doc?.isPdf || !Array.isArray(doc.ocrBlocksByPage)) return [];
+  return doc.ocrBlocksByPage
+    .map((pg, idx) => {
+      const pageNo = Number(pg?.pageNo) || idx + 1;
+      const originalFilename = Array.isArray(doc.pdfPageImages) ? doc.pdfPageImages[pageNo - 1] : null;
+      const parsedFilename = Array.isArray(pg?.files) ? pg.files[0] : null;
+      const imageSize = pg?.imageSize || null;
+      const chunks = Array.isArray(pg?.chunks) ? pg.chunks : [];
+      return {
+        pageNo,
+        imageFilename: originalFilename || parsedFilename,
+        imageKind: "original",
+        chunks,
+        bands: buildHorizontalBands(chunks, pageNo, imageSize),
+        imageSize,
+      };
+    })
+    .filter((pg) => !!pg.imageFilename)
+    .sort((a, b) => a.pageNo - b.pageNo);
+}
+
+function buildHorizontalBands(chunks, pageNo, imageSize) {
+  const pageWidth = Number(imageSize?.width) || 0;
+  const ranges = (Array.isArray(chunks) ? chunks : [])
+    .map((chunk, idx) => {
+      const norm = chunk?.bboxNorm || {};
+      const px = chunk?.bboxPx || {};
+      const y1 = Number(norm.y1);
+      const y2 = Number(norm.y2);
+      if (![y1, y2].every(Number.isFinite) || y2 <= y1) return null;
+      return {
+        chunk,
+        idx,
+        y1,
+        y2,
+        y1Px: Number(px.y1),
+        y2Px: Number(px.y2),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (a.y1 - b.y1) || (a.y2 - b.y2));
+
+  const groups = [];
+  for (const item of ranges) {
+    const last = groups[groups.length - 1];
+    if (!last || item.y1 > last.y2) {
+      groups.push({
+        items: [item],
+        y1: item.y1,
+        y2: item.y2,
+      });
+      continue;
+    }
+    last.items.push(item);
+    last.y1 = Math.min(last.y1, item.y1);
+    last.y2 = Math.max(last.y2, item.y2);
+  }
+
+  return groups.map((group, idx) => {
+    const y1PxList = group.items.map((item) => item.y1Px).filter(Number.isFinite);
+    const y2PxList = group.items.map((item) => item.y2Px).filter(Number.isFinite);
+    const labels = [...new Set(group.items.map((item) => String(item.chunk?.label || "text")))];
+    return {
+      chunkKey: `p${String(pageNo).padStart(4, "0")}_band_${String(idx).padStart(3, "0")}`,
+      pageNo,
+      index: idx,
+      label: "band",
+      bboxNorm: {
+        x1: 0,
+        y1: group.y1,
+        x2: 1,
+        y2: group.y2,
+      },
+      bboxPx: {
+        x1: 0,
+        y1: y1PxList.length ? Math.min(...y1PxList) : null,
+        x2: pageWidth || null,
+        y2: y2PxList.length ? Math.max(...y2PxList) : null,
+      },
+      content: group.items
+        .map((item) => String(item.chunk?.content || "").trim())
+        .filter(Boolean)
+        .join("\n\n"),
+      sourceLabels: labels,
+      sourceChunkCount: group.items.length,
+      sourceChunks: group.items.map((item) => ({
+        chunkId: item.chunk?.chunkId || `p${pageNo}_c${item.idx}`,
+        label: item.chunk?.label || "text",
+        content: item.chunk?.content || "",
+        bboxPx: item.chunk?.bboxPx || {},
+      })),
+    };
+  });
+}
+
+function clearChunkSelection({ persist = true } = {}) {
+  state.hoveredChunkKey = null;
+  state.selectedChunkKeys = [];
+  state.selectedChunkItems = [];
+  if (persist) void syncNowConversationSelection();
+}
+
+function createMessageId() {
+  return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createChatMessage(role, text, extra = {}) {
+  return {
+    id: extra.id || createMessageId(),
+    role,
+    text,
+    timestamp: extra.timestamp || new Date().toISOString(),
+    ...extra,
+  };
+}
+
+function isDiskWorkspaceProject() {
+  const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
+  return !!(state.appPhase === "workspace" && proj?.storage === "disk");
+}
+
+function getDocConversationBundle(docId) {
+  return docId ? state.docConversations[docId] || null : null;
+}
+
+function getActiveConversationSession(docId) {
+  const bundle = getDocConversationBundle(docId);
+  if (!bundle) return null;
+  const sessions = Array.isArray(bundle.sessions) ? bundle.sessions : [];
+  const activeId = bundle.activeSessionId || sessions[0]?.id || null;
+  return sessions.find((item) => item?.id === activeId) || sessions[0] || null;
+}
+
+function conversationSessionToThread(session, docName) {
+  if (!session) {
+    return {
+      meta: "new",
+      messages: [{ role: "assistant", text: `已加载《${docName || "未命名"}》。请选择块后提问。` }],
+      suggestions: ["总结这份文档", "列出关键要点", "下一步建议是什么？"],
+    };
+  }
+  const messages = Array.isArray(session.messages) ? session.messages : [];
+  return {
+    meta: messages.length ? "ready" : "new",
+    messages: messages.length
+      ? messages
+      : [{ role: "assistant", text: `已创建《${docName || "未命名"}》的新对话。请选择块后提问。` }],
+    suggestions: Array.isArray(session.suggestions) ? session.suggestions : [],
+    sessionId: session.id || null,
+  };
+}
+
+function formatChatTime(timestamp) {
+  if (!timestamp) return "";
+  const d = new Date(timestamp);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function buildHistoryLabel(text, fallbackIndex) {
+  const raw = String(text || "").replace(/\s+/g, " ").trim();
+  if (!raw) return `事件 ${fallbackIndex}`;
+  return raw.length > 22 ? `${raw.slice(0, 22)}...` : raw;
+}
+
+function buildCitedChunkGroups(chunkIds) {
+  const ids = Array.isArray(chunkIds) ? chunkIds.filter(Boolean) : [];
+  if (!ids.length) return [];
+
+  const parsed = ids.map((id) => {
+    const m = String(id).match(/^p(\d+)_band_(\d+)$/);
+    if (!m) return { raw: String(id), sortable: false, chunkKey: String(id) };
+    return {
+      raw: String(id),
+      chunkKey: String(id),
+      sortable: true,
+      page: m[1],
+      band: Number(m[2]),
+      bandText: m[2],
+    };
+  });
+
+  const output = [];
+  let i = 0;
+  while (i < parsed.length) {
+    const current = parsed[i];
+    if (!current.sortable) {
+      output.push({
+        chunkKeys: [current.chunkKey],
+        page: null,
+        bandStartText: "",
+        bandEndText: "",
+      });
+      i += 1;
+      continue;
+    }
+
+    let j = i;
+    while (
+      j + 1 < parsed.length &&
+      parsed[j + 1].sortable &&
+      parsed[j + 1].page === current.page &&
+      parsed[j + 1].band === parsed[j].band + 1
+    ) {
+      j += 1;
+    }
+
+    if (j === i) {
+      output.push({
+        chunkKeys: [current.chunkKey],
+        page: Number(current.page),
+        bandStartText: current.bandText,
+        bandEndText: current.bandText,
+      });
+    } else {
+      const last = parsed[j];
+      output.push({
+        chunkKeys: parsed.slice(i, j + 1).map((item) => item.chunkKey),
+        page: Number(current.page),
+        bandStartText: current.bandText,
+        bandEndText: String(last.band).padStart(current.bandText.length, "0"),
+      });
+    }
+    i = j + 1;
+  }
+
+  return output.map((group, idx) => {
+    const bandPart = group.bandStartText && group.bandEndText && group.bandStartText !== group.bandEndText
+      ? `${group.bandStartText}-${group.bandEndText}`
+      : (group.bandStartText || "raw");
+    const label = group.page == null
+      ? `块${idx + 1}`
+      : `P${group.page}.${bandPart} 块${idx + 1}`;
+    return {
+      ...group,
+      label,
+    };
+  });
+}
+
+function locateCitedChunks(chunkKeys) {
+  const doc = getSelectedDoc();
+  if (!doc?.isPdf || !doc.ocrParsed) return;
+  const groups = buildCitedChunkGroups(chunkKeys);
+  const firstKey = groups[0]?.chunkKeys?.[0] || chunkKeys?.[0];
+  const m = String(firstKey || "").match(/^p(\d+)_band_/);
+  const targetPage = m ? Number(m[1]) : state.currentPage;
+  if (doc.pdfViewMode !== "parsed") {
+    doc.pdfViewMode = "parsed";
+    renderDocHeader();
+  }
+  setCurrentPage(targetPage);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const items = [];
+      for (const key of chunkKeys) {
+        const el = document.querySelector(`.chunk-box[data-chunk-key="${key}"]`);
+        const payload = getChunkPayloadFromElement(el);
+        if (payload?.chunkKey) items.push(payload);
+      }
+      if (!items.length) return;
+
+      items.sort((a, b) => {
+        const pageDiff = Number(a.pageNo || 0) - Number(b.pageNo || 0);
+        if (pageDiff !== 0) return pageDiff;
+        return Number(a.index || 0) - Number(b.index || 0);
+      });
+      state.selectedChunkItems = items;
+      state.selectedChunkKeys = items.map((item) => item.chunkKey);
+      renderChunkInspector();
+      syncChunkSelectionClasses();
+      void syncNowConversationSelection();
+
+      const firstEl = document.querySelector(`.chunk-box[data-chunk-key="${items[0].chunkKey}"]`);
+      if (firstEl) firstEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+}
+
+function getChunkIndexKey(item) {
+  return `${Number(item?.pageNo || 0)}:${Number(item?.index || -1)}`;
+}
+
+function getChunkPayloadFromElement(el) {
+  if (!el) return null;
+  try {
+    return JSON.parse(el.dataset.chunkPayload || "{}");
+  } catch {
+    return null;
+  }
+}
+
+function setSelectedChunkRange(anchorChunk, currentChunk) {
+  if (!anchorChunk || !currentChunk) return;
+  const anchorPage = Number(anchorChunk.pageNo || 0);
+  const currentPage = Number(currentChunk.pageNo || 0);
+  const anchorIndex = Number(anchorChunk.index);
+  const currentIndex = Number(currentChunk.index);
+  if (!Number.isFinite(anchorPage) || !Number.isFinite(currentPage) || anchorPage !== currentPage) return;
+  if (!Number.isFinite(anchorIndex) || !Number.isFinite(currentIndex)) return;
+
+  const start = Math.min(anchorIndex, currentIndex);
+  const end = Math.max(anchorIndex, currentIndex);
+  const inRange = [];
+
+  document.querySelectorAll(`.chunk-box[data-page-no="${anchorPage}"]`).forEach((el) => {
+    const payload = getChunkPayloadFromElement(el);
+    const idx = Number(payload?.index);
+    if (Number.isFinite(idx) && idx >= start && idx <= end) inRange.push(payload);
+  });
+
+  if (inRange.length !== end - start + 1) return;
+
+  inRange.sort((a, b) => Number(a.index || 0) - Number(b.index || 0));
+
+  if (state.chunkPress.mode === "remove") {
+    const removeKeys = new Set(inRange.map((item) => item.chunkKey));
+    state.selectedChunkItems = state.selectedChunkItems.filter((item) => !removeKeys.has(item.chunkKey));
+    state.selectedChunkKeys = state.selectedChunkItems.map((item) => item.chunkKey);
+  } else {
+    const merged = [...state.selectedChunkItems];
+    const existingKeys = new Set(merged.map((item) => item.chunkKey));
+    for (const item of inRange) {
+      if (!existingKeys.has(item.chunkKey)) {
+        merged.push(item);
+        existingKeys.add(item.chunkKey);
+      }
+    }
+    merged.sort((a, b) => {
+      const pageDiff = Number(a.pageNo || 0) - Number(b.pageNo || 0);
+      if (pageDiff !== 0) return pageDiff;
+      return Number(a.index || 0) - Number(b.index || 0);
+    });
+    state.selectedChunkItems = merged;
+    state.selectedChunkKeys = merged.map((item) => item.chunkKey);
+  }
+  state.currentPage = anchorPage;
+  $("#pageNum").value = String(state.currentPage);
+  void syncNowConversationSelection();
+  renderChunkInspector();
+  syncChunkSelectionClasses();
+}
+
+function clearChunkPressTimer() {
+  if (state.chunkPress.timer) {
+    clearTimeout(state.chunkPress.timer);
+    state.chunkPress.timer = null;
+  }
+}
+
+function resetChunkPress() {
+  clearChunkPressTimer();
+  state.chunkPress.active = false;
+  state.chunkPress.moved = false;
+  state.chunkPress.anchorKey = null;
+  state.chunkPress.pointerId = null;
+  state.chunkPress.mode = null;
+}
+
+function setSelectedChunk(chunk) {
+  if (!chunk) {
+    clearChunkSelection();
+  } else {
+    const idx = state.selectedChunkKeys.indexOf(chunk.chunkKey);
+    if (idx >= 0) {
+      state.selectedChunkKeys.splice(idx, 1);
+      state.selectedChunkItems = state.selectedChunkItems.filter((item) => item.chunkKey !== chunk.chunkKey);
+    } else {
+      state.selectedChunkKeys = [...state.selectedChunkKeys, chunk.chunkKey];
+      state.selectedChunkItems = [...state.selectedChunkItems, chunk];
+    }
+    if (Number.isFinite(Number(chunk.pageNo))) {
+      state.currentPage = Number(chunk.pageNo);
+      $("#pageNum").value = String(state.currentPage);
+    }
+    void syncNowConversationSelection();
+  }
+  renderChunkInspector();
+  syncChunkSelectionClasses();
+}
+
+function renderChunkInspector() {
+  const wrap = $("#chunkInspector");
+  const meta = $("#chunkInspectorMeta");
+  const pos = $("#chunkInspectorPosition");
+  const content = $("#chunkInspectorContent");
+  if (!wrap || !meta || !pos || !content) return;
+
+  const doc = getSelectedDoc();
+  const shouldShow = !!(doc?.isPdf && isPdfParsedView(doc) && state.selectedChunkItems.length);
+  wrap.hidden = !shouldShow;
+  if (!shouldShow) {
+    meta.textContent = "Click a chunk box";
+    pos.textContent = "";
+    content.textContent = "";
+    return;
+  }
+
+  const items = state.selectedChunkItems.slice().sort((a, b) => {
+    const pageDiff = Number(a.pageNo || 0) - Number(b.pageNo || 0);
+    if (pageDiff !== 0) return pageDiff;
+    return Number(a.index || 0) - Number(b.index || 0);
+  });
+  const first = items[0];
+  const last = items[items.length - 1];
+  meta.textContent = `${items.length} selected | page ${first.pageNo}${last.pageNo !== first.pageNo ? `-${last.pageNo}` : ""}`;
+  const y1List = items.map((item) => Number(item?.bboxPx?.y1)).filter(Number.isFinite);
+  const y2List = items.map((item) => Number(item?.bboxPx?.y2)).filter(Number.isFinite);
+  pos.textContent = `y1=${y1List.length ? Math.min(...y1List) : "-"}, y2=${y2List.length ? Math.max(...y2List) : "-"}`;
+  content.textContent = items
+    .map((item) => {
+      const labels = Array.isArray(item.sourceLabels) && item.sourceLabels.length ? `labels: ${item.sourceLabels.join(", ")}` : "";
+      const head = `Page ${item.pageNo} | #${item.index} | ${item.sourceChunkCount || 1} chunks`;
+      return [head, labels, item.content || "(empty chunk)"].filter(Boolean).join("\n");
+    })
+    .join("\n\n---\n\n");
+}
+
+function syncChunkSelectionClasses() {
+  const selectedIndexSet = new Set(
+    state.selectedChunkItems.map((item) => `${Number(item.pageNo || 0)}:${Number(item.index || 0)}`)
+  );
+  const itemMap = new Map(
+    state.selectedChunkItems.map((item) => [item.chunkKey, item])
+  );
+
+  document.querySelectorAll(".chunk-box").forEach((el) => {
+    const key = el.dataset.chunkKey;
+    const isSelected = state.selectedChunkKeys.includes(key);
+    const item = itemMap.get(key);
+    let payloadIndex = -1;
+    if (!item) {
+      try {
+        payloadIndex = Number(JSON.parse(el.dataset.chunkPayload || "{}").index ?? -1);
+      } catch {
+        payloadIndex = -1;
+      }
+    }
+    const pageNo = Number(item?.pageNo ?? el.dataset.pageNo ?? 0);
+    const index = Number(item?.index ?? payloadIndex);
+    const hasPrev = isSelected && selectedIndexSet.has(`${pageNo}:${index - 1}`);
+    const hasNext = isSelected && selectedIndexSet.has(`${pageNo}:${index + 1}`);
+
+    el.classList.toggle("is-hover", key === state.hoveredChunkKey);
+    el.classList.toggle("is-selected", isSelected);
+    el.classList.toggle("is-joined-prev", hasPrev);
+    el.classList.toggle("is-joined-next", hasNext);
+  });
+}
+
+async function syncNowConversationSelection() {
+  if (!state.currentProjectId || state.appPhase !== "workspace") return;
+  const doc = getSelectedDoc();
+  const selectedItems = doc
+    ? state.selectedChunkItems.map((item) => ({
+        ...item,
+        docId: doc.id,
+        docName: doc.name,
+      }))
+    : [];
+  try {
+    await fetch(`${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/now-conversation`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selectedItems }),
+    });
+  } catch (e) {
+    console.warn("[app] sync now_conversation failed", e);
+  }
+}
+
+async function fetchNowConversationFromApi(projectId) {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/projects/${encodeURIComponent(projectId)}/now-conversation`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 function getPdfNavTotal(doc) {
   if (!doc?.isPdf) return 1;
   if (doc.ocrParsed && doc.pdfViewMode === "parsed" && doc.ocrBlocksByPage?.length) {
-    const n = flattenOcrBlockList(doc).length;
+    const n = getParsedPdfPages(doc).length;
     return n > 0 ? n : 1;
   }
   return doc.pdfNumPages || doc.pdfPageImages?.length || 1;
@@ -102,7 +594,7 @@ function isPdfParsedView(doc) {
     doc.ocrParsed &&
     doc.pdfViewMode === "parsed" &&
     doc.ocrBlocksByPage?.length &&
-    flattenOcrBlockList(doc).length > 0
+    getParsedPdfPages(doc).length > 0
   );
 }
 
@@ -119,9 +611,18 @@ function updateParseOcrButton() {
     return;
   }
   btn.disabled = false;
+  const hasChunkPayload =
+    Array.isArray(doc.ocrBlocksByPage) &&
+    doc.ocrBlocksByPage.length > 0 &&
+    doc.ocrBlocksByPage.every((pg) => Array.isArray(pg?.chunks));
   if (!doc.ocrParsed) {
     btn.textContent = "解析";
     btn.title = "GLM-OCR 解析（首次），每页生成版面可视化（框+标签）";
+    return;
+  }
+  if (!hasChunkPayload) {
+    btn.textContent = "瑙ｆ瀽";
+    btn.title = "补齐 chunk 框数据并切换为解析视图";
     return;
   }
   if (doc.pdfViewMode === "parsed") {
@@ -537,6 +1038,7 @@ function renderDbChat() {
   const wrap = $("#chatMessages");
   if (!wrap) return;
   wrap.innerHTML = "";
+  renderHistory(null);
   $("#suggestions").querySelectorAll(".chip-row").forEach((n) => n.remove());
   const st = $("#suggestTitle");
   if (st) st.style.display = "none";
@@ -570,7 +1072,12 @@ function renderDbChat() {
   const thread = state.dbThreads[db.id];
   setThreadMeta(thread.meta || "ready");
   const msgs = thread.messages || [];
-  msgs.forEach((m) => appendMessage(m.role, m.text));
+  msgs.forEach((m, idx) => appendMessage(m.role, m.text, {
+    id: m.id || `db_msg_legacy_${idx}`,
+    timestamp: m.timestamp || "",
+    citedChunkIds: Array.isArray(m.citedChunkIds) ? m.citedChunkIds : [],
+  }));
+  renderHistory(thread);
 }
 
 function simulateDbReply(db, userText) {
@@ -588,19 +1095,22 @@ async function handleDbMessage(userText) {
   const text = (userText || "").trim();
   if (!text) return;
 
-  appendMessage("user", text);
+  const userMsg = createChatMessage("user", text);
+  appendMessage(userMsg.role, userMsg.text, userMsg);
   if (!state.dbThreads[db.id]) state.dbThreads[db.id] = { messages: [], meta: "ready" };
   state.dbThreads[db.id].messages = state.dbThreads[db.id].messages || [];
-  state.dbThreads[db.id].messages.push({ role: "user", text });
+  state.dbThreads[db.id].messages.push(userMsg);
 
   setThreadMeta("thinking...");
   await new Promise((r) => setTimeout(r, 450));
 
   const reply = simulateDbReply(db, text);
-  appendMessage("assistant", reply);
-  state.dbThreads[db.id].messages.push({ role: "assistant", text: reply });
+  const assistantMsg = createChatMessage("assistant", reply);
+  appendMessage(assistantMsg.role, assistantMsg.text, assistantMsg);
+  state.dbThreads[db.id].messages.push(assistantMsg);
   state.dbThreads[db.id].meta = "ready";
   setThreadMeta("ready");
+  renderHistory(state.dbThreads[db.id]);
 }
 
 function setThreadMeta(text) {
@@ -665,8 +1175,14 @@ async function handleParseOcrClick() {
   const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
   if (!doc?.isPdf || proj?.storage !== "disk" || state.appPhase !== "workspace") return;
 
-  if (doc.ocrParsed) {
+  const hasChunkPayload =
+    Array.isArray(doc.ocrBlocksByPage) &&
+    doc.ocrBlocksByPage.length > 0 &&
+    doc.ocrBlocksByPage.every((pg) => Array.isArray(pg?.chunks));
+
+  if (doc.ocrParsed && hasChunkPayload) {
     doc.pdfViewMode = doc.pdfViewMode === "parsed" ? "original" : "parsed";
+    clearChunkSelection();
     state.currentPage = 1;
     renderDocHeader();
     renderDocumentContinuous();
@@ -692,12 +1208,13 @@ async function handleParseOcrClick() {
     }
     const data = await res.json();
     const updated = data.doc;
-    if (updated) {
+  if (updated) {
       const idx = state.docs.findIndex((d) => d.id === doc.id);
       if (idx >= 0) {
         state.docs[idx] = { ...state.docs[idx], ...updated };
       }
     }
+    clearChunkSelection();
     state.currentPage = 1;
     renderDocHeader();
     renderDocumentContinuous();
@@ -737,6 +1254,9 @@ async function deleteDocument(docId) {
       const data = await res.json().catch(() => ({}));
       state.docs = state.docs.filter((d) => d.id !== docId);
       delete state.threads[docId];
+      if (state.selectedChunkItems.some((item) => item?.docId === docId)) {
+        clearChunkSelection({ persist: false });
+      }
       if (Object.prototype.hasOwnProperty.call(data, "selectedDocId")) {
         state.selectedDocId = data.selectedDocId;
       } else if (state.selectedDocId === docId) {
@@ -750,6 +1270,9 @@ async function deleteDocument(docId) {
   } else {
     state.docs = state.docs.filter((d) => d.id !== docId);
     delete state.threads[docId];
+    if (state.selectedChunkItems.some((item) => item?.docId === docId)) {
+      clearChunkSelection();
+    }
     if (state.selectedDocId === docId) {
       state.selectedDocId = null;
     }
@@ -784,10 +1307,14 @@ function setSelectedDoc(docId, { keepMessages = false } = {}) {
   state.selectedDocId = docId;
   state.currentPage = 1;
   state.docSearchQuery = "";
+  clearChunkSelection();
   $("#docSearch").value = "";
   $("#pageNum").value = String(1);
 
   renderFileList();
+  if (isDiskWorkspaceProject() && docId) {
+    void loadDocConversations(docId, { render: !keepMessages });
+  }
   if (state.viewMode === "document") {
     renderDocHeader();
     renderDocumentContinuous();
@@ -866,9 +1393,10 @@ function renderDocumentContinuous() {
       (Array.isArray(images) ? images.length : 0) ||
       0;
     const parsedView = isPdfParsedView(doc);
-    const flatBlocks = parsedView ? flattenOcrBlockList(doc) : [];
+    const parsedPages = parsedView ? getParsedPdfPages(doc) : [];
+    const flatBlocks = parsedPages;
 
-    if (parsedView && flatBlocks.length === 0) {
+    if (parsedView && parsedPages.length === 0) {
       pagesWrap.innerHTML = "";
       delete pagesWrap.dataset.pdfDocId;
       delete pagesWrap.dataset.pdfViewKey;
@@ -899,7 +1427,7 @@ function renderDocumentContinuous() {
     $("#viewerHint").style.display = "none";
 
     doc.pdfNumPages = pageCount;
-    const numPages = parsedView ? flatBlocks.length : pageCount;
+    const numPages = parsedView ? parsedPages.length : pageCount;
     renderDocHeader();
     const cur = clamp(state.currentPage, 1, numPages);
     state.currentPage = cur;
@@ -932,10 +1460,11 @@ function renderDocumentContinuous() {
       let fn;
       let src;
       let alt;
+      let chunks = [];
       if (parsedView) {
-        const b = flatBlocks[p - 1];
-        fn = b.filename;
-        src = buildOcrBlockImageUrl(doc, fn);
+        const b = parsedPages[p - 1];
+        fn = b.imageFilename;
+        src = buildPdfPageImageUrl(doc, fn) || buildOcrBlockImageUrl(doc, fn);
         alt = `第 ${b.pageNo} 页 · 版面可视化`;
       } else {
         fn = images[p - 1];
@@ -966,11 +1495,59 @@ function renderDocumentContinuous() {
       img.src = src;
 
       wrap.appendChild(img);
+      if (parsedView) {
+        const parsedPage = parsedPages[p - 1];
+        const bands = Array.isArray(parsedPage?.bands) ? parsedPage.bands : [];
+        if (bands.length) {
+          const overlay = document.createElement("div");
+          overlay.className = "chunk-overlay";
+          overlay.dataset.pageNo = String(parsedPage.pageNo || p);
+
+          for (const chunk of bands) {
+            const norm = chunk.bboxNorm || {};
+            const y1 = Number(norm.y1);
+            const y2 = Number(norm.y2);
+            if (![y1, y2].every(Number.isFinite)) continue;
+
+            const chunkKey = chunk.chunkKey || `p${chunk.pageNo ?? p}_band_${chunk.index ?? 0}`;
+            const box = document.createElement("button");
+            box.type = "button";
+            box.className = "chunk-box";
+            box.dataset.chunkKey = chunkKey;
+            box.dataset.pageNo = String(chunk.pageNo ?? parsedPage.pageNo ?? p);
+            box.dataset.chunkPayload = JSON.stringify({
+              chunkKey,
+              pageNo: chunk.pageNo ?? parsedPage.pageNo ?? p,
+              index: chunk.index ?? 0,
+              label: chunk.label || "band",
+              content: chunk.content || "",
+              bboxPx: chunk.bboxPx || {},
+              sourceLabels: chunk.sourceLabels || [],
+              sourceChunkCount: chunk.sourceChunkCount || 0,
+            });
+            box.style.left = "0";
+            box.style.top = `${y1 * 100}%`;
+            box.style.width = "100%";
+            box.style.minWidth = "100%";
+            box.style.maxWidth = "100%";
+            box.style.height = `${(y2 - y1) * 100}%`;
+            box.style.borderRadius = "0";
+            box.style.boxSizing = "border-box";
+            box.style.zIndex = "6";
+            box.title = `Page ${chunk.pageNo ?? parsedPage.pageNo ?? p} · ${chunk.label || "chunk"} #${chunk.index ?? 0}`;
+            overlay.appendChild(box);
+          }
+
+          wrap.appendChild(overlay);
+        }
+      }
       section.appendChild(wrap);
       pagesWrap.appendChild(section);
     }
 
     reorderPdfSections(pagesWrap, start, end);
+    syncChunkSelectionClasses();
+    renderChunkInspector();
     renderFileList();
 
     requestAnimationFrame(() => {
@@ -984,6 +1561,8 @@ function renderDocumentContinuous() {
   pagesWrap.innerHTML = "";
   delete pagesWrap.dataset.pdfDocId;
   delete pagesWrap.dataset.pdfViewKey;
+  clearChunkSelection();
+  renderChunkInspector();
 
   const total = doc?.pages?.length ?? 0;
   if (!doc || total === 0) return;
@@ -1037,49 +1616,168 @@ function renderDocumentContinuous() {
 
 function renderChat() {
   const docId = state.selectedDocId;
-  const thread = state.threads[docId] || {
+  let thread = state.threads[docId] || {
     meta: "new",
-    messages: [{ role: "assistant", text: `已加载《${getSelectedDoc()?.name || "未命名"}》。请提问。` }],
-    suggestions: ["总结这份文档", "列出关键要点", "下一步建议是什么？"]
+    messages: [{
+      role: "assistant",
+      text: `????${getSelectedDoc()?.name || "???"}????????????????????????????`
+    }],
+    suggestions: ["??????", "??????", "?????????"]
   };
 
+  const doc = getSelectedDoc();
+  if (isDiskWorkspaceProject() && docId && doc && state.viewMode !== "database") {
+    thread = conversationSessionToThread(getActiveConversationSession(docId), doc.name);
+  }
   setThreadMeta(thread.meta || "ready");
   $("#chatMessages").innerHTML = "";
 
   const msgs = thread.messages || [];
-  msgs.forEach((m) => appendMessage(m.role, m.text));
+  msgs.forEach((m, idx) => appendMessage(m.role, m.text, {
+    id: m.id || `msg_legacy_${idx}`,
+    timestamp: m.timestamp || "",
+    citedChunkIds: Array.isArray(m.citedChunkIds) ? m.citedChunkIds : [],
+  }));
 
   renderSuggestions(thread.suggestions || []);
+  renderHistory(thread);
 }
 
-function appendMessage(role, text) {
+function appendMessage(role, text, options = {}) {
   const wrap = $("#chatMessages");
   const row = document.createElement("div");
   row.className = `msg ${role}`;
+  if (options.id) row.dataset.messageId = options.id;
 
   const bubble = document.createElement("div");
   bubble.className = "bubble";
+
+  const head = document.createElement("div");
+  head.className = "bubble-head";
 
   const r = document.createElement("div");
   r.className = "role";
   r.textContent = role === "user" ? "You" : "Assistant";
 
+  const time = document.createElement("div");
+  time.className = "msg-time";
+  time.textContent = formatChatTime(options.timestamp);
+
   const t = document.createElement("div");
   t.className = "text";
   t.textContent = text;
 
-  bubble.appendChild(r);
+  head.appendChild(r);
+  head.appendChild(time);
+  bubble.appendChild(head);
   bubble.appendChild(t);
+
+  const groups = buildCitedChunkGroups(options.citedChunkIds);
+  if (role === "assistant" && groups.length) {
+    const refs = document.createElement("div");
+    refs.className = "cited-blocks";
+
+    const title = document.createElement("div");
+    title.className = "cited-blocks-title";
+    title.textContent = "引用块";
+    refs.appendChild(title);
+
+    const list = document.createElement("div");
+    list.className = `cited-blocks-list${groups.length > 1 ? " is-vertical" : ""}`;
+    groups.forEach((group) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cited-block-btn";
+      btn.textContent = group.label;
+      btn.addEventListener("click", () => locateCitedChunks(group.chunkKeys));
+      list.appendChild(btn);
+    });
+    refs.appendChild(list);
+    bubble.appendChild(refs);
+  }
+
   row.appendChild(bubble);
   wrap.appendChild(row);
   wrap.scrollTop = wrap.scrollHeight;
 }
 
+function renderHistory(thread) {
+  const panel = $("#chatHistoryPanel");
+  const list = $("#chatHistoryList");
+  const toggleBtn = $("#btnToggleHistory");
+  if (!panel || !list || !toggleBtn) return;
+
+  list.innerHTML = "";
+  const docId = state.selectedDocId;
+  if (isDiskWorkspaceProject() && docId && state.viewMode !== "database") {
+    const bundle = getDocConversationBundle(docId);
+    const sessions = Array.isArray(bundle?.sessions) ? bundle.sessions : [];
+    const activeId = bundle?.activeSessionId || sessions[0]?.id || null;
+    panel.hidden = !state.chatHistoryVisible || sessions.length === 0;
+    toggleBtn.classList.toggle("is-active", state.chatHistoryVisible);
+    toggleBtn.disabled = sessions.length === 0;
+    sessions.forEach((session, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `history-chip${session?.id === activeId ? " is-active" : ""}`;
+      const label = session?.title || `对话 ${idx + 1}`;
+      btn.textContent = label;
+      const time = formatChatTime(session?.updatedAt || session?.startedAt || "");
+      if (time) btn.title = `${label} ${time}`;
+      btn.addEventListener("click", async () => {
+        if (!session?.id) return;
+        try {
+          const data = await activateDocConversationApi(docId, session.id);
+          upsertConversationSession(docId, data.session, data.activeSessionId || session.id);
+          renderChat();
+        } catch (e) {
+          console.warn("[app] activate conversation failed", e);
+        }
+      });
+      list.appendChild(btn);
+    });
+    const suggestions = $("#suggestions");
+    if (suggestions) suggestions.hidden = state.chatHistoryVisible;
+    return;
+  }
+  const messages = Array.isArray(thread?.messages) ? thread.messages : [];
+  const historyItems = messages
+    .filter((m) => m?.role === "user" && String(m.text || "").trim())
+    .map((m, idx) => ({
+      label: buildHistoryLabel(m.text, idx + 1),
+      messageId: m.id || `msg_legacy_${idx}`,
+      timestamp: m.timestamp || "",
+    }));
+
+  panel.hidden = !state.chatHistoryVisible || historyItems.length === 0;
+  toggleBtn.classList.toggle("is-active", state.chatHistoryVisible);
+  toggleBtn.disabled = historyItems.length === 0;
+
+  historyItems.forEach((item) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "history-chip";
+    btn.textContent = item.label;
+    const time = formatChatTime(item.timestamp);
+    if (time) btn.title = `${item.label} ${time}`;
+    btn.addEventListener("click", () => {
+      const target = document.querySelector(`.msg[data-message-id="${item.messageId}"]`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    list.appendChild(btn);
+  });
+
+  const suggestions = $("#suggestions");
+  if (suggestions) suggestions.hidden = state.chatHistoryVisible;
+}
+
 function renderSuggestions(suggestions) {
   const el = $("#suggestions");
+  if (!el) return;
+  el.hidden = state.chatHistoryVisible;
   // 只移除之前生成的 chip 行，保留顶部标题。
   el.querySelectorAll(".chip-row").forEach((n) => n.remove());
-  if (!suggestions || suggestions.length === 0) return;
+  if (state.chatHistoryVisible || !suggestions || suggestions.length === 0) return;
 
   const row = document.createElement("div");
   row.className = "chip-row";
@@ -1088,13 +1786,92 @@ function renderSuggestions(suggestions) {
     chip.type = "button";
     chip.className = "chip";
     chip.textContent = s;
-    chip.addEventListener("click", () => {
-      $("#chatText").value = s;
+    chip.addEventListener("click", async () => {
+      $("#chatText").value = "";
       $("#chatText").focus();
+      await handleSendMessage(s);
     });
     row.appendChild(chip);
   });
   el.appendChild(row);
+}
+
+async function askSelectionApi(docId, question) {
+  const res = await fetch(
+    `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}/ask-selection`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(typeof data.detail === "string" ? data.detail : `提问失败 (${res.status})`);
+  }
+  return data;
+}
+
+async function fetchDocConversationsApi(docId) {
+  const res = await fetch(
+    `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}/conversations`
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(typeof data.detail === "string" ? data.detail : `加载对话失败 (${res.status})`);
+  }
+  return data;
+}
+
+async function createDocConversationApi(docId) {
+  const res = await fetch(
+    `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}/conversations`,
+    { method: "POST" }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(typeof data.detail === "string" ? data.detail : `新建对话失败 (${res.status})`);
+  }
+  return data;
+}
+
+async function activateDocConversationApi(docId, sessionId) {
+  const res = await fetch(
+    `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}/conversations/${encodeURIComponent(sessionId)}/activate`,
+    { method: "PUT" }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(typeof data.detail === "string" ? data.detail : `切换对话失败 (${res.status})`);
+  }
+  return data;
+}
+
+function upsertConversationSession(docId, session, activeSessionId = null) {
+  if (!docId || !session?.id) return;
+  const current = getDocConversationBundle(docId) || { sessions: [], activeSessionId: null };
+  const sessions = Array.isArray(current.sessions) ? current.sessions.slice() : [];
+  const idx = sessions.findIndex((item) => item?.id === session.id);
+  if (idx >= 0) sessions[idx] = session;
+  else sessions.unshift(session);
+  sessions.sort((a, b) => String(b?.updatedAt || "").localeCompare(String(a?.updatedAt || "")));
+  state.docConversations[docId] = {
+    sessions,
+    activeSessionId: activeSessionId || session.id,
+  };
+}
+
+async function loadDocConversations(docId, { render = true } = {}) {
+  if (!docId || !isDiskWorkspaceProject()) return null;
+  const data = await fetchDocConversationsApi(docId);
+  state.docConversations[docId] = {
+    sessions: Array.isArray(data.sessions) ? data.sessions : [],
+    activeSessionId: data.activeSessionId || (Array.isArray(data.sessions) ? data.sessions[0]?.id : null) || null,
+  };
+  if (render && state.selectedDocId === docId && state.viewMode !== "database") {
+    renderChat();
+  }
+  return state.docConversations[docId];
 }
 
 function clamp(n, min, max) {
@@ -1173,32 +1950,65 @@ async function handleSendMessage(userText) {
   if (!text) return;
 
   // 追加 user
-  appendMessage("user", text);
-
   const docId = doc.id;
-  if (!state.threads[docId]) state.threads[docId] = { messages: [], suggestions: [], meta: "ready" };
-  state.threads[docId].messages = state.threads[docId].messages || [];
-  state.threads[docId].messages.push({ role: "user", text });
+  const useConversationApi = isDiskWorkspaceProject();
+  if (!useConversationApi) {
+    if (!state.threads[docId]) state.threads[docId] = { messages: [], suggestions: [], meta: "ready" };
+    state.threads[docId].messages = state.threads[docId].messages || [];
+    const userMsg = createChatMessage("user", text);
+    appendMessage(userMsg.role, userMsg.text, userMsg);
+    state.threads[docId].messages.push(userMsg);
+  }
 
   setThreadMeta("thinking...");
-  // 演示延迟
-  await new Promise((r) => setTimeout(r, 550));
-
-  const reply = simulateAssistantReply(doc, text);
-  appendMessage("assistant", reply);
-  state.threads[docId].messages.push({ role: "assistant", text: reply });
-  setThreadMeta("ready");
+  try {
+    if (useConversationApi && !getDocConversationBundle(docId)) {
+      await loadDocConversations(docId, { render: false });
+    }
+    const result = await askSelectionApi(docId, text);
+    if (useConversationApi && result.session) {
+      upsertConversationSession(docId, result.session, result.session.id);
+      renderChat();
+    } else {
+      const reply = `${result.answer || ""}`;
+      const assistantMsg = createChatMessage("assistant", reply, {
+        citedChunkIds: result.cited_chunk_ids || [],
+      });
+      appendMessage(assistantMsg.role, assistantMsg.text, assistantMsg);
+      state.threads[docId].messages.push(assistantMsg);
+      state.threads[docId].suggestions = Array.isArray(result.follow_up_questions)
+        ? result.follow_up_questions
+        : [];
+      renderSuggestions(state.threads[docId].suggestions);
+      renderHistory(state.threads[docId]);
+    }
+    setThreadMeta("ready");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "提问失败";
+    const assistantMsg = createChatMessage("assistant", msg);
+    appendMessage(assistantMsg.role, assistantMsg.text, assistantMsg);
+    if (!useConversationApi) {
+      state.threads[docId].messages.push(assistantMsg);
+      renderHistory(state.threads[docId]);
+    }
+    setThreadMeta("error");
+  }
 
   const hint = $("#resultsChatHint");
   if (hint) {
+    const activeThread = useConversationApi
+      ? conversationSessionToThread(getActiveConversationSession(docId), doc.name)
+      : state.threads[docId];
+    const lastAssistant = activeThread?.messages?.[activeThread.messages.length - 1]?.text || "";
     if (state.viewMode === "results") {
-      const preview = reply.length > 220 ? `${reply.slice(0, 220)}…` : reply;
-      hint.textContent = `与当前文档相关的对话摘要（演示）：\n${preview}`;
+      const preview = lastAssistant.length > 220 ? `${lastAssistant.slice(0, 220)}…` : lastAssistant;
+      hint.textContent = `与当前文档相关的对话摘要：\n${preview}`;
       hint.hidden = false;
     } else {
       hint.hidden = true;
     }
   }
+  await saveWorkspaceToDisk();
 }
 
 function setupEventHandlers() {
@@ -1380,6 +2190,31 @@ function setupEventHandlers() {
     await handleSendMessage(text);
   });
 
+  $("#btnToggleHistory")?.addEventListener("click", () => {
+    state.chatHistoryVisible = !state.chatHistoryVisible;
+    if (state.viewMode === "database") {
+      renderDbChat();
+      return;
+    }
+    renderChat();
+  });
+
+  $("#btnNewConversation")?.addEventListener("click", async () => {
+    const doc = getSelectedDoc();
+    if (!doc || !isDiskWorkspaceProject()) return;
+    try {
+      const data = await createDocConversationApi(doc.id);
+      upsertConversationSession(doc.id, data.session, data.activeSessionId || data.session?.id);
+      $("#chatMessages").innerHTML = "";
+      $("#chatText").value = "";
+      state.chatHistoryVisible = false;
+      renderChat();
+    } catch (e) {
+      console.warn("[app] create conversation failed", e);
+      alert(e instanceof Error ? e.message : "新建对话失败");
+    }
+  });
+
   const btnParseOcr = $("#btnParseOcr");
   if (btnParseOcr) {
     btnParseOcr.addEventListener("click", () => void handleParseOcrClick());
@@ -1503,7 +2338,54 @@ function setupEventHandlers() {
   // 中间文档：鼠标悬停时，高亮当前“分块”（对应模拟的 region）
   const pagesWrap = $("#pages");
   let lastHover = null;
+  pagesWrap.addEventListener("pointerdown", (e) => {
+    const chunkEl = e.target.closest(".chunk-box");
+    if (!chunkEl || e.button !== 0) return;
+    const payload = getChunkPayloadFromElement(chunkEl);
+    if (!payload?.chunkKey) return;
+
+    resetChunkPress();
+    state.chunkPress.pointerId = e.pointerId;
+    state.chunkPress.anchorKey = payload.chunkKey;
+    state.chunkPress.mode = state.selectedChunkKeys.includes(payload.chunkKey) ? "remove" : "add";
+    state.chunkPress.timer = setTimeout(() => {
+      state.chunkPress.active = true;
+      state.chunkPress.timer = null;
+      setSelectedChunkRange(payload, payload);
+    }, 250);
+  });
+  pagesWrap.addEventListener("pointermove", (e) => {
+    if (state.chunkPress.pointerId !== e.pointerId) return;
+    const chunkEl = e.target.closest(".chunk-box");
+    if (!chunkEl) return;
+    const payload = getChunkPayloadFromElement(chunkEl);
+    if (!payload?.chunkKey) return;
+
+    state.chunkPress.moved = true;
+    if (!state.chunkPress.active) return;
+
+    const anchorEl = pagesWrap.querySelector(`.chunk-box[data-chunk-key="${state.chunkPress.anchorKey}"]`);
+    const anchorPayload = getChunkPayloadFromElement(anchorEl);
+    setSelectedChunkRange(anchorPayload, payload);
+  });
+  pagesWrap.addEventListener("pointerup", (e) => {
+    if (state.chunkPress.pointerId !== e.pointerId) return;
+    clearChunkPressTimer();
+    state.chunkPress.active = false;
+    state.chunkPress.pointerId = null;
+    state.chunkPress.anchorKey = null;
+    state.chunkPress.moved = false;
+  });
+  pagesWrap.addEventListener("pointercancel", () => {
+    resetChunkPress();
+  });
   pagesWrap.addEventListener("mouseover", (e) => {
+    const chunkEl = e.target.closest(".chunk-box");
+    if (chunkEl) {
+      state.hoveredChunkKey = chunkEl.dataset.chunkKey || null;
+      syncChunkSelectionClasses();
+      return;
+    }
     const el = e.target.closest(".ocr-block");
     if (!el) return;
     if (lastHover === el) return;
@@ -1511,9 +2393,40 @@ function setupEventHandlers() {
     el.classList.add("block-hover");
     lastHover = el;
   });
+  pagesWrap.addEventListener("mouseout", (e) => {
+    const chunkEl = e.target.closest(".chunk-box");
+    if (!chunkEl) return;
+    const next = e.relatedTarget?.closest?.(".chunk-box");
+    if (next === chunkEl) return;
+    if (state.hoveredChunkKey === chunkEl.dataset.chunkKey) {
+      state.hoveredChunkKey = null;
+      syncChunkSelectionClasses();
+    }
+  });
+  pagesWrap.addEventListener("click", (e) => {
+    const chunkEl = e.target.closest(".chunk-box");
+    if (!chunkEl) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (state.chunkPress.active || state.chunkPress.moved) {
+      resetChunkPress();
+      return;
+    }
+    try {
+      const payload = JSON.parse(chunkEl.dataset.chunkPayload || "{}");
+      setSelectedChunk(payload);
+    } catch {
+      setSelectedChunk(null);
+    }
+  });
   pagesWrap.addEventListener("mouseleave", () => {
     if (lastHover && lastHover.classList) lastHover.classList.remove("block-hover");
     lastHover = null;
+    resetChunkPress();
+    if (state.hoveredChunkKey) {
+      state.hoveredChunkKey = null;
+      syncChunkSelectionClasses();
+    }
   });
 
   // “连续阅读”模式：滚动时自动更新当前页码（用于右侧聊天上下文/页码控件显示）。
@@ -1621,6 +2534,7 @@ function applyProjectBundle(proj) {
       ? []
       : fallbackArtifacts.slice();
   state.filteredArtifacts = state.artifacts.slice();
+  state.docConversations = {};
 
   state.selectedDbId =
     proj.selectedDbId !== undefined && proj.selectedDbId !== null
@@ -1770,6 +2684,27 @@ async function enterWorkspace(projectId) {
   }
 
   applyProjectBundle(bundle);
+  clearChunkSelection({ persist: false });
+  if (proj.storage === "disk") {
+    const nowConversation = await fetchNowConversationFromApi(projectId);
+    const items = Array.isArray(nowConversation?.selectedItems) ? nowConversation.selectedItems : [];
+    if (items.length) {
+      const targetDoc = state.docs.find((d) => d.id === items[0].docId);
+      if (targetDoc) {
+        state.selectedDocId = targetDoc.id;
+        state.selectedChunkKeys = items.map((item) => item.chunkKey).filter(Boolean);
+        state.selectedChunkItems = items;
+      }
+    }
+    if (state.selectedDocId) {
+      try {
+        await loadDocConversations(state.selectedDocId, { render: false });
+      } catch (e) {
+        console.warn("[app] load conversations failed", e);
+      }
+    }
+  }
+  renderChunkInspector();
 
   const landing = $("#landingView");
   const ws = $("#workspace");
@@ -2075,4 +3010,3 @@ async function main() {
 }
 
 main();
-

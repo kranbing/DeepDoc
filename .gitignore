@@ -25,6 +25,9 @@ node_modules/
 .env
 .env.*
 !.env.example
+backend/.deepseek_api_key
+backend/.glmocr_api_key
+backend/.zhipu_api_key
 
 # 系统与编辑器
 .DS_Store
