@@ -15,26 +15,27 @@
 在 test 目录下执行：
 
 ```powershell
-# maas 本地测试入口（默认从 config.yaml/.env 读取 MaaS API 配置，不需要 --api-key）
-python .\run_ocr_pipeline_maas.py --input .\example\ocr_demo.png
+# OCR 统一入口（--mode 选择 maas / selfhosted / mock）
+python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode maas
 
-# selfhosted 本地测试入口
-python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png
+# selfhosted 模式
+python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode selfhosted
 
 # 若本地 OCR 服务暂不可用，可开启 mock 回退保证流程可跑通
-python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png --enable-mock-fallback
+python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode selfhosted --enable-mock-fallback
+
+# Excel 解析入口（输出 QA 友好的结构化 chunks）
+python .\run_excel_pipeline.py --input .\example\demo_table.xlsx
 ```
 
 说明：
 
-- maas 入口读取 `pipeline.maas`（如 `api_key/api_url/model`）配置。
-- selfhosted 入口读取 `pipeline.ocr_api`（如 `api_host/api_port/model`）配置。
-- 两个入口均默认不需要传 `--api-key`。
+- OCR 统一入口通过 `--mode` 切换实现。
+- `--mode maas` 读取 `pipeline.maas`（如 `api_key/api_url/model`）配置。
+- `--mode selfhosted` 读取 `pipeline.ocr_api`（如 `api_host/api_port/model`）配置。
+- 默认不需要传 `--api-key`。
 - 程序会按顺序查找配置文件：当前目录 `config.yaml` -> `test/config.yaml` -> `GLM-OCR-0.1.4/glmocr/config.yaml`。
 
-兼容说明：
-
-- `run_ocr_pipeline.py` 仍可继续使用（通用入口，支持 `--mode` 选择）。
 
 ## 主要模块
 
@@ -45,3 +46,24 @@ python .\run_ocr_pipeline_selfhosted.py --input .\example\ocr_demo.png --enable-
 - retry_strategies.py：增强/本地/PDF重试策略
 - visualization.py：边界框错误可视化输出
 - custom_adapter_template.py：自定义OCR后端集成模板
+- excel_adapter.py：Excel 适配器（读取 workbook/sheet/cell）
+- excel_postprocess.py：Excel chunk 生成与质量评估
+
+## Excel Chunk 结构
+
+Excel 解析输出遵循可用于 QA 的 chunk 结构，核心字段示例：
+
+```json
+{
+	"type": "excel_chunk",
+	"sheet": "Sheet1",
+	"range": "A2:D21",
+	"headers": ["日期", "品类", "数量", "金额"],
+	"rows": [
+		{"row_index": 2, "values": {"日期": "2026-04-01", "品类": "A", "数量": 12, "金额": 329.5}}
+	],
+	"text": "工作表: Sheet1\n范围: A2:D21\n...",
+	"position": {"sheet": "Sheet1", "row_start": 2, "row_end": 21, "col_start": 1, "col_end": 4},
+	"structure": {"row_count": 20, "col_count": 4, "has_header": true}
+}
+```

@@ -1,6 +1,8 @@
 from .pipeline import OCRPipeline, PipelineConfig
 from .adapters import OCRAdapter, GlmOcrAdapter, MockOcrAdapter, FailoverOCRAdapter
-from .runner import run_pipeline, run_maas_pipeline, run_selfhosted_pipeline
+from .excel_adapter import ExcelAdapter, OpenpyxlExcelAdapter
+from .excel_postprocess import ExcelChunker, ExcelChunkerConfig, evaluate_excel_chunk_quality
+from .runner import run_pipeline
 
 __all__ = [
 	"OCRPipeline",
@@ -9,7 +11,10 @@ __all__ = [
 	"GlmOcrAdapter",
 	"MockOcrAdapter",
 	"FailoverOCRAdapter",
+	"ExcelAdapter",
+	"OpenpyxlExcelAdapter",
+	"ExcelChunker",
+	"ExcelChunkerConfig",
+	"evaluate_excel_chunk_quality",
 	"run_pipeline",
-	"run_maas_pipeline",
-	"run_selfhosted_pipeline",
 ]
