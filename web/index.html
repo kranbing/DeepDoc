@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeepDOC</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app app--landing">
+      <div id="landingView" class="landing" aria-label="项目选择">
+        <canvas id="landingMeshCanvas" class="landing-mesh-canvas" aria-hidden="true"></canvas>
+        <header class="landing-hero">
+          <div class="brand landing-brand">
+            <div class="brand-icon" aria-hidden="true">◆</div>
+            <div class="brand-text">
+              <h1 class="brand-title">DeepDOC</h1>
+              <p class="brand-subtitle" id="landingBrandSubtitle">PDF · 数据库 · 交付物（演示）</p>
+            </div>
+          </div>
+        </header>
+        <div class="landing-main">
+          <aside class="landing-user" id="landingUser" aria-label="用户信息"></aside>
+          <div class="landing-projects-column">
+            <div class="landing-projects-header">
+              <h2 class="landing-section-title">项目</h2>
+              <button type="button" id="btnCreateProject" class="btn btn-primary btn-create-project">
+                新建项目
+              </button>
+            </div>
+            <div id="projectGrid" class="project-grid" role="list"></div>
+          </div>
+
+          <div id="createProjectModal" class="modal" hidden>
+            <div class="modal-backdrop" data-close="modal" aria-hidden="true"></div>
+            <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalCreateTitle">
+              <h3 id="modalCreateTitle" class="modal-title">新建项目</h3>
+              <label class="modal-label" for="inputProjectName">项目名称</label>
+              <input
+                id="inputProjectName"
+                class="input modal-input"
+                type="text"
+                placeholder="例如：论文检索实验"
+                maxlength="200"
+                autocomplete="off"
+              />
+              <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" id="btnCancelCreate">取消</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitCreate">创建</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="workspace" class="workspace" hidden>
+        <header class="topbar">
+          <div class="topbar-left">
+            <button id="btnBackToProjects" class="btn btn-ghost btn-back" type="button" title="返回项目列表">
+              ← 项目
+            </button>
+            <div class="brand">
+              <div class="brand-icon" aria-hidden="true">◆</div>
+              <div class="brand-text">
+                <div class="brand-title">DeepDOC</div>
+                <div class="brand-subtitle" id="brandSubtitle">PDF · 数据库 · 交付物（演示）</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="btnParseOcr" class="btn btn-ghost" type="button" disabled title="请先选择 PDF">
+              解析
+            </button>
+            <button id="btnUpload" class="btn btn-ghost" type="button" title="上传 PDF">
+              Upload
+            </button>
+            <input id="fileInput" type="file" accept="application/pdf" hidden />
+          </div>
+        </header>
+
+        <main class="layout">
+        <!-- Left: document list -->
+        <aside class="panel panel-left">
+          <div id="leftSectionFiles" class="left-section left-section--files">
+            <div class="panel-header">
+              <div class="panel-title">Files</div>
+              <div class="panel-meta" id="filesCount">0</div>
+            </div>
+
+            <div class="searchbox">
+              <input
+                id="fileSearch"
+                class="input"
+                type="text"
+                placeholder="Search file name..."
+                autocomplete="off"
+              />
+            </div>
+
+            <ul id="fileList" class="file-list" role="listbox" aria-label="文件列表"></ul>
+          </div>
+
+          <div id="leftSectionDatabase" class="left-section left-section--database" hidden>
+            <div class="panel-header">
+              <div class="panel-title">DATE BASE</div>
+              <div class="panel-meta" id="dbCount">0</div>
+            </div>
+
+            <div class="searchbox">
+              <input
+                id="dbSearch"
+                class="input"
+                type="text"
+                placeholder="Search database..."
+                autocomplete="off"
+              />
+            </div>
+
+            <ul id="dbList" class="file-list" role="listbox" aria-label="数据库列表"></ul>
+          </div>
+
+          <div id="leftSectionResults" class="left-section left-section--results" hidden>
+            <div class="panel-header">
+              <div class="panel-title">Deliverables</div>
+              <div class="panel-meta" id="artifactCount">0</div>
+            </div>
+
+            <div class="searchbox">
+              <input
+                id="artifactSearch"
+                class="input"
+                type="text"
+                placeholder="Search deliverables..."
+                autocomplete="off"
+              />
+            </div>
+
+            <ul id="artifactList" class="file-list" role="listbox" aria-label="生成结果列表"></ul>
+          </div>
+
+          <nav class="left-view-nav" aria-label="中间区域视图切换">
+            <button type="button" class="view-tab is-active" data-view="document">主界面</button>
+            <button type="button" class="view-tab" data-view="database">数据库视图</button>
+            <button type="button" class="view-tab" data-view="results">生成结果</button>
+          </nav>
+        </aside>
+
+        <!-- Center: document preview -->
+        <section class="panel panel-center">
+          <div class="doc-top">
+            <div class="doc-meta">
+              <div class="doc-name" id="docName">请选择一个文件</div>
+              <div class="doc-submeta" id="docSubmeta">-</div>
+            </div>
+
+            <div class="doc-controls">
+              <div class="control-group">
+                <label class="label" for="docSearch">Doc Search</label>
+                <input id="docSearch" class="input input-sm" type="text" placeholder="输入关键词..." />
+              </div>
+
+              <div class="control-group">
+                <label class="label" for="pageNum">Page</label>
+                <div class="page-nav">
+                  <button id="btnPrevPage" class="icon-btn" type="button" aria-label="上一页">‹</button>
+                  <input id="pageNum" class="input input-sm input-num" type="number" min="1" value="1" />
+                  <span id="pageTotal" class="page-total">/ 1</span>
+                  <button id="btnNextPage" class="icon-btn" type="button" aria-label="下一页">›</button>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="label" for="zoomRange">Zoom</label>
+                <input id="zoomRange" class="range" type="range" min="0.8" max="1.4" step="0.05" value="1" />
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-viewer">
+            <div id="centerViewDocument" class="center-view is-active">
+              <div id="viewerHint" class="viewer-hint">从左侧选择文件后，这里会显示示例页面内容。</div>
+              <div id="pages" class="pages" aria-live="polite"></div>
+              <aside id="chunkInspector" class="chunk-inspector" hidden aria-live="polite">
+                <div class="chunk-inspector-head">
+                  <div class="chunk-inspector-title">Chunk Detail</div>
+                  <div id="chunkInspectorMeta" class="chunk-inspector-meta">Click a chunk box</div>
+                </div>
+                <div id="chunkInspectorPosition" class="chunk-inspector-position"></div>
+                <pre id="chunkInspectorContent" class="chunk-inspector-content"></pre>
+                <div id="chunkNeighborWrap" class="chunk-neighbor-wrap" hidden>
+                  <div class="chunk-subtitle">邻近块</div>
+                  <div id="chunkNeighborList" class="chunk-neighbor-list"></div>
+                </div>
+                <div class="chunk-browser">
+                  <div class="chunk-subtitle">Chunk Browser</div>
+                  <div class="chunk-browser-toolbar">
+                    <label class="label" for="chunkPageFilter">Page</label>
+                    <select id="chunkPageFilter" class="input input-sm"></select>
+                    <button type="button" id="btnRefreshChunks" class="btn btn-ghost btn-mini">刷新块</button>
+                  </div>
+                  <div id="chunkListMeta" class="chunk-list-meta">请先解析 PDF。</div>
+                  <div id="chunkList" class="chunk-list"></div>
+                </div>
+                <div class="chunk-browser">
+                  <div class="chunk-subtitle">Vector Search Test</div>
+                  <div class="chunk-browser-toolbar">
+                    <input id="vectorSearchInput" class="input input-sm" type="text" placeholder="输入检索问题..." />
+                  </div>
+                  <div class="chunk-browser-actions">
+                    <button type="button" id="btnRebuildVectorIndex" class="btn btn-ghost btn-mini">重建索引</button>
+                    <button type="button" id="btnUpdateDocIndex" class="btn btn-ghost btn-mini">更新当前文档</button>
+                    <button type="button" id="btnDeleteDocIndex" class="btn btn-ghost btn-mini">删除当前文档索引</button>
+                    <button type="button" id="btnVectorSearch" class="btn btn-primary btn-mini">检索测试</button>
+                  </div>
+                  <div id="vectorIndexMeta" class="chunk-list-meta">索引状态：未加载</div>
+                  <div id="vectorSearchResults" class="chunk-list"></div>
+                </div>
+              </aside>
+            </div>
+
+            <div id="centerViewDatabase" class="center-view">
+              <div class="viewer-panel">
+                <h3 class="viewer-panel-title">数据库视图</h3>
+                <p class="viewer-panel-desc" id="dbViewDesc">从左侧选择一个数据库以查看说明与连接信息。</p>
+                <ul class="viewer-panel-list" id="dbViewDetail">
+                  <li>当前库：<span id="dbViewNameHint">—</span></li>
+                  <li>可在此接入向量检索、元数据表或知识库条目。</li>
+                </ul>
+              </div>
+            </div>
+
+            <div id="centerViewResults" class="center-view">
+              <div class="viewer-panel results-detail">
+                <div class="results-kind-row">
+                  <span id="resultsKindBadge" class="results-kind-badge">—</span>
+                  <span id="resultsCreatedAt" class="results-meta-inline"></span>
+                </div>
+                <h3 class="viewer-panel-title" id="resultsDetailTitle">—</h3>
+                <p class="viewer-panel-desc" id="resultsDetailSource">从左侧选择一项生成结果。</p>
+                <div class="results-preview-wrap">
+                  <pre class="results-preview" id="resultsPreview"></pre>
+                </div>
+                <p id="resultsChatHint" class="results-chat-hint" hidden></p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: chat -->
+        <aside id="panelRight" class="panel panel-right" data-viewmode="document">
+          <div class="panel-header">
+            <div class="panel-title" id="rightPanelTitle">Chat</div>
+            <div class="panel-header-actions">
+              <div class="panel-meta" id="threadMeta">ready</div>
+              <button id="btnNewConversation" class="btn btn-ghost btn-header-action" type="button">NEW</button>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chatMessages" role="log" aria-label="聊天消息列表"></div>
+
+          <div class="chat-suggestions" id="suggestions">
+            <div class="suggest-title" id="suggestTitle">Follow up</div>
+          </div>
+
+          <div id="chatHistoryPanel" class="chat-history" hidden>
+            <div class="chat-history-title">History</div>
+            <div id="chatHistoryList" class="chat-history-list" aria-label="聊天历史"></div>
+          </div>
+
+          <form id="chatForm" class="chat-input" autocomplete="off">
+            <textarea
+              id="chatText"
+              class="textarea"
+              rows="2"
+              placeholder="Type a question...（例如：总结这份文档、给出要点、下一步建议）"
+            ></textarea>
+            <div class="chat-actions">
+              <button id="btnToggleHistory" class="btn btn-ghost" type="button">History</button>
+              <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+          </form>
+        </aside>
+      </main>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,168 @@
+{
+  "user": {
+    "displayName": "演示用户",
+    "email": "demo@deepdoc.local",
+    "note": "DeepDOC 知识工作台 · 每个项目绑定一套 PDF、数据库与生成结果"
+  },
+  "projects": [
+    {
+      "id": "proj_paper_vectors",
+      "name": "论文检索 · 向量索引",
+      "summary": "1912.09555v1.pdf ↔ deepdoc_vectors ↔ 分析报告与向量检索导出",
+      "docs": [
+        {
+          "id": "doc_1912",
+          "name": "1912.09555v1.pdf",
+          "createdAt": "2025-03-23",
+          "docSummary": "示例论文：展示左侧文件列表、中心文档预览与右侧聊天的联动。",
+          "pages": [
+            {
+              "pageNo": 1,
+              "text": "Abstract\nThis paper introduces a web-based document chat mock for demonstration.\nWe simulate file list, page navigation, and a simple assistant response."
+            },
+            {
+              "pageNo": 2,
+              "text": "1. Introduction\nDeep-document assistants help users search, summarize, and reason over long PDFs.\nIn this mock UI we keep everything client-side."
+            },
+            {
+              "pageNo": 3,
+              "text": "3. Formalization and Assumptions\nAssumption A: The interface should be responsive.\nAssumption B: The chat UI must keep context per document.\nConclusion: Use lightweight JS state."
+            },
+            {
+              "pageNo": 4,
+              "text": "4. Experiments\nWe evaluate interaction flows.\n- Click file\n- Search within document\n- Ask chat question\nResult: The UI updates instantly."
+            },
+            {
+              "pageNo": 5,
+              "text": "5. Related Work\nExisting systems provide PDF viewing and chat.\nOur goal: mimic layout and interactions only."
+            },
+            {
+              "pageNo": 6,
+              "text": "6. Conclusion\nThis is a mock implementation for UI design.\nNo real PDF parsing is performed."
+            },
+            {
+              "pageNo": 7,
+              "text": "7. Methodology\nIn a production system, the document viewer would parse PDF content and build an index.\nThe UI state would keep track of:\n- current page anchor\n- search highlights\n- chat thread per document\n\nThis mock follows the same interaction contract, but uses static text to emulate long-form reading.\nThat keeps the demo fully client-side and deterministic."
+            },
+            {
+              "pageNo": 8,
+              "text": "8. Interaction Design\nWe focus on usability details that make the interface feel fast:\n\n1) Instant file switching\nWhen you click a file on the left, the center viewer and the right chat thread update together.\n\n2) Page navigation without breaking context\n\"Prev/Next\" and \"page number\" scroll to the corresponding section in the continuous reader.\n\n3) Search highlighting\nKeywords are visually marked to help users locate relevant passages quickly."
+            },
+            {
+              "pageNo": 9,
+              "text": "9. Experiments (Demo)\nEven without real parsing, we can validate the interaction flow:\n- click files rapidly and verify chat thread persistence\n- type a keyword in Doc Search and confirm the viewer scroll position updates\n- send multiple chat messages and check per-document history\n\nIn real evaluation, you would measure latency for parsing, indexing, and response generation."
+            },
+            {
+              "pageNo": 10,
+              "text": "10. Discussion\nA continuous reader often improves comprehension compared to strict page-by-page cards.\nUsers can maintain a reading rhythm while still being able to jump by page anchors.\n\nHowever, continuous layouts also require careful scroll synchronization.\nThis demo updates `Page` based on the section nearest to the top of the viewer."
+            },
+            {
+              "pageNo": 11,
+              "text": "11. Limitations\nBecause this is a UI mock:\n- it does not render real PDF typography\n- it does not handle images, equations, or tables\n- it does not perform true semantic retrieval\n\nThe goal is to provide a realistic front-end interaction prototype, not a full document understanding system."
+            },
+            {
+              "pageNo": 12,
+              "text": "12. Future Work\nTo make this prototype real, consider:\n1) Integrate PDF.js for accurate rendering.\n2) Build a text index per document (or per page chunk).\n3) Add retrieval-augmented generation to ground assistant answers.\n4) Persist chat threads and viewer state on the server.\n\nWith these upgrades, the UI design from this mock can become a functional product."
+            }
+          ]
+        }
+      ],
+      "databases": [
+        {
+          "id": "db_vectors",
+          "name": "deepdoc_vectors",
+          "description": "向量索引 · 文档块嵌入（演示）",
+          "meta": "SQLite + FAISS"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "art_report_01",
+          "name": "DeepDoc_Analysis_Report.docx",
+          "kind": "docx",
+          "source": "Sources: 1912.09555v1.pdf × deepdoc_vectors",
+          "createdAt": "2025-03-22",
+          "preview": "Executive Summary\n\nThis report synthesizes the uploaded PDF with vector-retrieved passages from deepdoc_vectors.\n\n1. Overview\nCross-modal alignment between document layout and database records is validated.\n\n2. Findings\n- Chunk coverage: 94% of cited paragraphs mapped to DB rows.\n- Tables: 3 structured tables exported to appendix.\n\n( Demo text — replace with real DOCX render / download link. )"
+        }
+      ],
+      "threads": {
+        "doc_1912": {
+          "meta": "ready",
+          "suggestions": [
+            "总结这份文档",
+            "列出关键要点",
+            "下一步建议是什么？",
+            "解释一下第3页在讲什么"
+          ],
+          "messages": [
+            {
+              "role": "assistant",
+              "text": "已加载《1912.09555v1.pdf》。你可以点击左侧其它文件，或在右侧输入问题（例如“总结这份文档”）。"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "proj_ui_meta",
+      "name": "多语言 UI · 元数据",
+      "summary": "样本-多语言设计.pdf ↔ metadata_store ↔ 元数据查询导出",
+      "docs": [
+        {
+          "id": "doc_bilingual",
+          "name": "样本-多语言设计.pdf",
+          "createdAt": "2025-01-10",
+          "docSummary": "多语言样式示例：用于验证 UI 与交互是否通顺。",
+          "pages": [
+            {
+              "pageNo": 1,
+              "text": "Overview\n本示例用于展示界面样式。\n页面内容是静态文本（不解析真实 PDF）。"
+            },
+            {
+              "pageNo": 2,
+              "text": "需求\n- 左侧：文件检索\n- 中间：页码切换与文档关键词搜索\n- 右侧：聊天与追问建议"
+            },
+            {
+              "pageNo": 3,
+              "text": "示例\n你可以输入：总结这份文档、给出要点、下一步建议。\n界面会根据关键词返回不同风格的回复。"
+            }
+          ]
+        }
+      ],
+      "databases": [
+        {
+          "id": "db_meta",
+          "name": "metadata_store",
+          "description": "元数据与表结构登记",
+          "meta": "PostgreSQL"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "art_query_01",
+          "name": "metadata_query_export.xlsx",
+          "kind": "xlsx",
+          "source": "Sources: 样本-多语言设计.pdf × metadata_store",
+          "createdAt": "2025-03-21",
+          "preview": "Sheet: query_result\n\n| doc_id | chunk_id | score | label |\n|--------|----------|-------|-------|\n| doc_1912 | c_12 | 0.91 | section |\n| doc_1912 | c_44 | 0.88 | table |\n\n( Demo TSV-style preview — open real file in Excel. )"
+        }
+      ],
+      "threads": {
+        "doc_bilingual": {
+          "meta": "ready",
+          "suggestions": [
+            "用要点总结",
+            "给出实现建议",
+            "把界面交互讲清楚"
+          ],
+          "messages": [
+            {
+              "role": "assistant",
+              "text": "已加载《样本-多语言设计.pdf》。这个页面的内容是示例文本，用于演示搜索高亮与聊天联动。"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

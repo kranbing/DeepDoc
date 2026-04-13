@@ -1,0 +1,315 @@
+/* Markdown Body Reset */
+.markdown-body * {
+	line-height: inherit;
+	margin: revert;
+	padding: revert;
+	font-size: revert;
+	list-style: revert;
+	font-weight: revert;
+	border: revert;
+}
+
+/* Markdown Body Styles */
+.markdown-body {
+	color: var(--foreground);
+	font-size: 0.875rem;
+	line-height: 1.6;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+/* Headings */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+	font-weight: 600;
+	line-height: 1.25;
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+	color: var(--foreground);
+}
+
+.markdown-body h1 {
+	font-size: 1.875rem;
+	padding-bottom: 0.5em;
+}
+
+.markdown-body h2 {
+	font-size: 1.5rem;
+	border-bottom: 1px solid var(--border);
+	padding-bottom: 0.5em;
+}
+
+.markdown-body h3 {
+	font-size: 1.25rem;
+}
+
+.markdown-body h4 {
+	font-size: 1.125rem;
+}
+
+.markdown-body h5 {
+	font-size: 1rem;
+}
+
+.markdown-body h6 {
+	font-size: 0.875rem;
+	color: var(--muted-foreground);
+}
+
+/* Paragraphs */
+.markdown-body p {
+	margin-top: 0.75em;
+	margin-bottom: 0.75em;
+}
+
+.markdown-body p:first-child {
+	margin-top: 0;
+}
+
+.markdown-body p:last-child {
+	margin-bottom: 0;
+}
+
+/* Links */
+.markdown-body a {
+	color: var(--primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	transition: color 0.2s;
+}
+
+.markdown-body a:hover {
+	color: var(--primary-foreground);
+}
+
+/* Lists */
+.markdown-body ul,
+.markdown-body ol {
+	margin-top: 0.75em;
+	margin-bottom: 0.75em;
+	padding-left: 1.5em;
+}
+
+.markdown-body li {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+}
+
+.markdown-body li > p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.markdown-body ul {
+	list-style-type: disc;
+}
+
+.markdown-body ol {
+	list-style-type: decimal;
+}
+
+.markdown-body ul ul,
+.markdown-body ol ol,
+.markdown-body ul ol,
+.markdown-body ol ul {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+}
+
+/* Code */
+.markdown-body code:not(.hljs) {
+	background-color: var(--muted);
+	color: var(--foreground);
+	padding: 0.125rem 0.375rem;
+	border-radius: 0.25rem;
+	font-size: 0.875em;
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.markdown-body code.hljs {
+	word-wrap: break-word;
+	word-break: break-word;
+	white-space: pre-wrap;
+	display: block;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	background-color: var(--muted);
+	color: var(--foreground);
+	overflow-x: auto;
+}
+
+.markdown-body pre {
+	background-color: var(--muted);
+	border-radius: 0.5rem;
+	padding: 1rem;
+	overflow-x: auto;
+	margin-top: 0.75em;
+	margin-bottom: 0.75em;
+}
+
+.markdown-body pre code {
+	background-color: transparent;
+	padding: 0;
+	border-radius: 0;
+}
+
+/* Code Header */
+.markdown-body .zp-code-header {
+	padding: 0.25rem 0.5rem;
+	background-color: var(--muted);
+	border-bottom: 1px solid var(--border);
+	border-radius: 0.5rem 0.5rem 0 0;
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+}
+
+/* Line Numbers */
+.markdown-body .code-line-number {
+	pointer-events: none;
+	counter-increment: linenumber;
+	display: inline-block;
+	width: 1.875rem;
+	margin-right: 0.25rem;
+	text-align: right;
+	color: var(--muted-foreground);
+	user-select: none;
+}
+
+.markdown-body .code-line-number::before {
+	content: counter(linenumber);
+}
+
+/* Tables */
+.markdown-body table {
+	border: 1px solid var(--border);
+	border-collapse: collapse;
+	margin: 1rem 0;
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+	display: block;
+	background-color: transparent;
+	table-layout: auto;
+	width: fit-content;
+}
+
+/* Table header and body styles can be customized here if needed */
+
+.markdown-body table th,
+.markdown-body table td {
+	border: 1px solid var(--border);
+	padding: 0.5rem 0.75rem;
+	text-align: left;
+}
+
+.markdown-body table th {
+	font-weight: 600;
+	color: var(--foreground);
+	background-color: var(--muted);
+}
+
+
+/* Blockquotes */
+.markdown-body blockquote {
+	border-left: 4px solid var(--border);
+	padding-left: 1rem;
+	margin: 1rem 0;
+	color: var(--muted-foreground);
+	font-style: italic;
+}
+
+/* Horizontal Rules */
+.markdown-body hr {
+	border: none;
+	border-top: 1px solid var(--border);
+	margin: 1.5rem 0;
+}
+
+/* Images */
+.markdown-body img {
+	max-width: 100%;
+	width: auto;
+	height: auto;
+	border-radius: 0.5rem;
+	margin: 1rem auto;
+	display: block;
+}
+
+/* Center aligned images in divs */
+.markdown-body div[style*='text-align: center'] img,
+.markdown-body div[style*='text-align:center'] img {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Strong and Emphasis */
+.markdown-body strong {
+	font-weight: 600;
+	color: var(--foreground);
+}
+
+.markdown-body em {
+	font-style: italic;
+}
+
+/* Task Lists */
+.markdown-body input[type='checkbox'] {
+	margin-right: 0.5rem;
+	accent-color: var(--primary);
+}
+
+/* Math Formula Styles */
+.markdown-body .katex {
+	font-size: 1.1em;
+	line-height: 1.2;
+}
+
+.markdown-body .katex-display {
+	margin: 1em 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.markdown-body .katex-display > .katex {
+	display: inline-block;
+	text-align: initial;
+}
+
+/* Inline math */
+.markdown-body .katex-html {
+	white-space: nowrap;
+}
+
+/* Ensure math formulas don't break layout */
+.markdown-body .katex-display {
+	text-align: center;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+/* Prevent content from overflowing */
+.markdown-body * {
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+/* Allow specific elements to overflow with scroll */
+.markdown-body pre,
+.markdown-body code.hljs,
+.markdown-body table,
+.markdown-body .katex-display {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+/* Hide images without src attribute */
+.markdown-body img:not([src]),
+.markdown-body img[src=""],
+.markdown-body img[src=''] {
+	display: none;
+}
+

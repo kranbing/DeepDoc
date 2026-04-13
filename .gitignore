@@ -1,0 +1,55 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node
+node_modules/
+**/node_modules/
+
+# 模型与权重（体积大，勿提交）
+*.pth
+*.pt
+*.onnx
+*.bin
+*.safetensors
+
+# 环境变量（可能含密钥）
+.env
+.env.*
+!.env.example
+backend/.deepseek_api_key
+backend/.glmocr_api_key
+backend/.zhipu_api_key
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# 日志与临时
+*.log
+npm-debug.log*
+.cache/
+
+# 用户项目数据（后端 data/projects/<uuid>/）
+data/projects/**/*
+!data/projects/.gitkeep
+
+test/example
+test/output
+embedding_test/outputs/
+embedding_test/
+chunk_strategy_test/outputs/
+chunk_strategy_test/
+chunk_strategy_test/rag_data/*/
+!chunk_strategy_test/rag_data/.gitkeep

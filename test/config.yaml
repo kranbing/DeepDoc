@@ -1,0 +1,12 @@
+pipeline:
+  maas:
+    enabled: true # maas 入口会读取该配置（selfhosted 入口会覆盖为 false）
+    api_url: https://open.bigmodel.cn/api/paas/v4/layout_parsing
+    model: glm-ocr
+    # Required environment variable: API_KEY
+    api_key: ${Your-API-KEY}
+  ocr_api:
+    # selfhosted 入口读取该配置
+    api_host: 127.0.0.1
+    api_port: 8080
+    model: glm-ocr
