@@ -37,6 +37,7 @@ Thumbs.db
 .vscode/
 
 # 日志与临时
+logs/
 *.log
 npm-debug.log*
 .cache/
@@ -47,3 +48,4 @@ data/projects/**/*
 
 test/example
 test/output
+*.yaml

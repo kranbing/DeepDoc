@@ -14,6 +14,7 @@ from backend.services.project_store import (
     write_document_overview,
     write_documents_index,
 )
+from backend.services.runtime_logger import log_event
 
 
 def _deepseek_api_key(root: Path) -> Optional[str]:
@@ -182,9 +183,12 @@ def _heuristic_overview(doc: Dict[str, Any], payload: Dict[str, Any], samples: L
 
 
 def generate_overview(root: Path, doc: Dict[str, Any]) -> Dict[str, Any]:
+    doc_id = str(doc.get("id") or "")
+    log_event("overview.generate.start", docId=doc_id)
     samples, title_candidates = collect_overview_samples(doc)
     payload = default_overview_payload(doc, doc.get("ocrQualityReport"), samples, title_candidates)
     if not samples:
+        log_event("overview.generate.empty", docId=doc_id, reason="no_samples")
         return payload
     sample_lines = []
     for chunk in samples:
@@ -210,8 +214,22 @@ def generate_overview(root: Path, doc: Dict[str, Any]) -> Dict[str, Any]:
         payload["overviewLong"] = str(result.get("overviewLong") or "").strip()
         payload["keywords"] = result.get("keywords") if isinstance(result.get("keywords"), list) else []
         payload["topics"] = result.get("topics") if isinstance(result.get("topics"), list) else []
+        log_event(
+            "overview.generate.end",
+            docId=doc_id,
+            mode="deepseek",
+            keywordCount=len(payload["keywords"]),
+            topicCount=len(payload["topics"]),
+        )
         return payload
-    except Exception:
+    except Exception as exc:
+        log_event(
+            "overview.generate.fallback",
+            level="WARNING",
+            docId=doc_id,
+            mode="heuristic",
+            error=str(exc),
+        )
         return _heuristic_overview(doc, payload, samples)
 
 
@@ -251,6 +269,13 @@ def upsert_document_overview(root: Path, project_dir: Path, doc: Dict[str, Any])
     entries.sort(key=lambda entry: str(entry.get("updatedAt") or ""), reverse=True)
     index["documents"] = entries
     write_documents_index(project_dir, index)
+    log_event(
+        "overview.upserted",
+        docId=doc_id,
+        hasOverview=True,
+        pageCount=item["pageCount"],
+        avgFinalScore=item["avgFinalScore"],
+    )
     return overview
 
 

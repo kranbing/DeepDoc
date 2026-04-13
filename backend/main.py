@@ -19,6 +19,7 @@ import os
 import re
 import shutil
 import sys
+import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
@@ -27,7 +28,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib import error as urlerror
 from urllib import request as urlrequest
 
-from fastapi import Body, FastAPI, File, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -44,6 +45,12 @@ from backend.services.project_store import (
     write_document_quality_report,
     write_json as write_data_json,
     write_documents_index,
+)
+from backend.services.runtime_logger import (
+    clear_request_id,
+    configure_backend_logging,
+    log_event,
+    set_request_id,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -1067,6 +1074,7 @@ def get_glm_ocr_parser() -> Any:
     global _glm_ocr_parser, _glm_ocr_parser_mode
     api_key = _glmocr_api_key()
     if not api_key:
+        log_event("ocr.parser.init.failed", level="ERROR", reason="missing_api_key")
         raise HTTPException(
             status_code=503,
             detail="缺少 GLM-OCR API Key，请设置 ZHIPU_API_KEY / GLMOCR_API_KEY，或写入 backend/.glmocr_api_key。",
@@ -1075,6 +1083,7 @@ def get_glm_ocr_parser() -> Any:
         _ensure_glmocr_importable()
         from glmocr import GlmOcr
     except ImportError as e:
+        log_event("ocr.parser.init.failed", level="ERROR", reason="glmocr_import_error", error=str(e))
         raise HTTPException(
             status_code=503,
             detail="未安装 GLM-OCR SDK：在仓库根目录执行 pip install -r backend/requirements.txt",
@@ -1090,6 +1099,7 @@ def get_glm_ocr_parser() -> Any:
             _glm_ocr_parser = None
         _glm_ocr_parser = GlmOcr(mode="maas", api_key=api_key)
         _glm_ocr_parser_mode = mode_key
+        log_event("ocr.parser.initialized", mode=mode_key)
     return _glm_ocr_parser
 
 
@@ -1453,6 +1463,7 @@ def render_pdf_to_page_images(pdf_path: Path, out_dir: Path, dpi: int = 144) -> 
 
 
 app = FastAPI(title="DeepDOC API", version="0.1.0", lifespan=_app_lifespan)
+configure_backend_logging()
 
 # 勿同时使用 allow_credentials=True 与 allow_origins=["*"]，浏览器会拒绝跨域。
 # 本 API 不用 Cookie，故关闭 credentials，便于 file:// 或其它端口调试时访问。
@@ -1463,6 +1474,51 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def request_logging_middleware(request: Request, call_next):
+    request_id = (request.headers.get("X-Request-Id") or "").strip() or uuid.uuid4().hex[:16]
+    set_request_id(request_id)
+    started = time.perf_counter()
+    client_ip = request.client.host if request.client else ""
+
+    log_event(
+        "api.request.start",
+        route=request.url.path,
+        method=request.method,
+        query=str(request.url.query or ""),
+        clientIp=client_ip,
+    )
+
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        latency_ms = round((time.perf_counter() - started) * 1000, 2)
+        log_event(
+            "api.request.error",
+            level="ERROR",
+            route=request.url.path,
+            method=request.method,
+            statusCode=500,
+            latencyMs=latency_ms,
+            errorType=type(exc).__name__,
+            error=str(exc),
+        )
+        clear_request_id()
+        raise
+
+    latency_ms = round((time.perf_counter() - started) * 1000, 2)
+    response.headers["X-Request-Id"] = request_id
+    log_event(
+        "api.request.end",
+        route=request.url.path,
+        method=request.method,
+        statusCode=int(response.status_code),
+        latencyMs=latency_ms,
+    )
+    clear_request_id()
+    return response
 
 
 class CreateProjectBody(BaseModel):
@@ -1522,6 +1578,12 @@ def create_project(body: CreateProjectBody) -> Dict[str, Any]:
     write_qa_sessions(pdir, default_qa_sessions_state())
     write_qa_compactions(pdir, default_qa_compactions_state())
     write_documents_index(pdir, default_documents_index())
+    log_event(
+        "project.created",
+        projectId=pid,
+        projectName=name,
+        storage="disk",
+    )
     return meta
 
 
@@ -1638,6 +1700,14 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
     doc_overview = read_document_overview(pdir, doc_id)
     if not isinstance(doc_overview, dict) or str(doc_overview.get("status") or "") != "ready":
         doc_overview = ensure_document_overview(ROOT, pdir, doc)
+    log_event(
+        "qa.ask.start",
+        projectId=project_id,
+        docId=doc_id,
+        selectedCount=len(selected_items),
+        expandedSelectedCount=len(expanded_selected),
+        neighborCount=len(neighbor_items),
+    )
     result = ask_deepseek_with_selection_v2(
         expanded_selected,
         neighbor_items,
@@ -1659,6 +1729,13 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
     now_conv["activeDocId"] = doc_id
     now_conv["activeSessionId"] = str(session.get("id") or "")
     write_now_conversation(pdir, now_conv)
+    log_event(
+        "qa.ask.end",
+        projectId=project_id,
+        docId=doc_id,
+        sessionId=str(session.get("id") or ""),
+        citedCount=len(result.get("cited_chunk_ids") if isinstance(result.get("cited_chunk_ids"), list) else []),
+    )
     return {
         **result,
         "selected_chunks": expanded_selected,
@@ -1746,6 +1823,13 @@ def delete_project_doc(project_id: str, doc_id: str) -> Dict[str, Any]:
     elif str(nc.get("activeDocId") or "") == doc_id:
         write_now_conversation(pdir, default_now_conversation_state())
     write_workspace(pdir, ws)
+    log_event(
+        "doc.deleted",
+        projectId=project_id,
+        docId=doc_id,
+        selectedDocId=sel,
+        remainingDocCount=len(new_docs),
+    )
     return {"status": "deleted", "selectedDocId": sel}
 
 
@@ -1764,6 +1848,7 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail="文档不存在")
     if not doc.get("isPdf"):
         raise HTTPException(status_code=400, detail="仅支持 PDF 文档")
+    log_event("doc.ocr.parse.start", projectId=project_id, docId=doc_id)
     existing_pages = doc.get("ocrBlocksByPage")
     has_chunk_payload = (
         isinstance(existing_pages, list)
@@ -1791,6 +1876,7 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
                     break
             ws["docs"] = docs
             write_workspace(pdir, ws)
+        log_event("doc.ocr.parse.skip", projectId=project_id, docId=doc_id, reason="already_parsed")
         return {"status": "already_parsed", "doc": doc}
 
     fn = doc.get("pdfFileName")
@@ -1842,11 +1928,20 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
             break
     ws["docs"] = docs
     write_workspace(pdir, ws)
+    log_event(
+        "doc.ocr.parse.end",
+        projectId=project_id,
+        docId=doc_id,
+        pageCount=len(ocr_blocks_by_page),
+        avgFinalScore=float((doc.get("ocrQualityReport") or {}).get("avgFinalScore") or 0.0),
+        retry=quality_report.get("retry") if isinstance(quality_report, dict) else {},
+    )
     return {"status": "ok", "doc": doc}
 
 
 @app.post("/api/projects/{project_id}/docs/{doc_id}/ocr-evaluate")
 def evaluate_ocr_document(project_id: str, doc_id: str) -> Dict[str, Any]:
+    log_event("doc.ocr.evaluate.start", projectId=project_id, docId=doc_id)
     if not _safe_workspace_doc_id(doc_id):
         raise HTTPException(status_code=400, detail="非法文档 ID")
     pdir = DATA_PROJECTS / project_id
@@ -1881,6 +1976,13 @@ def evaluate_ocr_document(project_id: str, doc_id: str) -> Dict[str, Any]:
             break
     ws["docs"] = docs
     write_workspace(pdir, ws)
+    log_event(
+        "doc.ocr.evaluate.end",
+        projectId=project_id,
+        docId=doc_id,
+        avgFinalScore=float(report.get("avgFinalScore") or 0.0),
+        pagesWithIssues=int(report.get("pagesWithIssues") or 0),
+    )
     return {"status": "ok", "report": report, "doc": doc}
 
 
@@ -1912,6 +2014,15 @@ async def upload_pdf(project_id: str, file: UploadFile = File(...)) -> Dict[str,
         if page_dir.exists():
             shutil.rmtree(page_dir, ignore_errors=True)
         raise HTTPException(status_code=500, detail="PDF 无页面或无法解析。")
+    log_event(
+        "doc.uploaded",
+        projectId=project_id,
+        docId=doc_id,
+        fileName=file.filename,
+        savedFileName=dest.name,
+        sizeBytes=len(content),
+        pageCount=len(page_images),
+    )
     return {
         "docId": doc_id,
         "name": file.filename,

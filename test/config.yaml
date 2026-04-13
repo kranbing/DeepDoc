@@ -4,7 +4,7 @@ pipeline:
     api_url: https://open.bigmodel.cn/api/paas/v4/layout_parsing
     model: glm-ocr
     # Required environment variable: API_KEY
-    api_key: ${Your-API-KEY}
+    api_key: 1c68bbd7c3554897a9a8500eac0f0d5b.bIrdqi6ZLaxo97QB
   ocr_api:
     # selfhosted 入口读取该配置
     api_host: 127.0.0.1

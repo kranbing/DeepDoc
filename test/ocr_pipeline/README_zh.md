@@ -26,6 +26,12 @@ python .\run_ocr_pipeline.py --input .\example\ocr_demo.png --mode selfhosted --
 
 # Excel 解析入口（输出 QA 友好的结构化 chunks）
 python .\run_excel_pipeline.py --input .\example\demo_table.xlsx
+
+# 统一多格式批处理入口（目录/单文件）
+python .\run_unified_index_pipeline.py --input .\example --recurse --continue-on-error --mode maas
+
+# PowerShell 批处理封装脚本
+.\run_unified_index_pipeline.ps1 -InputPath .\example -Recurse -ContinueOnError -Mode maas
 ```
 
 说明：
@@ -35,6 +41,60 @@ python .\run_excel_pipeline.py --input .\example\demo_table.xlsx
 - `--mode selfhosted` 读取 `pipeline.ocr_api`（如 `api_host/api_port/model`）配置。
 - 默认不需要传 `--api-key`。
 - 程序会按顺序查找配置文件：当前目录 `config.yaml` -> `test/config.yaml` -> `GLM-OCR-0.1.4/glmocr/config.yaml`。
+
+## 统一多格式批处理
+
+统一批处理入口支持以下格式进入同一索引流程：
+
+- PDF
+- 图片（jpg/jpeg/png/bmp/webp/tif/tiff）
+- XLSX
+- DOC/DOCX（需要本机安装 LibreOffice）
+
+状态模型采用简版：
+
+- `queued`
+- `processing`
+- `done`
+- `failed`
+
+日志采用双写：
+
+- 文本日志：`logs/batch.log`
+- 结构化事件日志：`logs/status_events.jsonl`
+
+结构化事件日志字段与后端语义保持一致（例如 `status`、`updatedAt`、`qualitySummary` 等），便于未来接入后端聚合。
+
+### 批处理命令示例
+
+```powershell
+# 目录批处理，递归扫描，失败继续
+python .\run_unified_index_pipeline.py `
+	--input .\example `
+	--recurse `
+	--continue-on-error `
+	--mode selfhosted
+maa
+# 单文件处理
+python .\run_unified_index_pipeline.py --input .\example\ocr_demo.png --mode maas
+```
+
+### 批处理输出
+
+默认输出根目录：`./output/pipeline_unified/<batch_id>/`
+
+- `unified_index.json`：批次级统一索引（文档状态、质量摘要、产物路径）
+- `unified_chunks.jsonl`：全量统一 chunk 流
+- `logs/batch.log`：文本日志
+- `logs/status_events.jsonl`：状态事件日志（JSONL）
+- `ocr/<doc_id>/pipeline_result.json`：PDF/图片/DOCX 的 OCR 原始结果
+- `excel/<doc_id>/excel_pipeline_result.json`：XLSX 原始结果
+- `converted/<doc_id>/*.pdf`：DOCX 转换中间产物
+
+### DOCX 前置依赖
+
+- 需要系统可执行 `soffice` 或 `libreoffice`。
+- 若依赖缺失，DOCX 文档会标记为 `failed`，并在 `status_events.jsonl` 中记录错误详情。
 
 
 ## 主要模块

@@ -35,7 +35,7 @@ pipeline:
     enabled: false # Disable MaaS to use local self-hosted OCR API
     api_url: https://open.bigmodel.cn/api/paas/v4/layout_parsing
     model: glm-ocr
-    api_key: null # Required! Get from https://open.bigmodel.cn
+    api_key: 1c68bbd7c3554897a9a8500eac0f0d5b.bIrdqi6ZLaxo97QB # Required! Get from https://open.bigmodel.cn
     verify_ssl: true
     connect_timeout: 30
     request_timeout: 300
