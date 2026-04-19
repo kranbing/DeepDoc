@@ -1,0 +1,189 @@
+{
+  "source_project_id": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+  "source_document_id": "pdf_9c569ed3",
+  "source_document_name": "DeepDoc-文档理解与多源数据整合的知识服务平台",
+  "purpose": "基础文档RAG测试集，覆盖事实、定义、流程、模块、指标、计划等稳定可验证问题",
+  "created_at": "2026-04-18",
+  "items": [
+    {
+      "id": "q001",
+      "category": "fact",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "evidence_chunk_ids": ["p0001_band_002", "p0001_band_003"],
+      "difficulty": "easy",
+      "notes": "封面信息，适合检查文档级标题识别。"
+    },
+    {
+      "id": "q002",
+      "category": "fact",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "evidence_chunk_ids": ["p0001_band_004", "p0001_band_005", "p0001_band_006"],
+      "difficulty": "easy",
+      "notes": "多实体抽取。"
+    },
+    {
+      "id": "q003",
+      "category": "fact",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "evidence_chunk_ids": ["p0001_band_007"],
+      "difficulty": "easy",
+      "notes": "简单事实。"
+    },
+    {
+      "id": "q004",
+      "category": "fact",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "evidence_chunk_ids": ["p0001_band_008"],
+      "difficulty": "easy",
+      "notes": "时间信息。"
+    },
+    {
+      "id": "q005",
+      "category": "definition",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "evidence_chunk_ids": ["p0004_band_001", "p0004_band_002"],
+      "difficulty": "medium",
+      "notes": "检查对背景/定义类表述的归纳能力。"
+    },
+    {
+      "id": "q006",
+      "category": "definition",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "evidence_chunk_ids": ["p0004_band_002", "p0004_band_003", "p0004_band_004", "p0004_band_005"],
+      "difficulty": "medium",
+      "notes": "适合检查四点归纳。"
+    },
+    {
+      "id": "q007",
+      "category": "definition",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "evidence_chunk_ids": ["p0005_band_001", "p0005_band_002", "p0005_band_003", "p0005_band_004"],
+      "difficulty": "medium",
+      "notes": "检查章节级结构理解。"
+    },
+    {
+      "id": "q008",
+      "category": "process",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "evidence_chunk_ids": ["p0017_band_000", "p0017_band_001"],
+      "difficulty": "medium",
+      "notes": "章节导语理解。"
+    },
+    {
+      "id": "q009",
+      "category": "process",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "evidence_chunk_ids": ["p0027_band_002", "p0027_band_003"],
+      "difficulty": "medium",
+      "notes": "功能清单类问题。"
+    },
+    {
+      "id": "q010",
+      "category": "process",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "evidence_chunk_ids": ["p0028_band_000", "p0028_band_001"],
+      "difficulty": "medium",
+      "notes": "功能链路题。"
+    },
+    {
+      "id": "q011",
+      "category": "process",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "evidence_chunk_ids": ["p0030_band_000", "p0030_band_001"],
+      "difficulty": "easy",
+      "notes": "模块总览。"
+    },
+    {
+      "id": "q012",
+      "category": "metric",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "evidence_chunk_ids": ["p0034_band_000"],
+      "difficulty": "easy",
+      "notes": "性能指标。"
+    },
+    {
+      "id": "q013",
+      "category": "metric",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "evidence_chunk_ids": ["p0034_band_001"],
+      "difficulty": "easy",
+      "notes": "性能指标。"
+    },
+    {
+      "id": "q014",
+      "category": "metric",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "evidence_chunk_ids": ["p0040_band_003"],
+      "difficulty": "medium",
+      "notes": "多个指标合并回答。"
+    },
+    {
+      "id": "q015",
+      "category": "process",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "evidence_chunk_ids": ["p0062_band_000"],
+      "difficulty": "easy",
+      "notes": "进度计划事实。"
+    },
+    {
+      "id": "q016",
+      "category": "process",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "evidence_chunk_ids": ["p0061_band_002", "p0061_band_003"],
+      "difficulty": "medium",
+      "notes": "流程理解。"
+    },
+    {
+      "id": "q017",
+      "category": "definition",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "evidence_chunk_ids": ["p0051_band_004", "p0051_band_005"],
+      "difficulty": "easy",
+      "notes": "后续可用于扩展测试。"
+    },
+    {
+      "id": "q018",
+      "category": "fact",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "evidence_chunk_ids": ["p0050_band_004", "p0050_band_005"],
+      "difficulty": "medium",
+      "notes": "模型能否从段落中抓到具体命名。"
+    },
+    {
+      "id": "q019",
+      "category": "process",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "evidence_chunk_ids": ["p0054_band_002", "p0054_band_003"],
+      "difficulty": "medium",
+      "notes": "核心链路理解。"
+    },
+    {
+      "id": "q020",
+      "category": "definition",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "evidence_chunk_ids": ["p0070_band_000", "p0070_band_001"],
+      "difficulty": "medium",
+      "notes": "可用于测试回答是否贴合预备方案。"
+    }
+  ]
+}

@@ -39,6 +39,7 @@ const state = {
   vectorSearchResults: [],
   vectorIndexStatus: null,
   chatHistoryVisible: false,
+  citedChunkKeys: [],
   chunkPress: {
     timer: null,
     active: false,
@@ -197,7 +198,15 @@ function clearChunkSelection({ persist = true } = {}) {
   state.hoveredChunkKey = null;
   state.selectedChunkKeys = [];
   state.selectedChunkItems = [];
+  state.citedChunkKeys = [];
+  syncChunkSelectionClasses();
   if (persist) void syncNowConversationSelection();
+}
+
+function clearCitedHighlights() {
+  if (!Array.isArray(state.citedChunkKeys) || state.citedChunkKeys.length === 0) return;
+  state.citedChunkKeys = [];
+  syncChunkSelectionClasses();
 }
 
 function createMessageId() {
@@ -272,12 +281,30 @@ function buildCitedChunkGroups(chunkIds) {
   if (!ids.length) return [];
 
   const parsed = ids.map((id) => {
+    const rag = String(id).match(/^rag_(\d+)_(\d+)_(\d+)$/);
+    if (rag) {
+      return {
+        raw: String(id),
+        chunkKey: String(id),
+        sortable: false,
+        citationType: "rag",
+        ragIndex: Number(rag[3]),
+      };
+    }
     const m = String(id).match(/^p(\d+)_band_(\d+)$/);
-    if (!m) return { raw: String(id), sortable: false, chunkKey: String(id) };
+    if (!m) {
+      return {
+        raw: String(id),
+        sortable: false,
+        chunkKey: String(id),
+        citationType: "raw",
+      };
+    }
     return {
       raw: String(id),
       chunkKey: String(id),
       sortable: true,
+       citationType: "band",
       page: m[1],
       band: Number(m[2]),
       bandText: m[2],
@@ -329,6 +356,15 @@ function buildCitedChunkGroups(chunkIds) {
   }
 
   return output.map((group, idx) => {
+    const firstKey = String(group.chunkKeys?.[0] || "");
+    if (/^rag_\d+_\d+_\d+$/.test(firstKey)) {
+      const ragMatch = firstKey.match(/^rag_(\d+)_(\d+)_(\d+)$/);
+      const ragNo = ragMatch ? Number(ragMatch[3]) + 1 : idx + 1;
+      return {
+        ...group,
+        label: `RAG #${ragNo}`,
+      };
+    }
     const bandPart = group.bandStartText && group.bandEndText && group.bandStartText !== group.bandEndText
       ? `${group.bandStartText}-${group.bandEndText}`
       : (group.bandStartText || "raw");
@@ -342,11 +378,96 @@ function buildCitedChunkGroups(chunkIds) {
   });
 }
 
-function locateCitedChunks(chunkKeys) {
+function buildSourceChunkToBandMap(doc) {
+  const pages = getParsedPdfPages(doc);
+  const map = new Map();
+  pages.forEach((page) => {
+    const bands = Array.isArray(page?.bands) ? page.bands : [];
+    bands.forEach((band) => {
+      const bandKey = String(band?.chunkKey || "");
+      const sourceChunks = Array.isArray(band?.sourceChunks) ? band.sourceChunks : [];
+      sourceChunks.forEach((source) => {
+        const sourceId = String(source?.chunkId || "").trim();
+        if (!sourceId || !bandKey || map.has(sourceId)) return;
+        map.set(sourceId, bandKey);
+      });
+    });
+  });
+  return map;
+}
+
+function flattenChunkContextItems(chunkContext) {
+  if (!chunkContext || typeof chunkContext !== "object") return [];
+  const groups = [
+    Array.isArray(chunkContext.currentChunks) ? chunkContext.currentChunks : [],
+    Array.isArray(chunkContext.neighborChunks) ? chunkContext.neighborChunks : [],
+    Array.isArray(chunkContext.retrievalChunks) ? chunkContext.retrievalChunks : [],
+  ];
+  const out = [];
+  const seen = new Set();
+  groups.flat().forEach((item) => {
+    if (!item || typeof item !== "object") return;
+    const id = String(item.chunkId || item.chunkKey || "");
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    out.push(item);
+  });
+  return out;
+}
+
+function resolveCitationChunkKeys(chunkKeys, chunkContext, doc) {
+  const inputKeys = Array.isArray(chunkKeys) ? chunkKeys.filter(Boolean).map((v) => String(v)) : [];
+  if (!inputKeys.length) return [];
+  const bandMap = buildSourceChunkToBandMap(doc);
+  const contextItems = flattenChunkContextItems(chunkContext);
+  const contextById = new Map(contextItems.map((item) => [String(item.chunkId || item.chunkKey || ""), item]));
+  const resolved = [];
+  const seen = new Set();
+
+  const pushUnique = (key) => {
+    const v = String(key || "");
+    if (!v || seen.has(v)) return;
+    seen.add(v);
+    resolved.push(v);
+  };
+
+  inputKeys.forEach((id) => {
+    if (/^p\d+_band_\d+$/.test(id)) {
+      pushUnique(id);
+      return;
+    }
+    if (/^p\d+_c\d+$/.test(id)) {
+      const mapped = bandMap.get(id);
+      if (mapped) pushUnique(mapped);
+      return;
+    }
+    if (/^rag_\d+_\d+_\d+$/.test(id)) {
+      const ragItem = contextById.get(id);
+      const sourceIds = Array.isArray(ragItem?.sourceChunkIds) ? ragItem.sourceChunkIds : [];
+      sourceIds.forEach((sourceId) => {
+        const mapped = bandMap.get(String(sourceId));
+        if (mapped) pushUnique(mapped);
+      });
+      return;
+    }
+  });
+  return resolved;
+}
+
+function locateCitedChunks(chunkKeys, chunkContext = null) {
   const doc = getSelectedDoc();
   if (!doc?.isPdf || !doc.ocrParsed) return;
-  const groups = buildCitedChunkGroups(chunkKeys);
-  const firstKey = groups[0]?.chunkKeys?.[0] || chunkKeys?.[0];
+  const resolvedChunkKeys = resolveCitationChunkKeys(chunkKeys, chunkContext, doc);
+  if (!resolvedChunkKeys.length) return;
+  const prevSorted = [...new Set((state.citedChunkKeys || []).map((v) => String(v)))].sort();
+  const nextSorted = [...new Set(resolvedChunkKeys.map((v) => String(v)))].sort();
+  if (prevSorted.length === nextSorted.length && prevSorted.every((v, i) => v === nextSorted[i])) {
+    clearChunkSelection({ persist: false });
+    renderChunkInspector();
+    return;
+  }
+  const groups = buildCitedChunkGroups(resolvedChunkKeys);
+  const firstKey = groups[0]?.chunkKeys?.[0] || resolvedChunkKeys?.[0];
   const m = String(firstKey || "").match(/^p(\d+)_band_/);
   const targetPage = m ? Number(m[1]) : state.currentPage;
   if (doc.pdfViewMode !== "parsed") {
@@ -358,7 +479,7 @@ function locateCitedChunks(chunkKeys) {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const items = [];
-      for (const key of chunkKeys) {
+      for (const key of resolvedChunkKeys) {
         const el = document.querySelector(`.chunk-box[data-chunk-key="${key}"]`);
         const payload = getChunkPayloadFromElement(el);
         if (payload?.chunkKey) items.push(payload);
@@ -370,6 +491,7 @@ function locateCitedChunks(chunkKeys) {
         if (pageDiff !== 0) return pageDiff;
         return Number(a.index || 0) - Number(b.index || 0);
       });
+      state.citedChunkKeys = items.map((item) => item.chunkKey);
       state.selectedChunkItems = items;
       state.selectedChunkKeys = items.map((item) => item.chunkKey);
       renderChunkInspector();
@@ -397,6 +519,7 @@ function getChunkPayloadFromElement(el) {
 
 function setSelectedChunkRange(anchorChunk, currentChunk) {
   if (!anchorChunk || !currentChunk) return;
+  clearCitedHighlights();
   const anchorPage = Number(anchorChunk.pageNo || 0);
   const currentPage = Number(currentChunk.pageNo || 0);
   const anchorIndex = Number(anchorChunk.index);
@@ -466,6 +589,7 @@ function setSelectedChunk(chunk) {
   if (!chunk) {
     clearChunkSelection();
   } else {
+    clearCitedHighlights();
     state.activeChunkDetail = null;
     state.activeChunkNeighbors = null;
     state.qaChunkContext = null;
@@ -725,10 +849,12 @@ function syncChunkSelectionClasses() {
   const itemMap = new Map(
     state.selectedChunkItems.map((item) => [item.chunkKey, item])
   );
+  const citeSet = new Set(Array.isArray(state.citedChunkKeys) ? state.citedChunkKeys : []);
 
   document.querySelectorAll(".chunk-box").forEach((el) => {
     const key = el.dataset.chunkKey;
     const isSelected = state.selectedChunkKeys.includes(key);
+    const isCited = citeSet.has(key);
     const item = itemMap.get(key);
     let payloadIndex = -1;
     if (!item) {
@@ -744,7 +870,8 @@ function syncChunkSelectionClasses() {
     const hasNext = isSelected && selectedIndexSet.has(`${pageNo}:${index + 1}`);
 
     el.classList.toggle("is-hover", key === state.hoveredChunkKey);
-    el.classList.toggle("is-selected", isSelected);
+    el.classList.toggle("is-selected", isSelected || isCited);
+    el.classList.toggle("is-cited", isCited && !isSelected);
     el.classList.toggle("is-joined-prev", hasPrev);
     el.classList.toggle("is-joined-next", hasNext);
   });
@@ -1923,7 +2050,7 @@ function appendMessage(role, text, options = {}) {
       btn.type = "button";
       btn.className = "cited-block-btn";
       btn.textContent = group.label;
-      btn.addEventListener("click", () => locateCitedChunks(group.chunkKeys));
+      btn.addEventListener("click", () => locateCitedChunks(group.chunkKeys, context));
       list.appendChild(btn);
     });
     refs.appendChild(list);
@@ -2819,6 +2946,18 @@ function setupEventHandlers() {
     } catch {
       setSelectedChunk(null);
     }
+  });
+
+  document.addEventListener("click", (e) => {
+    const citedBtn = e.target.closest(".cited-block-btn");
+    if (!citedBtn) return;
+    const message = citedBtn.closest(".msg.assistant");
+    const citedBlocks = message?.querySelectorAll?.(".cited-block-btn") || [];
+    const clickedLabel = String(citedBtn.textContent || "").trim();
+    const related = Array.from(citedBlocks)
+      .filter((btn) => String(btn.textContent || "").trim() === clickedLabel)
+      .map((btn) => btn.textContent);
+    void related;
   });
   pagesWrap.addEventListener("mouseleave", () => {
     if (lastHover && lastHover.classList) lastHover.classList.remove("block-hover");

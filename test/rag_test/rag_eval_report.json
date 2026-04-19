@@ -1,0 +1,4521 @@
+{
+  "summary": [
+    {
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.7,
+      "avg_answer_similarity": 0.2005,
+      "avg_key_fact_f1": 0.25,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 1.0
+    },
+    {
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.65,
+      "avg_answer_similarity": 0.2541,
+      "avg_key_fact_f1": 0.2366,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 3.0
+    },
+    {
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.85,
+      "avg_answer_similarity": 0.2779,
+      "avg_key_fact_f1": 0.3211,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 5.0
+    },
+    {
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.7,
+      "avg_answer_similarity": 0.1761,
+      "avg_key_fact_f1": 0.2764,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 1.0
+    },
+    {
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.55,
+      "avg_answer_similarity": 0.2227,
+      "avg_key_fact_f1": 0.2441,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 2.85
+    },
+    {
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.85,
+      "avg_answer_similarity": 0.2648,
+      "avg_key_fact_f1": 0.2788,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 5.0
+    },
+    {
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.7,
+      "avg_answer_similarity": 0.2181,
+      "avg_key_fact_f1": 0.2166,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 1.0
+    },
+    {
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.6,
+      "avg_answer_similarity": 0.226,
+      "avg_key_fact_f1": 0.2119,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 2.85
+    },
+    {
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "total": 20,
+      "answer_chunk_hit_rate": 0.85,
+      "avg_answer_similarity": 0.283,
+      "avg_key_fact_f1": 0.3086,
+      "avg_groundedness": 0.0,
+      "avg_retrieved": 5.0
+    }
+  ],
+  "results": [
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台. This information is clearly stated in the document overview, which shows '项目名称： DeepDoc-文档理解与多源数据整合的知识服务平台' as part of the course design project details.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "How does DeepDoc handle different types of documents?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.2525,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档信息，项目成员包括：于智通（学号2023112369）、韩显（学号2023112312）、樊亦简（学号2023112311）。指导教师为郭东明和马冲。",
+      "cited_chunk_ids": [
+        "rag_500_100_0113"
+      ],
+      "follow_up_questions": [
+        "项目成员的具体分工是什么？",
+        "这个项目属于哪个课程或机构？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.3333,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "根据提供的文档概述，指导教师是郭东明和马冲。然而，没有在检索到的具体文本块中找到直接证据来确认这一点，因为所选块（rag_500_100_0084）讨论的是技术层（表示与存储层、检索与推理层），不包含指导教师信息。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "指导教师郭东明和马冲的具体背景或角色是什么？",
+        "项目成员于智通、韩显、樊亦简在项目中承担了哪些任务？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1887,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，无法确定开题的具体日期。文档中只提到了“西南交通大学本科开题报告（课程设计）”，但没有包含具体的开题日期信息。",
+      "cited_chunk_ids": [
+        "rag_500_100_0124"
+      ],
+      "follow_up_questions": [
+        "这个开题报告是否包含在文档的其他部分？",
+        "文档中是否有关于项目时间安排或进度的章节？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1111,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "The provided evidence is insufficient to determine the core expression of the project background problem in the document. The available chunk [rag_500_100_0139] discusses future work directions and conclusions, but does not describe the background problem itself.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What specific background problem does the DeepDoc project aim to address?",
+        "Can you provide details about the motivation or challenges mentioned in the project introduction?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据提供的证据，无法确定项目要解决的四个关键问题。提供的文档块[rag_500_100_0139]只提到了后续工作的几个方面（如优化OCR、提升检索能力、增强内容可信度等），但没有明确列出项目最初要解决的四个关键问题。document_overview部分也只包含项目标题、成员等基本信息，没有涉及具体问题。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "项目文档中是否有专门列出关键问题的章节？",
+        "能否提供更多关于项目背景或问题定义的文档块？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1514,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档片段，项目的四个创新点包括：1) 基于深度学习的端到端的文档内容提取技术。然而，该片段只列出了第一个创新点，未完整展示所有四个创新点。因此，证据不足，无法确定其余三个创新点具体是什么。",
+      "cited_chunk_ids": [
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "项目的其他三个创新点是什么？",
+        "能否提供更多关于文档内容提取技术的细节？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1958,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的证据，无法回答“第2章研究现状从哪四个维度展开？”这个问题。提供的文档片段（rag_500_100_0015）来自第1章（1.4创新点分析），讨论了项目的创新点从四个层面展开，但未涉及第2章研究现状的具体维度。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "文档中是否有其他部分详细描述了研究现状的维度？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.124,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据提供的文档片段，文档解析模块被提及为系统五大核心模块之一，但该片段没有详细说明其包含的具体子功能。因此，无法从当前证据中确定文档解析模块包含哪些核心子功能。",
+      "cited_chunk_ids": [
+        "rag_500_100_0039"
+      ],
+      "follow_up_questions": [
+        "文档解析模块的具体子功能有哪些？",
+        "能否提供文档解析模块的详细描述或相关图表？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1207,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "根据文档，检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高检索召回率与准确率。2. 实施动态检索策略，根据查询内容和上下文信息对候选文档分块进行动态选择，并在必要时引入结构信息（如文档图关系）进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，生成最终回答，包括上下文构建、提示词设计以及模型调用（本地部署或API调用）。这些功能属于检索与推理层，是系统实现智能问答的关键环节。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085"
+      ],
+      "follow_up_questions": [
+        "检索模块中的混合检索策略具体如何平衡语义匹配和精确匹配？",
+        "动态检索策略在什么情况下会引入文档图关系进行增强检索？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1581,
+      "key_fact_f1": 0.1429,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统功能被划分为五大核心模块，但具体模块名称未在检索到的文本中详细列出。检索到的内容仅提到系统功能划分为五大核心模块，并参考图3-1，但未提供模块的具体名称或描述。",
+      "cited_chunk_ids": [
+        "rag_500_100_0039"
+      ],
+      "follow_up_questions": [
+        "五大核心模块的具体名称是什么？",
+        "图3-1中展示了哪些模块？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2459,
+      "key_fact_f1": 0.1667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "The document does not contain information about the target response time for document parsing. The provided chunk [rag_500_100_0104] only mentions project division and design implementation time, without specifying performance metrics like response time targets.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the key performance metrics mentioned in the document?",
+        "Which sections discuss the technical implementation or system requirements?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0323,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求表格，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的具体要求是什么？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "根据提供的文档内容，在准确性指标中，检索精度和问答准确率的具体目标值没有明确列出。文档中提到的准确性需求包括文字识别准确率（≥95%）、表格识别准确率（≥85%）、实体抽取准确率（≥80%）和答案可接受度（≥90%），但没有直接指定检索精度和问答准确率的目标数值。",
+      "cited_chunk_ids": [
+        "rag_500_100_0052"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了检索精度或问答准确率的具体指标？",
+        "能否提供更多关于系统性能评估的详细信息？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1831,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，第8周的工作包括：星期一集成RAG流程（检索+生成）和设计RAG提示词模板，星期五实现多文档查询接口和测试RAG问答。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周的具体任务有哪些？",
+        "第8周之后还有哪些与RAG相关的开发计划？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.303,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据提供的文档内容，系统在数据准备与RAG模块阶段的具体工作描述不充分。仅有的证据来自rag_500_100_0030，该部分讨论了传统RAG方法的不足（如固定分块策略破坏语义结构、难以利用版式信息）和LAD-RAG的改进（引入布局感知机制、动态检索策略），但未明确说明系统本身在数据准备和RAG模块的具体操作。因此，无法基于现有证据详细回答系统在这两个阶段的具体任务。",
+      "cited_chunk_ids": [
+        "rag_500_100_0030"
+      ],
+      "follow_up_questions": [
+        "系统在数据准备阶段如何处理文档的版式结构信息？",
+        "RAG模块中动态检索策略是如何根据用户查询自适应选择文档片段的？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1776,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "The document mentions that the project plans to build three types of self-constructed test sets for scenario-specific validation and model optimization, but it does not specify what those three types are. The provided chunk only states the intention to build them without listing the categories.",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "What are the specific names or descriptions of the three types of test sets mentioned in the document?",
+        "Can you provide more details from the document about the table or list that defines these test sets?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据提供的文档内容，公开数据集部分没有具体列出用于RAG问答评估的数据集名称。唯一相关的chunk提到“通过以上公开数据集，本项目能够覆盖从基础能力训练到复杂任务评测的全流程需求”，但没有提供具体的公开数据集名称或细节。因此，无法回答公开数据集部分具体提到了哪些用于RAG问答评估的数据集。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "公开数据集部分是否在文档的其他地方有更详细的描述？",
+        "能否提供自建测试集的具体类型或示例？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.05,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "在DeepDoc系统中，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，以支持高效检索。具体包括两个核心部分：向量数据库（如FAISS），用于存储通过文本嵌入模型生成的文档分块的高维语义向量，以支持基于语义相似度的向量检索；以及结构索引，通过构建文档结构图（以文档分块为节点，基于标题层级、段落邻接和跨模态关联建立边连接），实现对文档结构信息的显式建模，弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层中使用的文本嵌入模型具体是什么？",
+        "向量数据库和结构索引如何协同工作以提高检索效果？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2844,
+      "key_fact_f1": 0.2844,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略在提供的证据中未明确提及。文档中只讨论了算力不足时的降级方案，包括使用更小的基座模型、模型量化、加入请求队列和清理存储空间等措施，但没有专门针对RAG能力不足的降级策略。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了RAG能力不足时的降级方案？",
+        "系统问题降级方案是否包括其他未在表格中列出的场景？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_500_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1096,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.7042,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "Based on the provided evidence, I cannot definitively list all project members. The document overview mentions three members (于智通, 韩显, 樊亦简) and two instructors (郭东明, 马冲), but no chunks were manually selected to verify these details or provide additional context. The available rag_chunks only contain a member division table and team collaboration strategies, which do not explicitly list the members' names.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "Can you provide specific chunks that list the project members?",
+        "What is the full list of members and their roles in the DeepDoc project?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.046,
+      "key_fact_f1": 0.6667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "根据提供的文档概述，指导教师是郭东明和马冲。然而，没有具体的文本块（rag_chunks）直接引用或包含这一信息，因此无法提供基于具体段落的证据。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "指导教师郭东明和马冲的具体职责或背景是什么？",
+        "项目成员于智通、韩显、樊亦简在项目中承担了哪些角色？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.2632,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，无法确定开题日期。提供的chunks中没有包含开题日期的具体信息，只显示了项目时间安排和开题报告标题，但没有具体日期。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "这个项目的开题报告在第几页？",
+        "文档中是否有项目时间线或进度表部分？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1266,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "The provided chunks do not contain information about the project background problem. The available evidence only discusses the practical significance of the project (chunk rag_500_100_0014) and future challenges/improvements (chunks rag_500_100_0138 and rag_500_100_0139). Therefore, I cannot determine the core expression of the project background problem from the given evidence.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What specific problem or gap does the DeepDoc project aim to address according to the document?",
+        "Can you provide details about the motivation or background section of the document?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据文档内容，项目要解决的四个关键问题在1.2节中提及，但具体内容未在提供的文本块中详细列出。从rag_500_100_0011可知，项目旨在解决文档处理中的三大局限：处理深度不足（如对表格、图表理解能力弱）、整合能力缺失（无法实现跨文档知识关联）、场景适配单一（缺乏定制化能力），并基于此构建DeepDoc平台。然而，文档明确提到“面临以下四个层面的关键问题”，但具体是哪四个问题未在提供的证据中完整展示。",
+      "cited_chunk_ids": [
+        "rag_500_100_0011"
+      ],
+      "follow_up_questions": [
+        "四个关键问题的具体内容是什么？",
+        "项目如何针对每个问题提出解决方案？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.177,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档内容，项目的四个创新点分别是：1) 基于深度学习的端到端的文档内容提取技术；2) 基于布局感知与动态检索的长文档理解机制；3) 多源语义融合技术；4) 数据生成技术。这些创新点覆盖了从解析到应用的全链条技术体系。",
+      "cited_chunk_ids": [
+        "rag_500_100_0015",
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "能否详细说明多源语义融合技术的具体实现方法？",
+        "数据生成技术主要应用于哪些场景？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4314,
+      "key_fact_f1": 0.4,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的文档片段，无法确定第2章研究现状具体从哪四个维度展开。提供的chunks中没有包含第2章研究现状的具体内容，只提到了第2章中的图2-1LAD-RAG工作流图和2.5结论部分，但结论部分没有明确列出四个维度。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "能否提供第2章研究现状部分的完整文本？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1364,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据文档内容，文档解析模块包含以下核心子功能：1. OCR与版面分析子模块：采用光学字符识别技术提取文本，结合版面分析方法识别文档结构信息（如标题、段落、表格、图片区域等），实现从像素级信息到结构化文本信息的转换。2. 文档分块子模块：采用语义分块与结构感知分块相结合的方法对文档进行切分，保留文档层级关系与上下文语义，避免语义割裂问题。3. 结构化信息抽取子模块：引入专用文档解析模型（如EXTRACT-0）提取关键字段，生成结构化输出结果，实现从非结构化文本到结构化数据的转化。这些子模块共同构成文档解析与理解层的核心功能。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083"
+      ],
+      "follow_up_questions": [
+        "文档解析模块如何与系统的其他模块（如表示与存储层）协同工作？",
+        "OCR与版面分析子模块具体使用哪些技术或工具？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1159,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高检索召回率与准确率；2. 实施动态检索策略，根据查询内容与上下文信息对候选文档分块进行动态选择，并可能引入结构信息（如文档图关系）进行增强检索；3. 基于大语言模型（LLM）对检索结果进行整合与推理，生成最终回答，包括上下文构建、提示词设计以及模型调用（本地部署或API调用）。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085"
+      ],
+      "follow_up_questions": [
+        "检索模块如何平衡语义匹配与精确匹配？",
+        "动态检索策略具体如何利用文档图关系？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1719,
+      "key_fact_f1": 0.1429,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统被划分为五大核心模块，但具体模块名称仅在chunk rag_500_100_0038中提到了“文档解析模块”作为第一个模块，其他四个模块的名称未在提供的chunks中明确列出。chunk rag_500_100_0038和rag_500_100_0056都确认了系统有五大核心模块，但详细信息不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0038",
+        "rag_500_100_0056"
+      ],
+      "follow_up_questions": [
+        "五大核心模块的具体名称是什么？",
+        "除了文档解析模块，其他四个模块的功能是什么？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1915,
+      "key_fact_f1": 0.1667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "根据文档中的性能需求表格，文档解析响应时间的目标是≤10秒/10页，即对于10页以内的文档，解析时间不超过10秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间对于超过10页的文档有什么要求？",
+        "系统支持的最大文档处理容量是多少？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4533,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求分析，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的目标是多少？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "The provided evidence does not contain specific numerical targets for retrieval precision and question-answering accuracy. The retrieved chunks discuss accuracy requirements for OCR, table recognition, entity extraction, and answer acceptability, as well as retrieval and generation processes, but do not specify the exact metrics for retrieval precision or QA accuracy rates.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the specific accuracy targets for retrieval precision and question-answering accuracy in the system?",
+        "Where in the document are the performance metrics for retrieval and QA detailed?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0057,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，在第8周的任务中，包括“集成RAG流程(检索+生成)”和“测试RAG问答≥30个问题”，这表明RAG问答系统的核心功能在该周实现并测试。后续周次（如第10-17周）主要涉及信息抽取、系统优化、报告撰写和答辩等任务，而非RAG问答系统的初始完成阶段。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107",
+        "rag_500_100_0108"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周具体完成了哪些功能？",
+        "RAG问答系统在后续周次中有哪些优化或扩展？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1974,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据提供的证据，无法回答系统在数据准备与RAG模块阶段分别做什么。提供的chunks主要讨论传统RAG方法的不足、LAD-RAG的改进、以及项目后期阶段（如阶段五、六）的存储、统计和优化任务，但没有具体描述数据准备和RAG模块阶段的功能或操作。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "数据准备阶段具体涉及哪些步骤，如数据清洗、标准化或预处理？",
+        "RAG模块在系统中是如何实现检索和生成的，是否有特定架构或组件？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1688,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [],
+      "retrieved_count": 0,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "error": "502: DeepSeek 请求失败: The read operation timed out",
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据文档内容，公开数据集部分提到了以下用于RAG问答评估的数据集：DocVQA和VisualMRC。这些数据集在评测阶段用于对整体系统进行端到端效果评估，并与基线模型对比。",
+      "cited_chunk_ids": [
+        "rag_500_100_0064"
+      ],
+      "follow_up_questions": [
+        "这些数据集的具体评估指标是什么？",
+        "文档中提到的其他数据集（如PubLayNet、IIT-CDIP、PubTables、FUNSD、XFUND）分别用于什么目的？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.419,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "根据文档内容，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，是系统实现高效检索的基础。具体包括两个核心部分：1. 向量数据库部分，通过文本嵌入模型将文档分块转化为高维语义向量并存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索；2. 结构索引部分，构建文档结构图（Document Graph），以文档分块为节点，根据标题层级关系、段落邻接关系以及跨模态关联建立边连接，实现对文档结构信息的显式建模，弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083",
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层使用的具体文本嵌入模型是什么？",
+        "文档结构图是如何处理跨模态关联（如表格与文本）的？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2716,
+      "key_fact_f1": 0.2716,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略在表8-2中未明确列出。该表仅包含训练算力不足、推理算力不足、并发量超预期和存储空间不足四种场景的降级方案，没有专门针对RAG能力不足的场景。因此，证据不足，无法确定RAG能力不足时的具体优先降级策略。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否有其他部分详细讨论RAG能力不足的降级方案？",
+        "系统问题降级方案是否包括针对检索增强生成（RAG）性能问题的具体措施？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_500_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0741,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台, as stated in the document overview.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档内容，项目成员包括：韩显、于智通、樊亦简。此外，指导教师为郭东明和马冲。",
+      "cited_chunk_ids": [
+        "rag_500_100_0106"
+      ],
+      "follow_up_questions": [
+        "项目成员的具体分工是什么？",
+        "指导教师郭东明和马冲分别负责什么？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.48,
+      "key_fact_f1": 0.6667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "The instructors are Guo Dongming and Ma Chong, as stated in the document overview.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the roles or affiliations of the instructors?",
+        "Can you provide more details about the project members?"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，开题报告是在第3周的星期五完善并提交的。具体来说，第3周星期五的任务是“完善开题报告并提交”，这表明开题日期是在项目开始后的第3周。然而，文档中没有明确指定具体的日历日期（如年月日），只提供了基于周次的时间安排。",
+      "cited_chunk_ids": [
+        "rag_500_100_0106"
+      ],
+      "follow_up_questions": [
+        "开题报告的具体提交日期（年月日）是什么？",
+        "项目是从哪一天开始计算的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1176,
+      "key_fact_f1": 0.25,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "文档中对项目背景问题的核心表述是：在数字经济时代，企业和教育机构面临海量非结构化文档（如合同、报告、学术文献等）带来的“数据丰富但知识贫乏”困境，传统人工处理方式效率低、易出错，难以满足快速变化的需求。同时，现有工具（如ChatGPT、ChatPDF）存在处理深度不足、整合能力缺失和场景适配单一三大局限，而大模型技术（如多模态大模型、RAG、知识图谱）为突破这些局限提供了可能。",
+      "cited_chunk_ids": [
+        "rag_500_100_0010"
+      ],
+      "follow_up_questions": [
+        "项目背景中提到的三大局限具体指什么？",
+        "大模型技术如何帮助解决文档处理中的问题？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1651,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据提供的文档，项目要解决的四个关键问题在1.2节中概述，但具体内容未包含在检索到的块中。检索到的块（rag_500_100_0010和rag_500_100_0011）仅描述了项目背景和当前工具的三大局限，未列出这四个问题。因此，证据不足，无法直接回答。",
+      "cited_chunk_ids": [
+        "rag_500_100_0010",
+        "rag_500_100_0011"
+      ],
+      "follow_up_questions": [
+        "项目在1.2节中提到的四个关键问题具体是什么？",
+        "项目如何针对这些关键问题设计解决方案？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1366,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档内容，项目的四个创新点分别是：1) 基于深度学习的端到端的文档内容提取技术；2) 基于布局感知与动态检索的长文档理解机制；3) 多源语义融合技术；4) 数据生成技术。这些创新点覆盖了从解析到应用的全链条技术体系。",
+      "cited_chunk_ids": [
+        "rag_500_100_0015",
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "这些创新点具体如何实现？",
+        "项目有哪些社会价值？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4314,
+      "key_fact_f1": 0.4,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的文档内容，无法确定第2章研究现状具体从哪四个维度展开。提供的chunks中没有包含第2章研究现状的详细内容，特别是缺少关于其展开维度的具体描述。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "文档中是否有关于研究现状维度的其他部分？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1714,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据文档内容，文档解析模块包含三个核心子功能：1. OCR与版面分析子模块，负责文本提取和结构识别；2. 文档分块子模块，采用语义分块与结构感知分块相结合的方法；3. 结构化信息抽取子模块，使用专用文档解析模型提取关键字段并生成结构化输出。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083"
+      ],
+      "follow_up_questions": [
+        "文档解析模块与其他模块如何通过API进行通信？",
+        "OCR与版面分析子模块具体支持哪些文档格式？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1905,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高召回率和准确率。2. 实施动态检索策略，根据查询内容和上下文动态选择候选文档分块，并可能引入结构信息进行增强检索。3. 基于大语言模型（LLM）整合和推理检索结果，生成最终回答，包括上下文构建、提示词设计和模型调用。4. 提供自然语言交互接口，支持语义查询、结构化数据查询和多轮对话，并包括历史记录查询与证据溯源功能，确保结果的可解释性和可追溯性。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085",
+        "rag_500_100_0086"
+      ],
+      "follow_up_questions": [
+        "检索模块如何具体实现向量相似度和BM25的混合检索？",
+        "动态检索策略中如何利用文档结构信息进行增强检索？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1818,
+      "key_fact_f1": 0.2857,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，DeepDoc系统的五大核心模块是：1. 文档解析模块（负责多格式文档上传与结构化解析），2. 检索问答模块（负责文档索引构建与语义问答），3. 知识图谱模块（负责实体抽取与知识关联），4. 表格生成模块（负责多源数据抽取与报表生成），5. 应用交互模块（负责用户界面与场景适配）。这些模块通过API进行通信协作。",
+      "cited_chunk_ids": [
+        "rag_500_100_0057"
+      ],
+      "follow_up_questions": [
+        "每个模块的具体技术实现是什么？",
+        "这些模块之间如何通过API进行数据流转？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4205,
+      "key_fact_f1": 0.8333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "根据文档中的性能需求，文档解析响应时间的目标是≤10秒/10页，即对于10页以内的文档，解析时间不超过10秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间是否适用于超过10页的文档？",
+        "系统支持的最大文档处理容量是多少？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4658,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的目标是多少？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5185,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "根据文档第18页的准确性需求表格，系统设定了多项准确性指标，但检索精度和问答准确率的具体数值目标并未明确列出。表格中提到了文字识别准确率（≥95%）、表格识别准确率（≥85%）、实体抽取准确率（≥80%）和答案可接受度（≥90%），但未直接指定检索精度或问答准确率的目标值。因此，证据不足以回答检索精度和问答准确率的具体目标是多少。",
+      "cited_chunk_ids": [
+        "rag_500_100_0052"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了检索精度或问答准确率的具体指标？",
+        "答案可接受度（≥90%）是否与问答准确率相关？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1379,
+      "key_fact_f1": 0.6667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，第8周的任务包括集成RAG流程（检索+生成）、设计RAG提示词模板（≥5种）、测试RAG问答（≥30个问题），这标志着RAG问答系统核心功能的实现。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周具体要完成哪些任务？",
+        "中期答辩是在第几周进行，与RAG问答系统的完成时间有何关系？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2804,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据文档内容，系统在数据准备阶段主要进行多格式文档解析与统一处理，支持Word、PDF等格式的接入与预处理，并采用语义分块与结构感知分块相结合的方法来提升长文档处理的上下文完整性。在RAG模块阶段，系统基于向量数据库构建语义检索能力，结合RAG框架实现面向自然语言查询的智能问答功能，并引入布局感知机制（如LAD-RAG）来建模文本语义与文档版式结构信息，采用动态检索策略自适应选择相关文档片段，以提升检索准确性与完整性。",
+      "cited_chunk_ids": [
+        "rag_500_100_0027",
+        "rag_500_100_0030",
+        "rag_500_100_0137"
+      ],
+      "follow_up_questions": [
+        "数据准备阶段如何处理OCR识别误差对信息抽取的影响？",
+        "RAG模块如何具体实现动态检索策略以优化长文档处理？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1833,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档，项目在自建测试集方面计划构建三类针对性的测试数据集，用于场景化效果验证与模型优化。具体是哪三类测试集，文档中未提供详细信息，证据不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "三类自建测试集的具体名称或类型是什么？",
+        "这些自建测试集主要针对哪些业务需求或应用场景？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1935,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据提供的文档内容，公开数据集部分提到了以下用于RAG问答评估的数据集：DocVQA和VisualMRC。这些数据集在评测阶段被用于对整体系统进行端到端效果评估，并与基线模型对比。",
+      "cited_chunk_ids": [
+        "rag_500_100_0064"
+      ],
+      "follow_up_questions": [
+        "除了DocVQA和VisualMRC，文档中是否提到了其他用于RAG问答评估的公开数据集？",
+        "这些数据集具体用于评估RAG系统的哪些方面？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4037,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "在DeepDoc系统的架构中，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，为系统实现高效检索提供基础。具体包括两个核心部分：1. 向量表示方面，通过文本嵌入模型将文档分块转化为高维语义向量，并存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索；2. 结构表示方面，构建文档结构图（Document Graph），以文档分块为节点，根据标题层级关系、段落邻接关系以及跨模态关联（如表格与文本）建立边连接，实现对文档结构信息的显式建模，以弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083",
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层使用的具体文本嵌入模型是什么？",
+        "文档结构图是如何构建和维护的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2403,
+      "key_fact_f1": 0.2403,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略没有在检索到的文本块中明确提及。检索到的chunk rag_500_100_0134讨论了算力不足时的降级方案（如使用更小的基座模型、模型量化等），但未具体针对RAG能力不足的场景。其他chunks描述了RAG的改进方法（如LAD-RAG）和功能优先级，但未直接回答RAG能力不足时的降级策略。因此，基于当前证据，无法确定RAG能力不足时的优先降级策略。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了RAG能力不足时的具体降级措施？",
+        "系统问题降级方案中，除了算力不足，还有哪些场景的降级策略？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_500_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0776,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台. This information is derived from the document overview, which explicitly states: '项目名称： DeepDoc-文档理解与多源数据整合的知识服务平台'.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "How does DeepDoc handle multi-source data integration?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.2976,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档信息，项目成员包括：于智通（2023112369）、韩显（2023112312）、樊亦简（2023112311）。指导教师为郭东明和马冲。",
+      "cited_chunk_ids": [
+        "rag_500_100_0113"
+      ],
+      "follow_up_questions": [
+        "成员的具体分工是什么？",
+        "项目成员的联系方式或角色是什么？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.359,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "根据提供的文档概述，指导教师是郭东明和马冲。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "这个项目是哪个学校的课程设计？",
+        "项目成员有哪些？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.6667,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，无法确定开题的具体日期。文档中只提到了“西南交通大学本科开题报告（课程设计）”，但没有包含具体的开题日期信息。",
+      "cited_chunk_ids": [
+        "rag_500_100_0124"
+      ],
+      "follow_up_questions": [
+        "这份开题报告是否包含具体的日期信息？",
+        "文档中是否有其他部分提到了项目的时间安排？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1111,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "The provided evidence is insufficient to determine the core expression of the project background problem in the document. The available chunk [rag_500_100_0139] discusses future work directions and conclusions, but does not contain information about the background problem that motivated the project.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What specific problem or challenge does the DeepDoc project aim to address according to the document?",
+        "Can you provide details about the motivation or need that led to the development of this document understanding platform?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据提供的文档片段，无法确定项目要解决的四个关键问题。提供的chunk [rag_500_100_0139] 只讨论了后续工作和未来方向，没有列出项目最初要解决的关键问题。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "项目最初的设计目标是什么？",
+        "文档中是否有专门列出项目要解决的关键问题部分？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1475,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "Based on the provided evidence, only one innovation point is explicitly mentioned: 1) 基于深度学习的端到端的文档内容提取技术 (End-to-end document content extraction technology based on deep learning). The chunk indicates there are four innovation points in total, but the other three are not detailed in the given context. Therefore, the evidence is insufficient to list all four innovation points.",
+      "cited_chunk_ids": [
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "What are the other three innovation points mentioned in the document?",
+        "Can you provide more details about the '解析一理解一关联一应用' technical system?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0489,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "基于提供的文档片段，无法回答“第2章研究现状从哪四个维度展开？”的问题，因为所选片段来自第1章（具体为1.4创新点分析），未包含第2章的内容或相关细节。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "文档中是否有其他部分提到了研究现状的维度？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.2041,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据提供的文档片段，文档解析模块是系统五大核心模块之一，但该片段没有具体列出文档解析模块包含哪些核心子功能。证据不足，无法回答该问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0039"
+      ],
+      "follow_up_questions": [
+        "文档解析模块的具体子功能有哪些？",
+        "能否提供文档解析模块的详细功能描述？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1359,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高召回率和准确率。2. 实施动态检索策略，根据查询内容和上下文动态选择文档分块，并可能引入结构信息（如文档图关系）进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，通过上下文构建、提示词设计和模型调用生成高质量的自然语言回答。这些功能属于检索与推理层，旨在实现智能问答。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085"
+      ],
+      "follow_up_questions": [
+        "检索模块如何平衡语义匹配和精确匹配？",
+        "动态检索策略具体如何利用文档图关系？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1762,
+      "key_fact_f1": 0.1429,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统功能被划分为五大核心模块，但具体模块名称未在检索到的文本中详细列出。检索到的文本仅提到“基于用户需求分析，将系统功能划分为五大核心模块，如之前图3-1所示”，随后开始描述“文档解析模块”。因此，证据不足以完整回答五大核心模块的具体名称。",
+      "cited_chunk_ids": [
+        "rag_500_100_0039"
+      ],
+      "follow_up_questions": [
+        "五大核心模块的具体名称是什么？",
+        "图3-1中展示了哪些模块？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1961,
+      "key_fact_f1": 0.1667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "The provided evidence is insufficient to determine the document parsing response time target. The selected chunk only contains information about project division and design implementation time, not specific performance metrics like response time goals.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the performance requirements or benchmarks mentioned in the document?",
+        "Which section discusses system performance or response time metrics?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求表格，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的目标是多少？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "根据提供的文档内容，在准确性指标中，检索精度和问答准确率的具体目标值没有明确列出。检索精度（通常指信息检索的准确率）未在提供的表格中提及，而问答准确率可能对应表格中的“答案可接受度”，其目标为≥90%。但请注意，表格中直接列出的准确性需求包括文字识别准确率（≥95%）、表格识别准确率（≥85%）、实体抽取准确率（≥80%）和答案可接受度（≥90%）。",
+      "cited_chunk_ids": [
+        "rag_500_100_0052"
+      ],
+      "follow_up_questions": [
+        "检索精度是否在文档的其他部分有定义？",
+        "答案可接受度与问答准确率是否被视为同一指标？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1469,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，第8周的任务包括：星期一集成RAG流程（检索+生成）和设计RAG提示词模板，星期五测试RAG问答（≥30个问题）。这表明RAG问答系统的核心开发和测试工作安排在第8周进行。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周的具体任务细节是什么？",
+        "RAG问答系统测试的准确率或性能指标有哪些要求？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2459,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据提供的文档片段，系统在数据准备与RAG模块阶段主要进行以下工作：在数据准备阶段，系统处理文档时不仅建模文本语义信息，还建模文档的版式结构信息（如页面布局、段落关系、表格结构），以构建更完整的文档表示。在RAG模块阶段，系统采用动态检索策略，根据用户查询内容自适应选择相关文档片段，而不是依赖固定数量或固定长度的文本块，以提升长文档信息检索的准确性与完整性。然而，证据仅来自一个片段，可能不完整，无法提供更详细的阶段划分或具体步骤。",
+      "cited_chunk_ids": [
+        "rag_500_100_0030"
+      ],
+      "follow_up_questions": [
+        "数据准备阶段具体包括哪些步骤或技术？",
+        "RAG模块阶段如何实现动态检索策略？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1577,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档内容，项目计划构建三类针对性的测试数据集，但具体是哪三类测试集在提供的证据中没有明确列出。文档只提到将构建三类针对性的测试数据集用于场景化效果验证与模型优化，但没有详细说明这三类的具体名称或类型。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "这三类自建测试集的具体名称或类型是什么？",
+        "自建测试集主要针对哪些企业和教育领域的应用场景？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1935,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "The provided evidence is insufficient to answer the question. The only relevant chunk mentions '公开数据集' (public datasets) in general but does not specify which datasets are used for RAG question-answering evaluation. The chunk discusses using public datasets to cover training and evaluation needs without starting from scratch, but no specific dataset names are listed.",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "What specific public datasets are mentioned elsewhere in the document for RAG evaluation?",
+        "Can you provide details from other sections about datasets used in this project?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0544,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "根据文档内容，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，是系统实现高效检索的基础。具体包括两个核心部分：1. 向量表示方面，通过文本嵌入模型将文档分块转化为高维语义向量，存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索；2. 结构表示方面，构建文档结构图，以文档分块为节点，根据标题层级关系、段落邻接关系及跨模态关联建立边连接，实现对文档结构信息的显式建模，以弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层中向量数据库和结构索引如何协同工作？",
+        "系统使用了哪些具体的文本嵌入模型？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2895,
+      "key_fact_f1": 0.2895,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据文档第44页表8-2“系统问题降级方案及影响评估表”，当RAG能力不足时（属于“训练算力不足”或“推理算力不足”场景），优先降级策略是：1. 使用更小的基座模型（如BERT-base替代BERT-large）以降低训练算力需求；2. 采用模型量化（如FP16→INT8）加速或改用CPU推理以降低推理算力需求。这些措施旨在保持核心功能可用，但可能伴随效果略有下降或精度损失1-2%。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "除了算力不足，文档中是否提到了其他RAG能力不足的场景及降级方案？",
+        "模型量化（FP16→INT8）的具体实施步骤是什么？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "rag_300_100",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0796,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.7042,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档概述，项目成员包括：于智通（学号2023112369）、韩显（学号2023112312）、樊亦简（学号2023112311）。指导教师为郭东明和马冲。检索到的具体内容块（rag_chunks）未直接列出成员名单，因此答案基于document_overview中的信息。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "项目成员的具体分工是什么？",
+        "指导教师郭东明和马冲分别负责哪些方面？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.2014,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "The question '指导教师是谁？' (Who is the instructor?) cannot be answered based on the provided rag_chunks, as they do not contain information about instructors. However, the document_overview includes '指导教师：郭东明，马冲' (Instructors: Guo Dongming, Ma Chong), which serves as background context but is not directly cited from the rag_chunks. Since no rag_chunks provide this detail, the evidence is insufficient to cite a specific chunk.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the roles or contributions of the instructors mentioned in the document?",
+        "Can you provide more details about the project members listed in the document?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0565,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，无法确定开题的具体日期。提供的chunks中包含项目时间安排表（涉及第14-17周）和开题报告标题，但没有明确的开题日期信息。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "这个项目的具体开题日期是什么？",
+        "开题报告是否包含具体的日期信息？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0988,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "根据文档内容，项目背景问题的核心表述是：传统文档处理方式效率低下且存在知识流失风险，需要智能化解决方案来提升效率、挖掘非结构化数据价值并支持决策。具体体现在：企业文档处理耗时（如合同审阅、报告分析从小时级缩短至分钟级）、非结构化文档难以转化为可查询的知识资产、以及人员流动导致的知识流失问题。项目旨在通过文档理解与多源数据整合技术解决这些痛点，实现高效、可追溯的知识服务。",
+      "cited_chunk_ids": [
+        "rag_500_100_0014"
+      ],
+      "follow_up_questions": [
+        "项目主要针对哪些用户群体解决了文档处理问题？",
+        "文档中提到的技术挑战具体有哪些？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1982,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据文档内容，项目要解决的四个关键问题包括：1. 处理深度不足，对表格、图表、复杂格式理解能力弱；2. 整合能力缺失，局限于单文档问答，无法实现跨文档的知识关联与融合；3. 场景适配单一，缺乏针对企业知识管理与学术研读的定制化能力；4. 将分散的非结构化数据转化为可用的知识资产过程中面临的关键问题（具体细节未在提供证据中展开）。",
+      "cited_chunk_ids": [
+        "rag_500_100_0011"
+      ],
+      "follow_up_questions": [
+        "这四个关键问题在文档中是否有更详细的解释或示例？",
+        "项目如何具体解决跨文档知识关联与融合的问题？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1818,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档内容，项目的四个创新点分别是：1) 基于深度学习的端到端的文档内容提取技术；2) 基于布局感知与动态检索的长文档理解机制；3) 多源语义融合技术；4) 数据生成技术。这些创新点覆盖了从解析到应用的全链条技术体系。",
+      "cited_chunk_ids": [
+        "rag_500_100_0015",
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "这些创新点具体是如何实现的？",
+        "项目在技术路线和难度方面有哪些评估？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4314,
+      "key_fact_f1": 0.4,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的文档内容，无法确定第2章研究现状具体从哪四个维度展开。提供的chunks中没有包含第2章研究现状的具体内容，只提到了第2章中的图2-1LAD-RAG工作流图和2.5结论部分，但结论部分没有明确列出四个维度。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "能否提供第2章研究现状部分的完整文本？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1364,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据文档内容，文档解析模块包含三个核心子功能：OCR与版面分析、文档分块、以及结构化信息抽取。这些子模块共同负责将原始文档数据转化为具备语义结构的信息表示。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083"
+      ],
+      "follow_up_questions": [
+        "文档解析模块中的OCR与版面分析具体如何工作？",
+        "文档分块模块中提到的结构感知分块与传统方法有何区别？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2124,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高检索召回率和准确率。2. 实施动态检索策略，根据查询内容和上下文信息动态选择候选文档分块，并可能引入结构信息（如文档图关系）进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，生成最终回答，涉及上下文构建、提示词设计和模型调用。这些功能属于检索与推理层，旨在实现智能问答。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085"
+      ],
+      "follow_up_questions": [
+        "检索模块如何平衡语义匹配和精确匹配？",
+        "动态检索策略具体如何利用文档图关系？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1762,
+      "key_fact_f1": 0.1429,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统被划分为五大核心模块，但具体模块名称未在提供的证据中详细列出。文档提到系统功能基于用户需求分析划分为五大核心模块（如之前图3-1所示），并在模块划分部分重申了五个核心模块通过API进行通信。然而，提供的证据片段仅明确提到了“文档解析模块”作为其中一个模块，其他四个模块的名称未在引用内容中指定。",
+      "cited_chunk_ids": [
+        "rag_500_100_0038",
+        "rag_500_100_0056"
+      ],
+      "follow_up_questions": [
+        "五大核心模块的具体名称是什么？",
+        "图3-1中展示了哪些模块？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1858,
+      "key_fact_f1": 0.1667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "根据文档中的性能需求，文档解析响应时间的目标是≤10秒/10页，即对于10页以内的文档，解析时间不超过10秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间对于超过10页的文档是否有不同的目标？",
+        "系统是否支持实时文档解析，还是仅支持批量处理？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4658,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求分析，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的目标是多少？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "The provided evidence does not contain specific numerical targets for retrieval precision and question-answering accuracy in the system's accuracy metrics. The available chunks discuss general accuracy requirements like OCR and entity extraction rates, and describe retrieval and QA modules, but do not specify the exact targets for retrieval precision or QA accuracy rates.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What specific accuracy targets are mentioned for retrieval and QA in other parts of the document?",
+        "Are there any performance evaluation results or benchmarks provided for the system?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0057,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，在第8周的星期一，计划集成RAG流程（检索+生成），并在星期五测试RAG问答（≥30个问题）。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107",
+        "rag_500_100_0108"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周的具体任务是什么？",
+        "RAG问答系统在后续周次中还有哪些相关开发或优化？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.3571,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "基于提供的证据，无法回答系统在数据准备与RAG模块阶段分别做什么。提供的chunks主要讨论传统RAG方法的不足、LAD-RAG的改进、以及项目后期阶段（如阶段五、六）的数据存储、统计、系统集成和优化任务，但没有具体描述数据准备和RAG模块阶段的具体功能或操作。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "数据准备阶段具体涉及哪些步骤，如数据收集、清洗或预处理？",
+        "RAG模块在系统中如何实现，包括检索和生成的具体机制？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1605,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档内容，项目在自建测试集方面计划构建三类针对性的测试数据集，用于场景化效果验证与模型优化。然而，提供的文档片段仅提到将构建三类测试集，但没有具体列出这三类测试集的具体名称或描述。因此，证据不足以明确回答是哪三类测试集。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "这三类自建测试集的具体名称是什么？",
+        "每类自建测试集针对哪些业务需求或应用场景？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.229,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据文档内容，公开数据集部分提到了以下用于RAG问答评估的数据集：DocVQA和VisualMRC。这些数据集在评测阶段用于对整体系统进行端到端效果评估，并与基线模型对比。",
+      "cited_chunk_ids": [
+        "rag_500_100_0064"
+      ],
+      "follow_up_questions": [
+        "这些数据集具体用于评估RAG系统的哪些方面？",
+        "文档中提到的其他数据集（如PubLayNet、IIT-CDIP、PubTables、FUNSD、XFUND）是否也用于RAG问答评估？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.419,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "根据文档内容，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，是系统实现高效检索的基础。具体包括两个核心部分：1. 向量表示方面，通过文本嵌入模型将文档分块转化为高维语义向量，并存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索。2. 结构表示方面，构建文档结构图，以文档分块为节点，根据标题层级关系、段落邻接关系以及跨模态关联建立边连接，实现对文档结构信息的显式建模，弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083",
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层使用的具体向量数据库是什么？",
+        "文档结构图是如何构建和维护的？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2882,
+      "key_fact_f1": 0.2882,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略在表8-2中未明确列出。该表仅包含训练算力不足、推理算力不足、并发量超预期和存储空间不足四种场景的降级方案，没有专门针对RAG能力不足的场景。因此，基于当前证据，无法确定RAG能力不足时的具体优先降级策略。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否有其他部分详细讨论RAG能力不足的降级方案？",
+        "系统问题降级方案是否包括针对检索增强生成（RAG）性能问题的具体措施？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "rag_300_100",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0732,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台, as stated in the document overview.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档内容，项目成员包括：韩显、于智通、樊亦简。此外，指导教师为郭东明和马冲。",
+      "cited_chunk_ids": [
+        "rag_500_100_0106"
+      ],
+      "follow_up_questions": [
+        "项目成员的具体分工是什么？",
+        "指导教师郭东明和马冲在项目中扮演什么角色？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.48,
+      "key_fact_f1": 0.6667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "根据提供的文档概述，指导教师是郭东明和马冲。然而，在自动检索到的具体文本块（rag_chunks）中，没有包含关于指导教师的信息。因此，虽然从背景上下文可以推断答案，但缺乏来自具体文本块的直接证据来支持这一细节。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "这个项目的具体实施时间是什么？",
+        "项目成员于智通、韩显、樊亦简分别负责什么角色？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1887,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，开题日期没有明确指定具体的日期。文档中显示在第3周的星期五有“完善开题报告并提交”的任务，这表明开题报告是在第3周完成的，但具体日期未在提供的文本中提及。",
+      "cited_chunk_ids": [
+        "rag_500_100_0106"
+      ],
+      "follow_up_questions": [
+        "开题报告的具体提交日期是什么？",
+        "项目是从哪一周开始的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1053,
+      "key_fact_f1": 0.25,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "文档中对项目背景问题的核心表述是：在数字经济时代，企业和教育机构面临海量非结构化文档（如合同、报告、学术文献等）带来的“数据丰富但知识贫乏”困境，传统人工处理方式效率低、耗时长且易出错，难以满足快速变化的需求。同时，现有工具（如ChatGPT、ChatPDF）存在处理深度不足、整合能力缺失和场景适配单一三大局限，而大模型技术（如多模态大模型、RAG、知识图谱）为突破这些局限提供了可能。",
+      "cited_chunk_ids": [
+        "rag_500_100_0010"
+      ],
+      "follow_up_questions": [
+        "项目背景中提到的三大局限具体指什么？",
+        "大模型技术如何帮助解决文档处理问题？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1712,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据文档，项目要解决的四个关键问题在1.2节中提及，但提供的chunks中只列出了三个局限作为背景，未完整列出四个问题。从rag_500_100_0010和rag_500_100_0011可知，当前工具存在三大局限：1. 处理深度不足，对表格、图表、复杂格式理解能力弱；2. 整合能力缺失，局限于单文档问答，无法实现跨文档的知识关联与融合；3. 场景适配单一，缺乏针对企业知识管理与学术研读的定制化能力。文档指出项目旨在解决这些问题，但具体四个关键问题未在提供的chunks中完整呈现，证据不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0010",
+        "rag_500_100_0011"
+      ],
+      "follow_up_questions": [
+        "四个关键问题具体是什么？",
+        "项目如何针对每个问题提出解决方案？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1498,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档内容，项目的四个创新点分别是：1) 基于深度学习的端到端的文档内容提取技术；2) 基于布局感知与动态检索的长文档理解机制；3) 多源语义融合技术；4) 数据生成技术。这些创新点覆盖了从解析到理解、关联再到应用的全链条技术体系。",
+      "cited_chunk_ids": [
+        "rag_500_100_0015",
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "这些创新点具体是如何实现的？",
+        "项目在技术路线和难度方面有哪些评估？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4151,
+      "key_fact_f1": 0.4,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的文档片段，无法确定第2章研究现状具体从哪四个维度展开。提供的chunks中没有包含第2章研究现状的详细内容，特别是关于其展开维度的信息。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "能否提供第2章研究现状部分的文档片段？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1782,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据文档内容，文档解析模块包含三个核心子功能：1. OCR与版面分析子模块，负责文本提取和结构识别；2. 文档分块子模块，采用语义分块与结构感知分块相结合的方法；3. 结构化信息抽取子模块，使用专用文档解析模型提取关键字段并生成结构化输出。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083"
+      ],
+      "follow_up_questions": [
+        "文档解析模块与其他模块如何通过API进行通信？",
+        "OCR与版面分析子模块具体支持哪些文档格式？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1905,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "根据文档内容，检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高召回率和准确率。2. 实施动态检索策略，根据查询内容和上下文动态选择候选文档分块，必要时引入结构信息进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，生成最终回答，包括上下文构建、提示词设计和模型调用。4. 提供自然语言交互接口，支持语义查询、结构化数据查询和多轮对话。5. 支持历史记录查询与证据溯源功能，确保生成结果的可解释性和可追溯性。",
+      "cited_chunk_ids": [
+        "rag_500_100_0084",
+        "rag_500_100_0085",
+        "rag_500_100_0086"
+      ],
+      "follow_up_questions": [
+        "检索模块如何具体实现向量相似度检索和BM25检索的结合？",
+        "动态检索策略在哪些场景下会引入结构信息进行增强检索？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1742,
+      "key_fact_f1": 0.2857,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，DeepDoc系统的五大核心模块是：1. 文档解析模块（负责多格式文档上传与结构化解析），2. 检索问答模块（负责文档索引构建与语义问答），3. 知识图谱模块（负责实体抽取与知识关联），4. 表格生成模块（负责多源数据抽取与报表生成），5. 应用交互模块（负责用户界面与场景适配）。这些模块通过API进行通信，共同构成系统的功能架构。",
+      "cited_chunk_ids": [
+        "rag_500_100_0057"
+      ],
+      "follow_up_questions": [
+        "每个核心模块的具体技术实现是什么？",
+        "模块间的API通信是如何设计的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4,
+      "key_fact_f1": 0.8333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "根据文档中的性能需求，文档解析响应时间的目标是≤10秒/10页，即对于10页以内的文档，解析时间不超过10秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间是否针对所有文档格式？",
+        "系统如何处理超过10页的文档的解析时间？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4658,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的目标是多少？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5185,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "根据提供的文档内容，在准确性指标中，检索精度和问答准确率的具体目标数值没有明确列出。文档中提到了其他准确性需求，如文字识别准确率≥95%、表格识别准确率≥85%、实体抽取准确率≥80%、答案可接受度≥90%，但没有检索精度和问答准确率的目标值。",
+      "cited_chunk_ids": [
+        "rag_500_100_0052"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了检索精度和问答准确率的具体指标？",
+        "系统的检索模块采用了哪些策略来提高检索精度？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2029,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，在第8周的星期一，任务包括“集成RAG流程(检索+生成)”，而在星期五，任务包括“测试RAG问答≥30个问题”，这表明RAG问答系统的核心功能将在第8周实现和测试。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周具体实现了哪些功能？",
+        "在RAG问答系统完成后，后续阶段（如第10周及以后）主要关注哪些方面的开发？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2609,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据提供的文档内容，系统在数据准备阶段主要进行多格式文档解析与统一处理，支持Word、PDF等格式的接入与预处理，并采用语义分块与结构感知分块相结合的方法来提升长文档处理的上下文完整性。在RAG模块阶段，系统基于向量数据库构建语义检索能力，并结合RAG框架实现面向自然语言查询的智能问答功能，但当前策略在极长文本或跨文档推理任务中仍存在上下文信息利用不充分的问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0137"
+      ],
+      "follow_up_questions": [
+        "数据准备阶段具体如何处理不同格式的文档？",
+        "RAG模块如何结合语义分块与结构感知分块？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2037,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档内容，项目在自建测试集方面计划构建三类针对性的测试数据集，用于场景化效果验证与模型优化。具体是哪三类测试集，文档中未提供详细信息，证据不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "三类自建测试集的具体名称或类型是什么？",
+        "这些自建测试集主要针对哪些业务需求或应用场景？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1895,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据提供的文档内容，公开数据集部分提到了以下用于RAG问答评估的数据集：DocVQA和VisualMRC。这些数据集在评测阶段用于对整体系统进行端到端效果评估，并与基线模型对比。",
+      "cited_chunk_ids": [
+        "rag_500_100_0064"
+      ],
+      "follow_up_questions": [
+        "这些数据集具体用于评估RAG问答的哪些方面？",
+        "文档中提到的其他数据集（如PubLayNet、IIT-CDIP、PubTables、FUNSD、XFUND）是否也用于RAG问答评估，还是主要用于其他目的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4074,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "在DeepDoc系统的架构中，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，为系统实现高效检索提供基础。具体包括两个核心部分：1. 向量表示方面，通过文本嵌入模型将文档分块转化为高维语义向量，并存储于向量数据库（如FAISS）中，以支持基于语义相似度的向量检索。2. 结构表示方面，构建文档结构图，以文档分块为节点，根据标题层级关系、段落邻接关系以及跨模态关联（如表格与文本）建立边连接，实现对文档结构信息的显式建模，以弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083",
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层使用的向量数据库具体是什么？",
+        "文档结构图是如何构建和存储的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.252,
+      "key_fact_f1": 0.252,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略没有在检索到的文本块中明确说明。检索到的内容主要涉及算力不足时的降级方案（如使用更小的基座模型、模型量化等），以及功能模块的优先级划分（P0、P1、P2），但没有直接针对RAG能力不足的具体降级策略。因此，基于当前证据，无法回答该问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了RAG能力不足时的降级方案？",
+        "系统问题降级方案中，除了算力不足，还有哪些场景的降级措施？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "rag_300_100",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1034,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.7042,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档信息，项目成员包括：于智通（2023112369）、韩显（2023112312）、樊亦简（2023112311）。指导教师为郭东明和马冲。",
+      "cited_chunk_ids": [
+        "rag_500_100_0113"
+      ],
+      "follow_up_questions": [
+        "成员的具体分工是什么？",
+        "项目成员的联系方式或角色是什么？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.359,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "Based on the provided evidence, the instructors for the project are Guo Dongming and Ma Chong, as indicated in the document overview under '指导教师：郭东明，马冲'. However, no specific chunks were provided to confirm this detail locally, so this answer relies on the overview context.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the roles or contributions of the instructors in the project?",
+        "Can you provide more details about the project members listed?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0776,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，无法确定开题的具体日期。文档中只提到了“西南交通大学本科开题报告（课程设计）”，但没有包含开题日期信息。",
+      "cited_chunk_ids": [
+        "rag_500_100_0124"
+      ],
+      "follow_up_questions": [
+        "这个开题报告是否包含在文档的其他部分？",
+        "文档中是否有项目时间表或进度安排部分？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1159,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "The provided evidence is insufficient to determine the core expression of the project background problem in the document. The available chunk [rag_500_100_0139] discusses future work directions and optimizations, but does not describe the background problem itself.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What specific background problems or challenges does the DeepDoc project aim to address?",
+        "Can you provide details about the motivation or initial problem statement mentioned in earlier sections of the document?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据提供的证据，无法确定项目要解决的四个关键问题。提供的文档块[rag_500_100_0139]只讨论了后续核心工作和未来深化方向，没有提及项目最初要解决的关键问题。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "项目最初设计时针对哪些具体问题？",
+        "能否提供项目背景或问题陈述部分的内容？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1967,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "Based on the provided evidence, only one innovation point is explicitly listed: 1) 基于深度学习的端到端的文档内容提取技术 (End-to-end document content extraction technology based on deep learning). The chunk mentions that there are four innovation points in total, but the other three are not detailed in the given context. Therefore, the full list of four innovation points cannot be determined from the available information.",
+      "cited_chunk_ids": [
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "What are the other three innovation points mentioned in the document?",
+        "Can you provide more details about the '解析一理解一关联一应用' technical system?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0459,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "基于提供的文档片段，无法回答“第2章研究现状从哪四个维度展开？”的问题，因为所选片段来自第1.4节，讨论的是创新点分析的四个层面，而非第2章的研究现状维度。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "文档中是否有其他部分详细描述了研究现状的维度？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.198,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据提供的文档片段，文档解析模块是系统五大核心模块之一，但该片段没有具体列出文档解析模块包含哪些核心子功能。证据不足，无法回答该问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0039"
+      ],
+      "follow_up_questions": [
+        "文档解析模块的具体子功能有哪些？",
+        "能否提供文档解析模块的详细功能描述？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1359,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高召回率和准确率。2. 实施动态检索策略，根据查询内容和上下文动态选择文档分块，并可能引入结构信息（如文档图关系）进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，通过上下文构建、提示词设计和模型调用生成高质量的自然语言回答。这些功能属于检索与推理层，旨在实现智能问答。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085"
+      ],
+      "follow_up_questions": [
+        "检索模块如何平衡语义匹配和精确匹配？",
+        "动态检索策略具体如何利用文档图关系？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1762,
+      "key_fact_f1": 0.1429,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统功能被划分为五大核心模块，但具体模块名称未在检索到的文本中详细列出。检索到的文本仅提到系统功能基于用户需求分析划分为五大核心模块，并参考图3-1，但未提供模块的具体名称或描述。",
+      "cited_chunk_ids": [
+        "rag_500_100_0039"
+      ],
+      "follow_up_questions": [
+        "五大核心模块的具体名称是什么？",
+        "图3-1中展示了哪些模块？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2308,
+      "key_fact_f1": 0.1667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "The provided evidence is insufficient to determine the document parsing response time target. The selected chunk only contains information about project division and design implementation time, not specific performance metrics like response time goals.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What specific performance metrics are mentioned in the document?",
+        "Are there any sections discussing system performance or response time targets?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "系统如何确保在并发情况下仍能维持≤3秒的问答响应时间？",
+        "除了问答响应时间，文档解析响应时间的目标是多少？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.6364,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "根据文档第18页的准确性需求表格，检索精度（即文字识别准确率）的目标是≥95%，问答准确率（即答案可接受度）的目标是≥90%。",
+      "cited_chunk_ids": [
+        "rag_500_100_0052"
+      ],
+      "follow_up_questions": [
+        "系统在表格识别和实体抽取方面的准确率目标是多少？",
+        "这些准确性指标是基于什么测试环境或数据集评估的？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，第8周的工作包括：星期一集成RAG流程（检索+生成）和设计RAG提示词模板，星期五实现多文档查询接口和测试RAG问答。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周的具体任务有哪些？",
+        "第8周之后还有哪些与RAG相关的开发计划？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.303,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据提供的文档片段，系统在数据准备与RAG模块阶段主要进行以下工作：在数据准备阶段，传统RAG方法采用固定分块策略处理文档，但这可能破坏文档的语义结构，导致跨页或跨段落信息被割裂，影响检索完整性。同时，传统向量检索主要依赖语义相似度匹配，难以有效利用文档中的版式信息（如标题层级、表格结构和页面布局）。针对这些问题，LAD-RAG方法在数据准备阶段引入了布局感知机制，同时建模文本语义信息和文档版式结构信息（如页面布局、段落关系及表格结构），构建更完整的文档表示。在RAG模块阶段，LAD-RAG采用动态检索策略，根据用户查询内容自适应选择相关文档片段，而非依赖固定数量或固定长度的文本块，以提升长文档信息检索的准确性与完整性。",
+      "cited_chunk_ids": [
+        "rag_500_100_0030"
+      ],
+      "follow_up_questions": [
+        "LAD-RAG方法与传统RAG方法在数据准备阶段的具体技术差异是什么？",
+        "系统如何处理视觉丰富文档（Visually Rich Documents）中的表格结构信息？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1273,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档内容，项目计划构建三类针对性的测试数据集，用于场景化效果验证与模型优化。具体是哪三类测试集，文档中只提到将构建三类测试集，但没有明确列出这三类的具体名称或描述。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "这三类自建测试集的具体名称是什么？",
+        "每类测试集针对哪些特定应用场景？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2286,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "The provided evidence does not specify which public datasets are mentioned in the '公开数据集' section for RAG question-answering evaluation. The only relevant chunk discusses the use of public datasets in general terms, stating they cover training and evaluation needs and reduce data acquisition costs, but it does not list or name any specific datasets.",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "What specific public datasets are listed in the document for RAG evaluation?",
+        "Which pages in the document detail the public datasets used?"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0444,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "根据文档内容，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，是系统实现高效检索的基础。具体包括两个核心部分：1. 向量表示方面，通过文本嵌入模型将文档分块转化为高维语义向量，存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索；2. 结构表示方面，构建文档结构图，以文档分块为节点，根据标题层级关系、段落邻接关系以及跨模态关联建立边连接，实现对文档结构信息的显式建模，以弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层中向量数据库和结构索引如何协同工作？",
+        "系统使用了哪些具体的文本嵌入模型？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2882,
+      "key_fact_f1": 0.2882,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略在所选片段中未明确提及。片段rag_500_100_0134讨论了算力不足时的降级方案，包括使用更小的基座模型、模型量化、加入请求队列和清理存储空间，但未具体涉及RAG能力不足的场景。因此，基于当前证据，无法回答该问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否有专门讨论RAG能力不足的降级策略部分？",
+        "系统问题降级方案是否包括其他未在片段中提到的场景？"
+      ],
+      "retrieved_count": 1,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 1,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0936,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台, as stated in the document overview.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档信息，项目成员包括：于智通（学号2023112369）、韩显（学号2023112312）、樊亦简（学号2023112311）。指导教师为郭东明和马冲。这些信息来自document_overview中的明确列表，但rag_chunks中没有直接提供成员名单，因此未引用具体chunk。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "项目成员的具体分工是什么？",
+        "指导教师的角色和职责是什么？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1905,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "The instructors are Guo Dongming and Ma Chong, as indicated in the document overview, which lists '指导教师：郭东明，马冲' (Instructors: Guo Dongming, Ma Chong). No specific chunks were provided that contain this information, but it is confirmed from the overview context.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the roles or contributions of the instructors in the project?",
+        "Can you provide more details about the project members listed?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0818,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，无法确定开题日期是什么时候。提供的chunks中没有包含开题日期的具体信息，只显示了项目分工时间表（第14-17周）和开题报告标题，但没有具体日期。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "这个项目的开题报告在第几页？",
+        "文档中是否有项目时间线或进度安排表？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1319,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "根据提供的文档内容，项目背景问题的核心表述是：当前存在大量非结构化文档处理效率低下、知识难以有效整合利用的问题。具体表现为：企业文档处理耗时（如合同审阅、报告分析需小时级）、文档知识难以转化为可查询的结构化资产、存在知识流失风险、以及教育场景中文献理解与科研效率低下。项目旨在通过文档理解与多源数据整合技术解决这些问题，提升效率并挖掘文档价值。",
+      "cited_chunk_ids": [
+        "rag_500_100_0014"
+      ],
+      "follow_up_questions": [
+        "项目具体针对哪些类型的文档进行处理？",
+        "文档中提到的企业服务案例有哪些具体应用场景？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1914,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据文档内容，项目要解决的四个关键问题包括：1. 文档处理深度不足，对表格、图表、复杂格式理解能力弱；2. 整合能力缺失，局限于单文档问答，无法实现跨文档的知识关联与融合；3. 场景适配单一，缺乏针对企业知识管理与学术研读的定制化能力；4. 将分散的非结构化数据转化为可用的知识资产过程中面临的关键问题（具体四个层面在文档中未详细展开）。",
+      "cited_chunk_ids": [
+        "rag_500_100_0011"
+      ],
+      "follow_up_questions": [
+        "这四个关键问题具体是如何在项目中解决的？",
+        "文档中提到的'四个层面的关键问题'具体指哪四个层面？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.199,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档内容，项目的四个创新点分别是：1) 基于深度学习的端到端的文档内容提取技术；2) 基于布局感知与动态检索的长文档理解机制；3) 多源语义融合技术；4) 数据生成技术。这些创新点覆盖了从解析到应用的全链条技术体系。",
+      "cited_chunk_ids": [
+        "rag_500_100_0015",
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "能否详细说明多源语义融合技术的具体实现方法？",
+        "数据生成技术主要应用于哪些场景？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4314,
+      "key_fact_f1": 0.4,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的文档内容，无法确定第2章研究现状具体从哪四个维度展开。提供的chunks中没有包含第2章研究现状的具体内容，只提到了第2章中的图2-1和2.5结论部分，但没有说明研究现状的四个维度。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "文档中是否有专门介绍研究现状维度的章节？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1488,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据文档内容，文档解析模块包含三个核心子功能：OCR与版面分析、文档分块、以及结构化信息抽取。这些子模块共同负责将原始文档数据转化为具备语义结构的信息表示。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083"
+      ],
+      "follow_up_questions": [
+        "文档解析模块中的OCR与版面分析具体如何工作？",
+        "文档分块模块与传统固定长度切分方式有何不同？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2124,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索和基于关键词匹配的BM25检索，以提高检索召回率和准确率。2. 实施动态检索策略，根据查询内容和上下文信息动态选择候选文档分块，并可能引入结构信息（如文档图关系）进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，生成最终回答，涉及上下文构建、提示词设计和模型调用。这些功能属于检索与推理层，是系统实现智能问答的关键环节。",
+      "cited_chunk_ids": [
+        "rag_500_100_0085"
+      ],
+      "follow_up_questions": [
+        "检索模块如何平衡语义匹配和精确匹配？",
+        "动态检索策略具体如何利用文档图关系？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1717,
+      "key_fact_f1": 0.1429,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统被划分为五大核心模块，但具体模块名称仅在chunk rag_500_100_0038和rag_500_100_0039中提到了第一个模块是“文档解析模块”。其他四个模块的名称在提供的chunks中没有明确列出，因此无法提供完整的五大核心模块列表。",
+      "cited_chunk_ids": [
+        "rag_500_100_0038",
+        "rag_500_100_0039",
+        "rag_500_100_0056"
+      ],
+      "follow_up_questions": [
+        "文档解析模块的具体功能是什么？",
+        "其他四个核心模块的名称是什么？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2195,
+      "key_fact_f1": 0.1667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "根据文档中的性能需求，文档解析响应时间的目标是≤10秒/10页，即对于10页以内的文档，解析时间不超过10秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间对于超过10页的文档是否有不同的目标？",
+        "系统是否支持实时文档解析，还是仅支持批量处理？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4658,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [],
+      "retrieved_count": 0,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "error": "502: DeepSeek 请求失败: The read operation timed out",
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "The provided evidence is insufficient to answer the question about the specific accuracy targets for retrieval precision and question-answering accuracy in the DeepDoc system. The retrieved chunks discuss general accuracy requirements (e.g., OCR, table recognition, entity extraction, and answer acceptability) and describe retrieval and question-answering modules, but do not specify numerical targets for retrieval precision or question-answering accuracy rates.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the specific performance metrics or targets mentioned for the retrieval module in the DeepDoc system?",
+        "Are there any sections in the document that detail evaluation results or benchmarks for retrieval and question-answering accuracy?"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.0047,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，在第8周的星期一，计划集成RAG流程（检索+生成），并在星期五测试RAG问答（≥30个问题）。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107",
+        "rag_500_100_0108"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周的具体任务是什么？",
+        "RAG问答系统测试后还有哪些后续开发阶段？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.3571,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "基于提供的证据，无法回答系统在数据准备与RAG模块阶段分别做什么。提供的chunks主要讨论传统RAG方法的不足、LAD-RAG的改进、以及项目后期阶段（如阶段五、六）的数据存储、统计、系统集成和优化任务，但没有具体描述数据准备和RAG模块阶段的功能或操作。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "数据准备阶段具体涉及哪些步骤，如数据收集、清洗或预处理？",
+        "RAG模块在系统中如何实现检索和生成功能？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.1625,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档内容，项目计划构建三类自建测试集，但具体是哪三类测试集在提供的证据中未明确说明。文档仅提到将构建三类针对性的测试数据集用于场景化效果验证与模型优化，但没有列出具体类别。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "三类自建测试集的具体名称或类型是什么？",
+        "这些自建测试集主要针对哪些业务需求或应用场景？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2727,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据文档内容，公开数据集部分提到了以下用于RAG问答评估的数据集：DocVQA和VisualMRC。这些数据集在评测阶段用于对整体系统进行端到端效果评估，并与基线模型对比。",
+      "cited_chunk_ids": [
+        "rag_500_100_0064"
+      ],
+      "follow_up_questions": [
+        "这些数据集具体用于评估哪些方面的性能？",
+        "文档中提到的其他数据集如PubLayNet、IIT-CDIP、PubTables、FUNSD和XFUND分别用于什么目的？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.419,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "根据文档，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，是系统实现高效检索的基础。具体包括两个核心部分：1. 向量数据库：通过文本嵌入模型将文档分块转化为高维语义向量，存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索。2. 结构索引：构建文档结构图，以文档分块为节点，根据标题层级关系、段落邻接关系及跨模态关联建立边连接，实现对文档结构信息的显式建模，以弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083",
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层使用的文本嵌入模型具体是什么？",
+        "文档结构图是如何构建和维护的？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.296,
+      "key_fact_f1": 0.296,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，RAG能力不足时的优先降级策略在提供的证据中未明确提及。检索到的chunk rag_500_100_0134详细描述了算力不足、推理算力不足、并发量超预期和存储空间不足等场景的降级方案，但未直接涉及RAG能力不足的情况。因此，基于现有证据，无法确定RAG能力不足时的具体优先降级策略。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了RAG能力不足的降级方案？",
+        "系统问题降级方案是否包括针对检索增强生成（RAG）性能问题的具体措施？"
+      ],
+      "retrieved_count": 3,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 3,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0638,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q001",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目名称是什么？",
+      "gold_answer": "项目名称是 DeepDoc-文档理解与多源数据整合的知识服务平台。",
+      "answer": "The project name is DeepDoc-文档理解与多源数据整合的知识服务平台, as stated in the document overview.",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "What are the main objectives of the DeepDoc project?",
+        "Who are the project members and their roles?"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.5,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q002",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "项目成员有哪些？",
+      "gold_answer": "项目成员包括于智通、韩显、樊亦简。",
+      "answer": "根据提供的文档内容，项目成员包括：韩显、于智通、樊亦简。此外，指导教师为郭东明和马冲。",
+      "cited_chunk_ids": [
+        "rag_500_100_0106"
+      ],
+      "follow_up_questions": [
+        "项目成员的具体角色或分工是什么？",
+        "指导教师在该项目中承担了哪些职责？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.48,
+      "key_fact_f1": 0.6667,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q003",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "指导教师是谁？",
+      "gold_answer": "指导教师是郭东明、马冲。",
+      "answer": "根据提供的文档概述，指导教师是郭东明和马冲。然而，没有在检索到的具体文本块中找到直接证据来确认这一点，因为所选文本块主要讨论项目价值、用户场景、技术架构和报告格式，未提及指导教师信息。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "这个项目是哪个学校或机构的课程设计？",
+        "项目成员的具体角色或贡献是什么？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.2128,
+      "key_fact_f1": 1.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q004",
+      "category": "fact",
+      "difficulty": "easy",
+      "question": "开题日期是什么时候？",
+      "gold_answer": "开题日期是2026年3月20日。",
+      "answer": "根据提供的文档内容，开题日期没有明确指定为具体的日历日期。从项目分工时间表可见，开题报告在第三周的星期五完成并提交，但文档未提供项目开始的周次对应的具体日期。因此，无法确定开题的具体日期。",
+      "cited_chunk_ids": [
+        "rag_500_100_0106"
+      ],
+      "follow_up_questions": [
+        "项目是从哪一周开始计算的？",
+        "开题报告提交的具体日期是什么？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.098,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q005",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "文档中对项目背景问题的核心表述是什么？",
+      "gold_answer": "核心问题是数字化进程带来了海量非结构化文档，但在将这些分散数据转化为可用知识资产时，仍面临多层面的关键问题。",
+      "answer": "文档中对项目背景问题的核心表述是：在数字经济时代，企业和教育机构面临海量非结构化文档（如合同、报告、学术文献等）带来的“数据丰富但知识贫乏”困境，传统人工处理方式效率低、易出错，难以满足快速变化的需求。同时，现有工具（如ChatGPT、ChatPDF）存在处理深度不足、整合能力缺失和场景适配单一三大局限，而大模型技术（如多模态大模型、RAG、知识图谱）为突破这些局限提供了可能。",
+      "cited_chunk_ids": [
+        "rag_500_100_0010"
+      ],
+      "follow_up_questions": [
+        "项目背景中提到的三大局限具体如何影响企业或教育场景？",
+        "大模型技术如何具体应用于解决文档理解与整合问题？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1651,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q006",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目要解决的四个关键问题是什么？",
+      "gold_answer": "四个关键问题分别是内容提取准确性问题、长文档理解问题、多源异构数据融合问题、场景化应用适配问题。",
+      "answer": "根据提供的文档内容，项目要解决的四个关键问题在1.2节中提及，但具体内容未包含在提供的chunks中。从上下文可知，项目旨在解决文档处理中的关键问题，但证据不足，无法列出确切的四个问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0010",
+        "rag_500_100_0011"
+      ],
+      "follow_up_questions": [
+        "项目在1.2节中提到的四个关键问题具体是什么？",
+        "项目如何利用大模型、RAG和知识图谱来解决这些问题？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2636,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q007",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "项目的四个创新点分别是什么？",
+      "gold_answer": "四个创新点是端到端文档内容提取、布局感知与动态检索、基于知识图谱的多源语义关联与融合、多源异构文档融合与自动表格生成。",
+      "answer": "根据提供的文档内容，项目的四个创新点分别是：1) 基于深度学习的端到端的文档内容提取技术；2) 基于布局感知与动态检索的长文档理解机制；3) 多源语义融合技术；4) 数据生成技术。这些创新点覆盖了从解析到理解、关联再到应用的全链条技术体系。",
+      "cited_chunk_ids": [
+        "rag_500_100_0015",
+        "rag_500_100_0016"
+      ],
+      "follow_up_questions": [
+        "这些创新点具体是如何实现的？",
+        "项目在技术路线和难度方面有哪些评估？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4151,
+      "key_fact_f1": 0.4,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q008",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "第2章研究现状从哪四个维度展开？",
+      "gold_answer": "从视觉文档理解、文字识别方法、文档布局分析、RAG检索问答四个维度展开。",
+      "answer": "根据提供的文档片段，无法确定第2章研究现状具体从哪四个维度展开。提供的chunks中没有包含第2章研究现状的详细内容，只提到了第2章中的图2-1和2.5结论部分，但未说明研究现状的维度划分。",
+      "cited_chunk_ids": [],
+      "follow_up_questions": [
+        "第2章研究现状的具体内容是什么？",
+        "研究现状是否涉及技术、应用、挑战或趋势等维度？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 0,
+      "answer_similarity": 0.15,
+      "key_fact_f1": 0.2,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q009",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "文档解析模块包含哪些核心子功能？",
+      "gold_answer": "文档解析模块包括多格式文档上传、端到端文档解析、复杂元素识别、低质量图像增强、解析结果预览。",
+      "answer": "根据文档内容，文档解析模块包含三个核心子功能：1. OCR与版面分析子模块 - 负责文本提取和文档结构识别；2. 文档分块子模块 - 采用语义分块与结构感知分块相结合的方法；3. 结构化信息抽取子模块 - 使用专用文档解析模型提取关键字段并生成结构化输出。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083"
+      ],
+      "follow_up_questions": [
+        "文档解析模块与其他模块如何通过API进行通信？",
+        "OCR与版面分析模块具体使用哪些技术或工具？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1879,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q010",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "检索问答模块的核心功能有哪些？",
+      "gold_answer": "检索问答模块包括文档结构分析、布局感知分块、向量索引构建、语义检索、动态重排序、答案生成与溯源、多轮对话。",
+      "answer": "根据提供的文档内容，检索问答模块的核心功能包括：1. 采用混合检索策略，结合基于向量相似度的语义检索与基于关键词匹配的BM25检索，以提高召回率与准确率。2. 实施动态检索策略，根据查询内容与上下文动态选择候选文档分块，并可能引入结构信息进行增强检索。3. 基于大语言模型（LLM）对检索结果进行整合与推理，生成最终回答，包括上下文构建、提示词设计和模型调用。4. 提供自然语言交互接口，支持语义查询、结构化数据查询及多轮对话。5. 支持历史记录查询与证据溯源功能，确保结果的可解释性与可追溯性。",
+      "cited_chunk_ids": [
+        "rag_500_100_0084",
+        "rag_500_100_0085",
+        "rag_500_100_0086"
+      ],
+      "follow_up_questions": [
+        "检索问答模块如何具体实现混合检索策略？",
+        "动态检索策略中如何利用文档结构信息？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1736,
+      "key_fact_f1": 0.2857,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q011",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "系统的五大核心模块是什么？",
+      "gold_answer": "五大核心模块是文档解析模块、检索问答模块、知识图谱模块、表格生成模块、应用交互模块。",
+      "answer": "根据提供的文档内容，系统的五大核心模块是：1. 文档解析模块（负责多格式文档上传与结构化解析），2. 检索问答模块（负责文档索引构建与语义问答），3. 知识图谱模块（负责实体抽取与知识关联），4. 表格生成模块（负责多源数据抽取与报表生成），5. 应用交互模块（负责用户界面与场景适配）。这些模块通过API进行通信，共同构成DeepDoc系统的功能架构。",
+      "cited_chunk_ids": [
+        "rag_500_100_0057"
+      ],
+      "follow_up_questions": [
+        "每个模块的具体技术实现是什么？",
+        "模块间的API通信是如何设计的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4,
+      "key_fact_f1": 0.8333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q012",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "文档解析响应时间的目标是多少？",
+      "gold_answer": "对于10页以内文档，解析响应时间目标是不超过10秒。",
+      "answer": "根据文档中的性能需求，文档解析响应时间的目标是≤10秒/10页，即对于10页以内的文档，解析时间不超过10秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间是否针对所有文档格式？",
+        "如果文档超过10页，解析时间目标是多少？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4658,
+      "key_fact_f1": 0.3333,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q013",
+      "category": "metric",
+      "difficulty": "easy",
+      "question": "问答响应时间目标是多少？",
+      "gold_answer": "问答响应时间目标是不超过3秒。",
+      "answer": "根据文档中的性能需求，问答响应时间目标是≤3秒，即从用户提问到生成答案的时间不超过3秒。",
+      "cited_chunk_ids": [
+        "rag_500_100_0051"
+      ],
+      "follow_up_questions": [
+        "文档解析响应时间的目标是多少？",
+        "系统支持的最大并发用户数是多少？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.5185,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q014",
+      "category": "metric",
+      "difficulty": "medium",
+      "question": "系统的准确性指标中，检索精度和问答准确率目标分别是多少？",
+      "gold_answer": "检索精度目标是召回率@5不低于85%，问答准确率目标是F1分数不低于80%。",
+      "answer": "根据提供的文档内容，在准确性指标中，检索精度和问答准确率的具体目标数值没有明确列出。文档中提到的准确性需求包括文字识别准确率（≥95%）、表格识别准确率（≥85%）、实体抽取准确率（≥80%）和答案可接受度（≥90%），但没有直接指定检索精度和问答准确率的目标值。",
+      "cited_chunk_ids": [
+        "rag_500_100_0052"
+      ],
+      "follow_up_questions": [
+        "文档中是否在其他部分提到了检索精度或问答准确率的具体指标？",
+        "系统的检索模块采用了哪些策略来提高检索精度？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1972,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q015",
+      "category": "process",
+      "difficulty": "easy",
+      "question": "RAG问答系统的阶段计划在第几周完成？",
+      "gold_answer": "RAG问答系统计划在第8周完成。",
+      "answer": "根据提供的文档内容，RAG问答系统的阶段计划在第8周完成。具体来说，在第8周的星期一，计划集成RAG流程（检索+生成），并在星期五测试RAG问答至少30个问题。",
+      "cited_chunk_ids": [
+        "rag_500_100_0107"
+      ],
+      "follow_up_questions": [
+        "RAG问答系统在第8周的具体任务有哪些？",
+        "中期答辩是在第几周进行的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.3488,
+      "key_fact_f1": 0.5,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q016",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统在数据准备与RAG模块阶段分别做什么？",
+      "gold_answer": "数据准备阶段负责数据集收集、清洗、预处理和标注；RAG模块阶段负责文档分块、索引构建和检索策略。",
+      "answer": "根据文档内容，系统在数据准备阶段主要进行多格式文档解析与统一处理，支持Word、PDF等格式的接入与预处理，并采用语义分块与结构感知分块相结合的方法以提升长文档处理的上下文完整性。在RAG模块阶段，系统基于向量数据库构建语义检索能力，并结合RAG框架实现面向自然语言查询的智能问答功能，同时针对传统RAG方法的不足，引入了布局感知机制（如LAD-RAG）来建模文本语义与文档版式结构信息，并采用动态检索策略自适应选择相关文档片段，以提升检索准确性和完整性。",
+      "cited_chunk_ids": [
+        "rag_500_100_0027",
+        "rag_500_100_0030",
+        "rag_500_100_0137"
+      ],
+      "follow_up_questions": [
+        "数据准备阶段具体如何处理不同格式的文档？",
+        "RAG模块如何结合布局感知机制来改进检索效果？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1719,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q017",
+      "category": "definition",
+      "difficulty": "easy",
+      "question": "项目在自建测试集方面计划构建哪三类测试集？",
+      "gold_answer": "计划构建教育文档测试集、企业文档测试集和跨文档综合测试集。",
+      "answer": "根据文档，项目在自建测试集方面计划构建三类针对性的测试数据集，用于场景化效果验证与模型优化。具体是哪三类测试集，文档中未提供详细信息，证据不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0065"
+      ],
+      "follow_up_questions": [
+        "三类自建测试集的具体名称或类型是什么？",
+        "这些自建测试集主要针对哪些业务需求或应用场景？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.1935,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q018",
+      "category": "fact",
+      "difficulty": "medium",
+      "question": "公开数据集部分提到了哪些用于RAG问答评估的数据集？",
+      "gold_answer": "文中提到了DocVQA、VisualMRC等数据集。",
+      "answer": "根据提供的文档内容，公开数据集部分提到了以下用于RAG问答评估的数据集：DocVQA和VisualMRC。这些数据集在评测阶段被用于对整体系统进行端到端效果评估，并与基线模型对比。",
+      "cited_chunk_ids": [
+        "rag_500_100_0064"
+      ],
+      "follow_up_questions": [
+        "这些数据集具体用于评估RAG问答的哪些方面？",
+        "文档中是否提到了其他用于RAG问答评估的数据集？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.4037,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q019",
+      "category": "process",
+      "difficulty": "medium",
+      "question": "系统架构中，表示与存储层负责什么？",
+      "gold_answer": "表示与存储层负责文档内容向量化表示及结构化索引构建，是高效检索的基础。",
+      "answer": "在DeepDoc系统的架构中，表示与存储层主要负责对文档内容进行向量化表示及结构化索引构建，以支持高效检索。具体包括两个核心部分：1. 向量表示方面，通过文本嵌入模型将文档分块转化为高维语义向量，并存储于向量数据库（如FAISS）中，支持基于语义相似度的向量检索。2. 结构表示方面，构建文档结构图，以文档分块为节点，根据标题层级关系、段落邻接关系以及跨模态关联（如表格与文本）建立边连接，实现对文档结构信息的显式建模，弥补纯向量检索在结构理解方面的不足。",
+      "cited_chunk_ids": [
+        "rag_500_100_0083",
+        "rag_500_100_0084"
+      ],
+      "follow_up_questions": [
+        "表示与存储层使用的具体文本嵌入模型是什么？",
+        "文档结构图是如何构建和存储的？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.2521,
+      "key_fact_f1": 0.2521,
+      "groundedness": 0.0
+    },
+    {
+      "test_id": "q020",
+      "category": "definition",
+      "difficulty": "medium",
+      "question": "系统问题降级方案中，RAG能力不足时的优先降级策略是什么？",
+      "gold_answer": "优先退回到标准RAG方案，先保证基础问答可用，布局感知模块作为增强功能后续完善。",
+      "answer": "根据提供的文档内容，系统问题降级方案中，当RAG能力不足时（具体指推理算力不足的场景），优先降级策略是：模型量化（如从FP16转为INT8）加速，或改用CPU推理。该策略可提升速度2-4倍，但会导致精度损失1-2%。",
+      "cited_chunk_ids": [
+        "rag_500_100_0134"
+      ],
+      "follow_up_questions": [
+        "除了推理算力不足，文档中提到的其他系统问题降级场景有哪些？",
+        "在训练算力不足时，推荐的降级方案是什么？"
+      ],
+      "retrieved_count": 5,
+      "strategy": "semantic_78_600_900_160",
+      "top_k": 5,
+      "exact_match": false,
+      "keyword_hits": 0,
+      "contains_gold_core": false,
+      "answer_chunk_hit": 1,
+      "answer_similarity": 0.0615,
+      "key_fact_f1": 0.0,
+      "groundedness": 0.0
+    }
+  ]
+}
