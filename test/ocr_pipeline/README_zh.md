@@ -69,12 +69,12 @@ python .\run_unified_index_pipeline.py --input .\example --recurse --continue-on
 
 ```powershell
 # 目录批处理，递归扫描，失败继续
-python .\run_unified_index_pipeline.py `
-	--input .\example `
-	--recurse `
-	--continue-on-error `
+python .\run_unified_index_pipeline.py 
+	--input .\example 
+	--recurse 
+	--continue-on-error 
 	--mode selfhosted
-maa
+
 # 单文件处理
 python .\run_unified_index_pipeline.py --input .\example\ocr_demo.png --mode maas
 ```
