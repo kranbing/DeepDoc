@@ -1,290 +1,459 @@
 from __future__ import annotations
 
 import json
-import sys
+import os
+import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
+
+ROOT = Path(__file__).resolve().parent
+QASPER_AFTER_DIR = ROOT / "test" / "Qasper_after"
+SPLITS = ["train", "validation", "test"]
+TOP_KS = [1, 3, 5]
+STRATEGIES = [
+    {"name": "rag_500_100", "chunk_size": 500, "overlap": 100},
+    {"name": "rag_300_100", "chunk_size": 300, "overlap": 100},
+    {"name": "semantic_78_600_900_160", "chunk_size": 0, "overlap": 0},
+]
+DEFAULT_MAX_ITEMS = 10
+TRAIN_MAX_ITEMS = 100
+DEFAULT_MAX_CASES = 20
+FALLBACK_ANSWER = "文档中未找到足够依据。"
+ANSWER_LANGUAGE = "English"
+REPORT_JSON_PATH = QASPER_AFTER_DIR / "rag_eval_report.json"
+REPORT_MD_PATH = QASPER_AFTER_DIR / "rag_eval_report.md"
+PARTIAL_JSON_PATH = QASPER_AFTER_DIR / "rag_eval_report.partial.json"
 
 
 def log(message: str) -> None:
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] {message}", flush=True)
 
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT))
 
-from backend.main import read_workspace
-from backend.services.overview_service import ensure_document_overview, read_document_overview
-from backend.services.qa_service import (
-    ask_deepseek_with_selection_v2,
-    normalize_chunk_context_items,
-)
-from backend.services.project_store import ensure_project_layout
-from backend.services.vector_store import search_project_vector_index
-
-# Best three chunk strategies from chunk_strategy_test/report.md
-STRATEGIES: List[Dict[str, Any]] = [
-    {"name": "rag_500_100", "label": "RAG Text Chunks", "strategy": "rag", "chunk_size": 500, "overlap": 100},
-    {"name": "rag_300_100", "label": "RAG Text Chunks", "strategy": "rag", "chunk_size": 300, "overlap": 100},
-    {"name": "semantic_78_600_900_160", "label": "Semantic Text Chunks", "strategy": "semantic", "config_hint": "semantic_78_600_900_160"},
-]
-TOP_KS = [1, 3, 5]
-
-TESTSET_PATH = ROOT / "rag_test" / "testset.json"
-REPORT_JSON_PATH = ROOT / "rag_eval_report.json"
-REPORT_MD_PATH = ROOT / "rag_eval_report.md"
+def load_split(split: str) -> Dict[str, Any]:
+    path = QASPER_AFTER_DIR / f"{split}.json"
+    if not path.is_file():
+        raise FileNotFoundError(f"Missing split file: {path}")
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
 
 
-def load_testset() -> Dict[str, Any]:
-    log(f"Loading testset from {TESTSET_PATH}")
-    with open(TESTSET_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    log(f"Loaded {len(data.get('items') or [])} test cases")
-    return data
+def normalize_text(text: str) -> str:
+    text = str(text or "").lower()
+    text = re.sub(r"\s+", "", text)
+    text = re.sub(r"[^\w\u4e00-\u9fff]", "", text)
+    return text
 
 
-def resolve_project_and_doc(testset: Dict[str, Any]) -> Tuple[Path, Dict[str, Any]]:
-    project_id = str(testset.get("source_project_id") or "").strip()
-    doc_id = str(testset.get("source_document_id") or "").strip()
-    if not project_id or not doc_id:
-        raise RuntimeError("testset.json 缺少 source_project_id 或 source_document_id")
-
-    project_dir = ROOT / "data" / "projects" / project_id
-    log(f"Resolving project {project_id}")
-    ensure_project_layout(project_dir)
-    ws = read_workspace(project_dir)
-    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
-    doc = next((item for item in docs if isinstance(item, dict) and str(item.get("id") or "") == doc_id), None)
-    if not doc:
-        raise RuntimeError(f"未在 workspace 中找到文档: {doc_id}")
-    log(f"Resolved document {doc_id}: {doc.get('name') or doc_id}")
-    return project_dir, doc
+def extract_tokens(text: str) -> List[str]:
+    raw = str(text or "")
+    tokens = re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?|[\u4e00-\u9fff]{2,}|\d+(?:\.\d+)?%?", raw)
+    return [t.lower() for t in tokens if str(t).strip()]
 
 
-def compute_score(answer: str, gold_answer: str, keywords: Sequence[str]) -> Dict[str, Any]:
-    answer_l = answer.lower().strip()
-    gold_l = gold_answer.lower().strip()
-    keyword_hits = sum(1 for kw in keywords if str(kw).lower() in answer_l)
-    exact = answer_l == gold_l
-    contains_gold_core = all(token.lower() in answer_l for token in gold_answer.split()[:3]) if gold_answer else False
-    return {
-        "exact_match": exact,
-        "keyword_hits": keyword_hits,
-        "contains_gold_core": contains_gold_core,
+def split_chunks_for_strategy(paper: Dict[str, Any], strategy: Dict[str, Any]) -> List[Dict[str, Any]]:
+    chunks = paper.get("chunks") if isinstance(paper.get("chunks"), list) else []
+    if strategy["chunk_size"] <= 0:
+        return [dict(chunk) for chunk in chunks if isinstance(chunk, dict)]
+
+    out: List[Dict[str, Any]] = []
+    buffer: List[Dict[str, Any]] = []
+    char_count = 0
+    for chunk in chunks:
+        if not isinstance(chunk, dict):
+            continue
+        text = str(chunk.get("text") or "").strip()
+        if not text:
+            continue
+        add = len(text) + (2 if buffer else 0)
+        if buffer and char_count + add > strategy["chunk_size"]:
+            content = "\n\n".join(str(x.get("text") or "").strip() for x in buffer).strip()
+            source_ids = [str(x.get("chunk_id") or "") for x in buffer if str(x.get("chunk_id") or "").strip()]
+            out.append(
+                {
+                    "chunkId": f"{strategy['name']}_{len(out):04d}",
+                    "content": content,
+                    "normalizedContent": content,
+                    "pageNo": 1,
+                    "index": len(out),
+                    "sourceChunkIds": source_ids,
+                    "sourcePageNos": [],
+                    "sourceChunkCount": len(buffer),
+                }
+            )
+
+            keep: List[Dict[str, Any]] = []
+            overlap_chars = 0
+            for item in reversed(buffer):
+                kept_text = str(item.get("text") or "").strip()
+                add2 = len(kept_text) + (2 if keep else 0)
+                if keep and overlap_chars + add2 > strategy["overlap"]:
+                    break
+                keep.insert(0, item)
+                overlap_chars += add2
+                if overlap_chars >= strategy["overlap"]:
+                    break
+            buffer = keep
+            char_count = sum(len(str(x.get("text") or "").strip()) for x in buffer) + max(0, len(buffer) - 1) * 2
+
+        buffer.append(chunk)
+        char_count += add
+
+    if buffer:
+        content = "\n\n".join(str(x.get("text") or "").strip() for x in buffer).strip()
+        source_ids = [str(x.get("chunk_id") or "") for x in buffer if str(x.get("chunk_id") or "").strip()]
+        out.append(
+            {
+                "chunkId": f"{strategy['name']}_{len(out):04d}",
+                "content": content,
+                "normalizedContent": content,
+                "pageNo": 1,
+                "index": len(out),
+                "sourceChunkIds": source_ids,
+                "sourcePageNos": [],
+                "sourceChunkCount": len(buffer),
+            }
+        )
+    return out
+
+
+def retrieve_chunks(chunks: List[Dict[str, Any]], question: str, top_k: int) -> List[Dict[str, Any]]:
+    q_tokens = set(extract_tokens(question))
+    scored: List[Tuple[float, Dict[str, Any]]] = []
+    for idx, chunk in enumerate(chunks):
+        text = str(chunk.get("normalizedContent") or chunk.get("content") or "")
+        c_tokens = set(extract_tokens(text))
+        overlap = len(q_tokens & c_tokens)
+        score = overlap / max(len(q_tokens), 1)
+        if question and normalize_text(question) in normalize_text(text):
+            score += 0.5
+        if overlap <= 0 and score <= 0:
+            continue
+        item = dict(chunk)
+        item["score"] = round(float(score) - idx * 1e-6, 6)
+        scored.append((item["score"], item))
+    if not scored:
+        return [dict(chunk, score=0.0) for chunk in chunks[: max(1, top_k)]]
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [item for _, item in scored[: max(1, top_k)]]
+
+
+def get_chunk_identifier(chunk: Dict[str, Any]) -> str:
+    for key in ("chunkId", "chunk_id"):
+        value = str(chunk.get(key) or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def expand_retrieved_chunk_ids(retrieved: Sequence[Dict[str, Any]]) -> List[str]:
+    expanded: List[str] = []
+    for chunk in retrieved:
+        if not isinstance(chunk, dict):
+            continue
+        chunk_id = get_chunk_identifier(chunk)
+        if chunk_id:
+            expanded.append(chunk_id)
+        source_ids = chunk.get("sourceChunkIds") if isinstance(chunk.get("sourceChunkIds"), list) else []
+        for source_id in source_ids:
+            source_id = str(source_id or "").strip()
+            if source_id:
+                expanded.append(source_id)
+    return list(dict.fromkeys(expanded))
+
+
+def build_model_answer(question: str, retrieved: List[Dict[str, Any]], paper: Dict[str, Any]) -> Dict[str, Any]:
+    from backend.services.qa_service import ask_deepseek_with_selection_v2
+
+    current_items = [dict(chunk) for chunk in retrieved]
+    support_items: List[Dict[str, Any]] = []
+    doc_name = str(paper.get("title") or paper.get("paper_id") or "Qasper paper")
+    prompt_question = f"{question}\n\nAnswer in {ANSWER_LANGUAGE}. Keep the answer concise and factual."
+    doc_overview = {
+        "status": "ready",
+        "title": doc_name,
+        "overviewShort": str(paper.get("abstract") or "").strip()[:600],
     }
-
-
-def build_context_for_question(
-    project_dir: Path,
-    doc: Dict[str, Any],
-    question: str,
-    top_k: int,
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], Dict[str, Any], str]:
-    doc_id = str(doc.get("id") or "")
-    log(f"Retrieving chunks with top_k={top_k} for question: {question}")
-    search_res = search_project_vector_index(project_dir, question, top_k=top_k, doc_id=doc_id)
-    current_chunks = normalize_chunk_context_items(search_res.get("results"))
-    log(f"Retrieved {len(current_chunks)} chunks")
-    support_chunks: List[Dict[str, Any]] = []
-    overview = read_document_overview(project_dir, doc_id)
-    if not isinstance(overview, dict) or str(overview.get("status") or "") != "ready":
-        log("Overview missing or not ready, generating overview")
-        try:
-            overview = ensure_document_overview(ROOT, project_dir, doc)
-        except Exception as exc:
-            log(f"Overview generation failed: {exc}")
-            overview = {}
-    return current_chunks, support_chunks, overview, "auto_retrieval"
-
-
-def run_case(
-    project_dir: Path,
-    doc: Dict[str, Any],
-    item: Dict[str, Any],
-    strategy: Dict[str, Any],
-    top_k: int,
-) -> Dict[str, Any]:
-    question = str(item.get("question") or "").strip()
-    gold_answer = str(item.get("gold_answer") or "").strip()
-    doc_name = str(doc.get("name") or doc.get("id") or "")
-    log(f"Running {strategy['name']} | top_k={top_k} | {item.get('id')}: {question}")
-    current_chunks, support_chunks, overview, context_source = build_context_for_question(project_dir, doc, question, top_k)
-
     try:
-        qa = ask_deepseek_with_selection_v2(
+        result = ask_deepseek_with_selection_v2(
             ROOT,
-            current_chunks,
-            support_chunks,
-            question,
+            current_items,
+            support_items,
+            prompt_question,
             doc_name,
-            doc_id=str(doc.get("id") or ""),
-            doc_overview=overview,
+            doc_id=str(paper.get("paper_id") or ""),
+            doc_overview=doc_overview,
             compacted_context="",
             recent_turns=[],
             manual_selected=False,
-            context_source=context_source,
+            context_source="qasper_after_eval",
         )
-        answer = str(qa.get("answer") or "")
-        cited_chunk_ids = qa.get("cited_chunk_ids") if isinstance(qa.get("cited_chunk_ids"), list) else []
-        follow_up_questions = qa.get("follow_up_questions") if isinstance(qa.get("follow_up_questions"), list) else []
-        log(f"QA done | cited={len(cited_chunk_ids)} | answer_len={len(answer)}")
+        answer = str(result.get("answer") or "").strip() or FALLBACK_ANSWER
+        cited_chunk_ids = [
+            str(x).strip()
+            for x in (result.get("cited_chunk_ids") if isinstance(result.get("cited_chunk_ids"), list) else [])
+            if str(x).strip()
+        ]
+        return {"answer": answer, "cited_chunk_ids": cited_chunk_ids, "llm_error": ""}
     except Exception as exc:
-        log(f"QA failed: {exc}")
-        raise
+        log(f"LLM answer failed: {exc}")
+        return {"answer": FALLBACK_ANSWER, "cited_chunk_ids": [], "llm_error": str(exc)}
 
-    metrics = compute_score(answer, gold_answer, item.get("expected_keywords") or item.get("keywords") or [])
+
+def normalize_answer(text: str) -> str:
+    return normalize_text(text)
+
+
+def answer_tokens(text: str) -> List[str]:
+    return extract_tokens(text)
+
+
+def compute_score(
+    answer: str,
+    gold_answer: str,
+    keywords: Sequence[str],
+    cited_chunk_ids: Sequence[str],
+    evidence_chunk_ids: Sequence[str],
+    retrieved_chunk_ids: Sequence[str],
+) -> Dict[str, Any]:
+    answer_norm = normalize_answer(answer)
+    gold_norm = normalize_answer(gold_answer)
+    exact_match = bool(answer_norm) and answer_norm == gold_norm
+
+    keyword_list = [str(k).strip() for k in keywords if str(k).strip()]
+    if not keyword_list:
+        keyword_list = [tok for tok in answer_tokens(gold_answer) if len(tok) >= 2][:8]
+    keyword_hits = sum(1 for kw in keyword_list if normalize_answer(kw) in answer_norm)
+    keyword_recall = round(keyword_hits / max(len(keyword_list), 1), 4) if keyword_list else 0.0
+
+    gold_tok = set(answer_tokens(gold_answer))
+    ans_tok = set(answer_tokens(answer))
+    token_recall = round(len(gold_tok & ans_tok) / max(len(gold_tok), 1), 4) if gold_tok else 0.0
+
+    cited_set = {str(x).strip() for x in cited_chunk_ids if str(x).strip()}
+    evidence_set = {str(x).strip() for x in evidence_chunk_ids if str(x).strip()}
+    retrieved_set = {str(x).strip() for x in retrieved_chunk_ids if str(x).strip()}
+
+    retrieval_hit = bool(retrieved_set & evidence_set)
+    evidence_hit = bool(cited_set & evidence_set)
+    evidence_recall = round(len(retrieved_set & evidence_set) / max(len(evidence_set), 1), 4) if evidence_set else 0.0
+    cited_support_rate = round(len(cited_set & evidence_set) / max(len(cited_set), 1), 4) if cited_set else 0.0
+
     return {
-        "test_id": item.get("id"),
-        "category": item.get("category"),
-        "difficulty": item.get("difficulty"),
-        "question": question,
-        "gold_answer": gold_answer,
-        "answer": answer,
-        "cited_chunk_ids": cited_chunk_ids,
-        "follow_up_questions": follow_up_questions,
-        "retrieved_count": len(current_chunks),
-        "strategy": strategy["name"],
-        "top_k": top_k,
-        **metrics,
+        "exact_match": exact_match,
+        "keyword_hits": keyword_hits,
+        "keyword_recall": keyword_recall,
+        "token_recall": token_recall,
+        "retrieval_hit": retrieval_hit,
+        "evidence_hit": evidence_hit,
+        "evidence_recall": evidence_recall,
+        "cited_support_rate": cited_support_rate,
     }
 
 
 def summarize_results(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     groups: Dict[Tuple[str, int], List[Dict[str, Any]]] = {}
     for item in results:
-        key = (str(item["strategy"]), int(item["top_k"]))
-        groups.setdefault(key, []).append(item)
+        groups.setdefault((str(item["strategy"]), int(item["top_k"])), []).append(item)
 
     summary: List[Dict[str, Any]] = []
-    for (strategy_name, top_k), items in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+    for (strategy, top_k), items in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
         total = len(items)
-        exact = sum(1 for x in items if x.get("exact_match"))
-        keyword = sum(1 for x in items if x.get("keyword_hits", 0) > 0)
-        core = sum(1 for x in items if x.get("contains_gold_core"))
-        avg_retrieved = sum(int(x.get("retrieved_count") or 0) for x in items) / max(total, 1)
         summary.append(
             {
-                "strategy": strategy_name,
+                "strategy": strategy,
                 "top_k": top_k,
                 "total": total,
-                "exact_match_rate": round(exact / total, 4) if total else 0.0,
-                "keyword_hit_rate": round(keyword / total, 4) if total else 0.0,
-                "gold_core_rate": round(core / total, 4) if total else 0.0,
-                "avg_retrieved": round(avg_retrieved, 2),
+                "exact_match_rate": round(sum(1 for x in items if x.get("exact_match")) / max(total, 1), 4),
+                "keyword_recall_avg": round(sum(float(x.get("keyword_recall") or 0) for x in items) / max(total, 1), 4),
+                "token_recall_avg": round(sum(float(x.get("token_recall") or 0) for x in items) / max(total, 1), 4),
+                "retrieval_hit_rate": round(sum(1 for x in items if x.get("retrieval_hit")) / max(total, 1), 4),
+                "evidence_hit_rate": round(sum(1 for x in items if x.get("evidence_hit")) / max(total, 1), 4),
+                "evidence_recall_avg": round(sum(float(x.get("evidence_recall") or 0) for x in items) / max(total, 1), 4),
+                "cited_support_rate_avg": round(sum(float(x.get("cited_support_rate") or 0) for x in items) / max(total, 1), 4),
             }
         )
     return summary
 
 
-def render_markdown(testset: Dict[str, Any], results: List[Dict[str, Any]], summary: List[Dict[str, Any]]) -> str:
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    project_name = testset.get("source_document_name") or testset.get("source_document_id")
-    lines: List[str] = []
-    lines.append("# RAG 主链路测试报告")
-    lines.append("")
-    lines.append(f"- 生成时间：{created_at}")
-    lines.append(f"- 来源项目：{testset.get('source_project_id')}")
-    lines.append(f"- 来源文档：{project_name}")
-    lines.append(f"- 测试集规模：{len(testset.get('items') or [])}")
-    lines.append(f"- 分块策略：{', '.join(strategy['name'] for strategy in STRATEGIES)}")
-    lines.append(f"- TOPK：{', '.join(map(str, TOP_KS))}")
-    lines.append("")
-    lines.append("## 策略与 TOPK 汇总")
-    lines.append("")
-    lines.append("| Strategy | TOPK | Total | Exact Match | Keyword Hit | Gold-Core | Avg Retrieved |")
-    lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
-    for s in summary:
+def render_markdown(summary: List[Dict[str, Any]], results: List[Dict[str, Any]], max_cases: int) -> str:
+    lines = [
+        "# Qasper_after RAG 测试报告",
+        "",
+        f"- 生成时间: {datetime.now():%Y-%m-%d %H:%M:%S}",
+        f"- 数据目录: {QASPER_AFTER_DIR}",
+        f"- chunk 策略: {', '.join(s['name'] for s in STRATEGIES)}",
+        f"- TOPK: {', '.join(map(str, TOP_KS))}",
+        f"- 每组参数固定前 {max_cases} 条 QA",
+        "",
+        "## 汇总",
+        "",
+        "| Strategy | TOPK | Total | Exact Match | Keyword Recall | Token Recall | Retrieval Hit | Evidence Hit | Evidence Recall | Cited Support |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for item in summary:
         lines.append(
-            f"| {s['strategy']} | {s['top_k']} | {s['total']} | {s['exact_match_rate']:.4f} | {s['keyword_hit_rate']:.4f} | {s['gold_core_rate']:.4f} | {s['avg_retrieved']:.2f} |"
+            f"| {item['strategy']} | {item['top_k']} | {item['total']} | {item['exact_match_rate']:.4f} | {item['keyword_recall_avg']:.4f} | {item['token_recall_avg']:.4f} | {item['retrieval_hit_rate']:.4f} | {item['evidence_hit_rate']:.4f} | {item['evidence_recall_avg']:.4f} | {item['cited_support_rate_avg']:.4f} |"
         )
-
-    lines.append("")
-    lines.append("## 详细结果")
-    lines.append("")
-    for item in results:
-        lines.append(f"### {item['test_id']} | {item['strategy']} | top_k={item['top_k']}")
-        lines.append(f"- 类别：{item['category']} | 难度：{item['difficulty']}")
-        lines.append(f"- 问题：{item['question']}")
-        lines.append(f"- 标准答案：{item['gold_answer']}")
-        lines.append(f"- 模型答案：{item['answer']}")
-        lines.append(f"- 引用 chunks：{', '.join(item['cited_chunk_ids']) if item['cited_chunk_ids'] else '无'}")
-        lines.append(f"- 召回块数：{item['retrieved_count']}")
-        lines.append(f"- exact_match：{item['exact_match']}")
-        lines.append(f"- keyword_hits：{item['keyword_hits']}")
-        lines.append(f"- gold_core：{item['contains_gold_core']}")
-        if item.get("follow_up_questions"):
-            lines.append(f"- follow_up_questions：{' | '.join(map(str, item['follow_up_questions']))}")
-        if item.get("error"):
-            lines.append(f"- error：{item['error']}")
-        lines.append("")
-
+    lines += ["", "## 详细结果", ""]
+    for item in results[:30]:
+        lines += [
+            f"### {item['paper_id']} | {item['split']} | {item['question_id']} | {item['strategy']} | top_k={item['top_k']}",
+            f"- 问题: {item['question']}",
+            f"- 标准答案: {item['gold_answer']}",
+            f"- 模型答案: {item['answer']}",
+            f"- 引用 chunks: {', '.join(item['cited_chunk_ids']) if item['cited_chunk_ids'] else '无'}",
+            f"- 召回块数: {item['retrieved_count']}",
+            f"- exact_match: {item['exact_match']}",
+            f"- keyword_recall: {item['keyword_recall']}",
+            f"- token_recall: {item['token_recall']}",
+            f"- retrieval_hit: {item['retrieval_hit']}",
+            f"- evidence_hit: {item['evidence_hit']}",
+            f"- evidence_recall: {item['evidence_recall']}",
+            f"- cited_support_rate: {item['cited_support_rate']}",
+            f"- llm_error: {item.get('llm_error') or '无'}",
+            "",
+        ]
     return "\n".join(lines)
 
 
-def main() -> None:
-    log("Starting RAG evaluation script")
-    testset = load_testset()
-    project_dir, doc = resolve_project_and_doc(testset)
-    log(f"Using strategies: {', '.join(strategy['name'] for strategy in STRATEGIES)}")
-    log(f"Using top_k values: {', '.join(map(str, TOP_KS))}")
+def collect_cases(papers: Sequence[Dict[str, Any]], max_cases: int) -> List[Dict[str, Any]]:
+    cases: List[Dict[str, Any]] = []
+    for paper in papers:
+        if not isinstance(paper, dict):
+            continue
+        qas = paper.get("qas") if isinstance(paper.get("qas"), list) else []
+        for qa in qas:
+            if not isinstance(qa, dict):
+                continue
+            cases.append({"paper": paper, "qa": qa})
+            if len(cases) >= max_cases:
+                return cases
+    return cases
 
+
+def run_single_case(paper: Dict[str, Any], qa: Dict[str, Any], strategy: Dict[str, Any], top_k: int) -> Dict[str, Any]:
+    chunks = split_chunks_for_strategy(paper, strategy)
+    question = str(qa.get("question") or "").strip()
+    gold_answer = str((qa.get("gold_answers") or [""])[0] or "").strip()
+    evidence_chunk_ids = qa.get("evidence_chunk_ids") if isinstance(qa.get("evidence_chunk_ids"), list) else []
+    retrieved = retrieve_chunks(chunks, question, top_k)
+    retrieved_chunk_ids = expand_retrieved_chunk_ids(retrieved)
+    llm_result = build_model_answer(question, retrieved, paper)
+    cited_chunk_ids = [
+        str(x).strip()
+        for x in (llm_result.get("cited_chunk_ids") if isinstance(llm_result.get("cited_chunk_ids"), list) else [])
+        if str(x).strip()
+    ]
+    answer = str(llm_result.get("answer") or "").strip()
+    metrics = compute_score(
+        answer,
+        gold_answer,
+        qa.get("keywords") or [],
+        cited_chunk_ids,
+        evidence_chunk_ids,
+        retrieved_chunk_ids,
+    )
+    return {
+        "split": paper.get("source_split"),
+        "paper_id": paper.get("paper_id"),
+        "title": paper.get("title"),
+        "question_id": qa.get("question_id"),
+        "question": question,
+        "gold_answer": gold_answer,
+        "answer": answer,
+        "strategy": strategy["name"],
+        "top_k": top_k,
+        "retrieved_count": len(retrieved),
+        "cited_chunk_ids": cited_chunk_ids,
+        "evidence_chunk_ids": evidence_chunk_ids,
+        "llm_error": str(llm_result.get("llm_error") or ""),
+        **metrics,
+    }
+
+
+def main() -> None:
+    if not QASPER_AFTER_DIR.is_dir():
+        raise FileNotFoundError(f"Missing Qasper_after directory: {QASPER_AFTER_DIR}")
+
+    max_items = int(os.getenv("RAG_EVAL_MAX_ITEMS", str(DEFAULT_MAX_ITEMS)) or DEFAULT_MAX_ITEMS)
+    max_items = max(1, max_items)
+    train_max_items = int(os.getenv("RAG_EVAL_TRAIN_MAX_ITEMS", str(TRAIN_MAX_ITEMS)) or TRAIN_MAX_ITEMS)
+    train_max_items = max(1, min(train_max_items, TRAIN_MAX_ITEMS))
+    max_cases = int(os.getenv("RAG_EVAL_MAX_CASES", str(DEFAULT_MAX_CASES)) or DEFAULT_MAX_CASES)
+    max_cases = max(1, max_cases)
+
+    log(f"Loading Qasper_after from {QASPER_AFTER_DIR}")
+    log(f"Using strategies: {', '.join(s['name'] for s in STRATEGIES)}")
+    log(f"Using top_k values: {', '.join(map(str, TOP_KS))}")
+    log(f"Using max papers per split: {max_items}")
+    log(f"Using train split max papers: {train_max_items}")
+    log(f"Using max QA cases per strategy/top_k: {max_cases}")
+    log(f"Using answer language: {ANSWER_LANGUAGE}")
+
+    all_papers: List[Dict[str, Any]] = []
+    for split in SPLITS:
+        data = load_split(split)
+        papers = data.get("papers") if isinstance(data.get("papers"), list) else []
+        limit = train_max_items if split == "train" else max_items
+        all_papers.extend([p for p in papers if isinstance(p, dict)][:limit])
+
+    cases = collect_cases(all_papers, max_cases)
     all_results: List[Dict[str, Any]] = []
-    total_runs = len(STRATEGIES) * len(TOP_KS) * len(testset.get("items") or [])
+    total_runs = len(cases) * len(STRATEGIES) * len(TOP_KS)
     run_idx = 0
+
     for strategy in STRATEGIES:
         log(f"=== Strategy start: {strategy['name']} ===")
         for top_k in TOP_KS:
             log(f"--- top_k={top_k} ---")
-            for item in testset.get("items") or []:
-                if not isinstance(item, dict):
-                    continue
+            for case in cases:
+                paper = case["paper"]
+                qa = case["qa"]
                 run_idx += 1
-                log(f"Progress {run_idx}/{total_runs}")
+                log(f"Progress {run_idx}/{max(total_runs, 1)} | {paper.get('paper_id')} | {qa.get('question_id')}")
                 try:
-                    result = run_case(project_dir, doc, item, strategy, top_k)
+                    result = run_single_case(paper, qa, strategy, top_k)
                     all_results.append(result)
                 except Exception as exc:
-                    log(f"Recorded failure for {item.get('id')}: {exc}")
                     all_results.append(
                         {
-                            "test_id": item.get("id"),
-                            "category": item.get("category"),
-                            "difficulty": item.get("difficulty"),
-                            "question": item.get("question"),
-                            "gold_answer": item.get("gold_answer"),
+                            "split": paper.get("source_split"),
+                            "paper_id": paper.get("paper_id"),
+                            "title": paper.get("title"),
+                            "question_id": qa.get("question_id"),
+                            "question": qa.get("question"),
+                            "gold_answer": (qa.get("gold_answers") or [""])[0] if isinstance(qa.get("gold_answers"), list) else "",
                             "answer": "",
-                            "cited_chunk_ids": [],
-                            "follow_up_questions": [],
-                            "retrieved_count": 0,
                             "strategy": strategy["name"],
                             "top_k": top_k,
+                            "retrieved_count": 0,
+                            "cited_chunk_ids": [],
+                            "evidence_chunk_ids": qa.get("evidence_chunk_ids") if isinstance(qa.get("evidence_chunk_ids"), list) else [],
                             "exact_match": False,
                             "keyword_hits": 0,
-                            "contains_gold_core": False,
+                            "keyword_recall": 0.0,
+                            "token_recall": 0.0,
+                            "retrieval_hit": False,
+                            "evidence_hit": False,
+                            "evidence_recall": 0.0,
+                            "cited_support_rate": 0.0,
+                            "llm_error": "",
                             "error": str(exc),
                         }
                     )
 
-                # 逐步落盘，避免最后 JSON 序列化失败导致全部结果丢失
-                partial_payload = {
-                    "summary": summarize_results(all_results),
-                    "results": all_results,
-                }
-                with open(REPORT_JSON_PATH.with_suffix(".partial.json"), "w", encoding="utf-8") as f:
-                    json.dump(partial_payload, f, ensure_ascii=False, indent=2)
+                with PARTIAL_JSON_PATH.open("w", encoding="utf-8") as f:
+                    json.dump({"summary": summarize_results(all_results), "results": all_results}, f, ensure_ascii=False, indent=2)
 
     summary = summarize_results(all_results)
-    report_md = render_markdown(testset, all_results, summary)
-
-    with open(REPORT_JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump({"summary": summary, "results": all_results}, f, ensure_ascii=False, indent=2)
-    with open(REPORT_MD_PATH, "w", encoding="utf-8") as f:
-        f.write(report_md)
+    REPORT_JSON_PATH.write_text(json.dumps({"summary": summary, "results": all_results}, ensure_ascii=False, indent=2), encoding="utf-8")
+    REPORT_MD_PATH.write_text(render_markdown(summary, all_results, max_cases), encoding="utf-8")
 
     log(f"Saved JSON report to: {REPORT_JSON_PATH}")
     log(f"Saved MD report to: {REPORT_MD_PATH}")
-    log(f"Saved partial JSON report to: {REPORT_JSON_PATH.with_suffix('.partial.json')}")
+    log(f"Saved partial JSON report to: {PARTIAL_JSON_PATH}")
 
 
 if __name__ == "__main__":

@@ -72,6 +72,19 @@
             <button id="btnParseOcr" class="btn btn-ghost" type="button" disabled title="请先选择 PDF">
               解析
             </button>
+            <div id="docProcessProgress" class="doc-process-progress" hidden>
+              <div class="doc-process-track">
+                <div id="docProcessFill" class="doc-process-fill"></div>
+              </div>
+              <div class="doc-process-stages" aria-live="polite">
+                <button id="stageOcr" class="doc-process-stage" type="button" data-view-mode="original">OCR</button>
+                <button id="stageChunk" class="doc-process-stage" type="button" data-view-mode="parsed">CHUNK</button>
+                <button id="stageLad" class="doc-process-stage" type="button" data-view-mode="graph">LAD</button>
+              </div>
+            </div>
+            <button id="btnRetrievalMode" class="btn btn-retrieval-mode" type="button" data-mode="rag" title="切换检索模式">
+              <span class="retrieval-mode-label">RAG</span>
+            </button>
             <button id="btnUpload" class="btn btn-ghost" type="button" title="上传 PDF">
               Upload
             </button>

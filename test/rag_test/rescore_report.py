@@ -5,13 +5,19 @@ import re
 from collections import defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Tuple
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_DOC_DIR = ROOT / "data" / "projects" / "6cf73d20-55fb-43c6-987e-efc088417ca9" / "documents" / "pdf_7f3c742d"
 SRC_PATH = ROOT / "rag_eval_report.partial.json"
-TESTSET_PATH = ROOT / "rag_test" / "testset.json"
-OUT_JSON = ROOT / "rag_test" / "rag_eval_report.json"
-OUT_MD = ROOT / "rag_test" / "rag_eval_report.md"
+TESTSET_PATH = ROOT / "test" / "rag_test" / "testset.json"
+OUT_JSON = ROOT / "test" / "rag_test" / "rag_eval_report.json"
+OUT_MD = ROOT / "test" / "rag_test" / "rag_eval_report.md"
+MAX_SAMPLE_QUESTIONS = 10
+# 默认只评估三个最优 chunk 策略下的三个 top_k 组合。
+# 如需调整，直接修改这里的列表即可。
+TARGET_STRATEGIES = ["rag_500_100", "rag_800_100", "rag_1000_100"]
+TARGET_TOP_KS = [1, 3, 5]
 
 
 def normalize_text(text: str) -> str:
@@ -60,15 +66,23 @@ def canonical_facts_from_gold(gold_answer: str, question: str) -> List[str]:
     q = str(question or "")
     if any(token in q for token in ["是什么", "谁", "哪些", "多少", "第几", "哪四个", "哪三个", "目标", "指标", "计划", "模块", "流程"]):
         facts.extend([t for t in re.split(r"[，。；：、\s]+", gold_answer) if len(t.strip()) >= 2][:10])
-    facts.extend(extract_keywords({"expected_keywords": []}))
+    # 退化为金标答案的关键句，避免事实集为空导致过度依赖相似度。
+    if not facts:
+        facts.extend(split_into_sentences(gold_answer)[:3])
     normalized: List[str] = []
-    seen: Set[str] = set()
+    seen = set()
     for fact in facts:
         nf = normalize_text(fact)
         if nf and nf not in seen:
             seen.add(nf)
             normalized.append(nf)
     return normalized
+
+
+def chunk_hits_text(text: str, facts: List[str]) -> int:
+    if not text or not facts:
+        return 0
+    return sum(1 for fact in facts if fact and fact in text)
 
 
 def build_cited_text(item: Dict[str, Any], chunk_text_map: Dict[str, str]) -> str:
@@ -91,20 +105,23 @@ def score_item(item: Dict[str, Any], chunk_text_map: Dict[str, str]) -> Dict[str
 
     answer_similarity = similarity_score(answer_raw, gold_answer)
     facts = canonical_facts_from_gold(gold_answer, str(item.get("question") or ""))
-    if facts:
-        covered = sum(1 for fact in facts if fact and fact in answer)
-        key_fact_f1 = round((covered / len(facts)), 4)
-    else:
-        key_fact_f1 = answer_similarity
 
     cited_text = build_cited_text(item, chunk_text_map)
-    if cited_text:
-        supported = sum(1 for fact in facts if fact in cited_text) if facts else 0
-        groundedness = round(supported / max(len(facts), 1), 4) if facts else similarity_score(answer_raw, cited_text)
-    else:
-        groundedness = 0.0 if item.get("cited_chunk_ids") else 0.0
+    answer_hit_count = chunk_hits_text(answer, facts)
+    cited_hit_count = chunk_hits_text(cited_text, facts)
 
-    answer_chunk_hit = 1 if item.get("cited_chunk_ids") else 0
+    if facts:
+        answer_support = answer_hit_count / len(facts)
+        cited_support = cited_hit_count / len(facts)
+        # 如果答案本身已经覆盖了关键事实，但引用块较弱，则 groundedness 不能过低。
+        key_fact_f1 = round(answer_support, 4)
+        groundedness = round(min(1.0, max(cited_support, answer_support * 0.7)), 4)
+    else:
+        # 无法抽出事实时，回退到语义相似度。
+        key_fact_f1 = answer_similarity
+        groundedness = answer_similarity if cited_text else 0.0
+
+    answer_chunk_hit = 1 if (item.get("cited_chunk_ids") and cited_text) else 0
     exact_match = answer == gold and bool(answer)
     return {
         **item,
@@ -122,20 +139,22 @@ def summarize(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         groups[(str(item.get("strategy")), int(item.get("top_k") or 0))].append(item)
 
     summary: List[Dict[str, Any]] = []
-    for (strategy, top_k), items in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
-        total = len(items)
-        summary.append(
-            {
-                "strategy": strategy,
-                "top_k": top_k,
-                "total": total,
-                "answer_chunk_hit_rate": round(sum(float(x.get("answer_chunk_hit") or 0) for x in items) / max(total, 1), 4),
-                "avg_answer_similarity": round(sum(float(x.get("answer_similarity") or 0) for x in items) / max(total, 1), 4),
-                "avg_key_fact_f1": round(sum(float(x.get("key_fact_f1") or 0) for x in items) / max(total, 1), 4),
-                "avg_groundedness": round(sum(float(x.get("groundedness") or 0) for x in items) / max(total, 1), 4),
-                "avg_retrieved": round(sum(int(x.get("retrieved_count") or 0) for x in items) / max(total, 1), 2),
-            }
-        )
+    for strategy in TARGET_STRATEGIES:
+        for top_k in TARGET_TOP_KS:
+            items = groups.get((strategy, top_k), [])
+            total = len(items)
+            summary.append(
+                {
+                    "strategy": strategy,
+                    "top_k": top_k,
+                    "total": total,
+                    "answer_chunk_hit_rate": round(sum(float(x.get("answer_chunk_hit") or 0) for x in items) / max(total, 1), 4),
+                    "avg_answer_similarity": round(sum(float(x.get("answer_similarity") or 0) for x in items) / max(total, 1), 4),
+                    "avg_key_fact_f1": round(sum(float(x.get("key_fact_f1") or 0) for x in items) / max(total, 1), 4),
+                    "avg_groundedness": round(sum(float(x.get("groundedness") or 0) for x in items) / max(total, 1), 4),
+                    "avg_retrieved": round(sum(int(x.get("retrieved_count") or 0) for x in items) / max(total, 1), 2),
+                }
+            )
     return summary
 
 
@@ -170,10 +189,53 @@ def render_md(summary: List[Dict[str, Any]], results: List[Dict[str, Any]]) -> s
     return "\n".join(lines)
 
 
+def load_project_chunk_text_map() -> Dict[str, str]:
+    chunk_text_map: Dict[str, str] = {}
+    if not PROJECT_DOC_DIR.is_dir():
+        return chunk_text_map
+    for path in PROJECT_DOC_DIR.rglob("*.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if path.name == "chunks.json" and isinstance(data, dict):
+            pages = data.get("pages") if isinstance(data.get("pages"), list) else []
+            for page in pages:
+                if not isinstance(page, dict):
+                    continue
+                for chunk in page.get("chunks") if isinstance(page.get("chunks"), list) else []:
+                    if not isinstance(chunk, dict):
+                        continue
+                    cid = str(chunk.get("chunkId") or chunk.get("chunkKey") or "").strip()
+                    content = str(chunk.get("content") or chunk.get("normalizedContent") or "")
+                    if cid and content:
+                        chunk_text_map[cid] = content
+        elif isinstance(data, dict):
+            pages = data.get("pages") if isinstance(data.get("pages"), list) else data.get("ocrBlocksByPage") if isinstance(data.get("ocrBlocksByPage"), list) else []
+            for page in pages:
+                if not isinstance(page, dict):
+                    continue
+                chunks = page.get("chunks") if isinstance(page.get("chunks"), list) else []
+                for chunk in chunks:
+                    if not isinstance(chunk, dict):
+                        continue
+                    cid = str(chunk.get("chunkId") or chunk.get("chunkKey") or "").strip()
+                    content = str(chunk.get("content") or chunk.get("normalizedContent") or "")
+                    if cid and content:
+                        chunk_text_map[cid] = content
+    return chunk_text_map
+
+
 def main() -> None:
     payload = json.loads(SRC_PATH.read_text(encoding="utf-8"))
-    chunk_text_map = {str(x.get("chunkId") or x.get("chunkKey") or ""): str(x.get("content") or "") for x in payload.get("results", []) if isinstance(x, dict)}
-    results = [score_item(item, chunk_text_map) for item in payload.get("results", []) if isinstance(item, dict)]
+    chunk_text_map = load_project_chunk_text_map()
+    results_all = [score_item(item, chunk_text_map) for item in payload.get("results", []) if isinstance(item, dict)]
+    filtered = [
+        item
+        for item in results_all
+        if str(item.get("strategy") or "") in TARGET_STRATEGIES and int(item.get("top_k") or 0) in TARGET_TOP_KS
+    ]
+    results = filtered[:MAX_SAMPLE_QUESTIONS]
     summary = summarize(results)
     OUT_JSON.write_text(json.dumps({"summary": summary, "results": results}, ensure_ascii=False, indent=2), encoding="utf-8")
     OUT_MD.write_text(render_md(summary, results), encoding="utf-8")

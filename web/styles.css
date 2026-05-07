@@ -163,6 +163,91 @@ body {
   align-items: center;
 }
 
+.doc-process-progress {
+  width: 330px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-btn);
+  background: var(--surface);
+  --view-index: 0;
+}
+
+.doc-process-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6e9ef;
+}
+
+.doc-process-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4a6fa5, #14b8a6);
+  transition: width 220ms ease, transform 220ms ease;
+}
+
+.doc-process-progress.is-view-switcher {
+  cursor: pointer;
+}
+
+.doc-process-progress.is-view-switcher .doc-process-track {
+  height: 6px;
+}
+
+.doc-process-progress.is-view-switcher .doc-process-fill {
+  width: calc(100% / 3) !important;
+  transform: translateX(calc(var(--view-index) * 100%));
+  background: linear-gradient(90deg, #4a6fa5, #14b8a6);
+}
+
+.doc-process-stages {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.doc-process-stage {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  text-transform: inherit;
+}
+
+.doc-process-progress:not(.is-view-switcher) .doc-process-stage {
+  pointer-events: none;
+}
+
+.doc-process-progress.is-view-switcher .doc-process-stage {
+  flex: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.doc-process-progress.is-view-switcher .doc-process-stage.is-active {
+  color: var(--accent);
+}
+
+.doc-process-stage.is-running {
+  color: var(--accent);
+}
+
+.doc-process-stage.is-done {
+  color: #0f766e;
+}
+
+.doc-process-stage.is-error {
+  color: #b91c1c;
+}
+
 /* —— 按钮 —— */
 .btn {
   border: 1px solid var(--border-subtle);
@@ -303,6 +388,39 @@ body {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.btn-retrieval-mode {
+  padding: 4px 14px;
+  min-height: 26px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  min-width: 52px;
+  text-align: center;
+}
+
+.btn-retrieval-mode[data-mode="rag"] {
+  background: var(--accent-soft);
+  border-color: rgba(74, 111, 165, 0.28);
+  color: var(--accent);
+}
+
+.btn-retrieval-mode[data-mode="lad"] {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #059669;
+}
+
+.btn-retrieval-mode:hover {
+  opacity: 0.85;
 }
 
 .searchbox {
@@ -615,7 +733,8 @@ body {
 }
 
 .center-view.is-active {
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 .viewer-panel {
@@ -761,6 +880,7 @@ body {
   display: flex;
   justify-content: center;
   padding-bottom: 16px;
+  width: 100%;
 }
 
 .pdf-page-section .page-section-head {
@@ -769,6 +889,7 @@ body {
 
 .pdf-page-img-wrap {
   width: calc(100% / var(--zoom));
+  min-width: 100%;
   margin: 0 auto;
   transform: scale(var(--zoom));
   transform-origin: top center;
@@ -1653,6 +1774,17 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.lad-graph-frame {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: #eef2f3;
+  box-shadow: var(--shadow-card);
 }
 
 @media (max-width: 720px) {

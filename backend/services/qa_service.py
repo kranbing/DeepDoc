@@ -30,6 +30,34 @@ def chunk_payload_to_prompt_item(item: Dict[str, Any]) -> Optional[Dict[str, Any
         "bboxPx": item.get("bboxPx") if isinstance(item.get("bboxPx"), dict) else {},
         "bboxNorm": item.get("bboxNorm") if isinstance(item.get("bboxNorm"), dict) else {},
         "charCount": int(item.get("charCount") or 0),
+        "blockType": str(item.get("blockType") or "").strip(),
+        "sectionId": str(item.get("sectionId") or "").strip(),
+        "sectionTitle": str(item.get("sectionTitle") or "").strip(),
+        "sectionLevel": item.get("sectionLevel"),
+        "sectionPath": item.get("sectionPath") if isinstance(item.get("sectionPath"), list) else [],
+        "sectionPathText": str(item.get("sectionPathText") or "").strip(),
+        "headingText": str(item.get("headingText") or "").strip(),
+        "isHeading": bool(item.get("isHeading")),
+        "structureRole": str(item.get("structureRole") or "").strip(),
+        "prevGlobalChunkId": item.get("prevGlobalChunkId"),
+        "nextGlobalChunkId": item.get("nextGlobalChunkId"),
+        "prevSamePageChunkId": item.get("prevSamePageChunkId"),
+        "nextSamePageChunkId": item.get("nextSamePageChunkId"),
+        "sourceSectionIds": [
+            str(v).strip()
+            for v in (item.get("sourceSectionIds") if isinstance(item.get("sourceSectionIds"), list) else [])
+            if str(v).strip()
+        ],
+        "sourceSectionPathTexts": [
+            str(v).strip()
+            for v in (item.get("sourceSectionPathTexts") if isinstance(item.get("sourceSectionPathTexts"), list) else [])
+            if str(v).strip()
+        ],
+        "sourceBlockTypes": [
+            str(v).strip()
+            for v in (item.get("sourceBlockTypes") if isinstance(item.get("sourceBlockTypes"), list) else [])
+            if str(v).strip()
+        ],
         "score": float(item.get("score")) if isinstance(item.get("score"), (int, float)) else None,
         "sourceChunkIds": [
             str(v).strip()
@@ -353,8 +381,25 @@ def _format_chunks_for_prompt(items: List[Dict[str, Any]], heading: str) -> str:
         cid = chunk_key(item)
         page_no = item.get("pageNo")
         label = str(item.get("label") or "chunk")
+        meta_parts: List[str] = []
+        section_path = str(item.get("sectionPathText") or "").strip()
+        if not section_path:
+            section_paths = item.get("sourceSectionPathTexts") if isinstance(item.get("sourceSectionPathTexts"), list) else []
+            section_path = " | ".join(str(value).strip() for value in section_paths[:3] if str(value).strip())
+        if section_path:
+            meta_parts.append(f"section_path={section_path}")
+        block_type = str(item.get("blockType") or "").strip()
+        if not block_type:
+            block_types = item.get("sourceBlockTypes") if isinstance(item.get("sourceBlockTypes"), list) else []
+            block_type = ",".join(str(value).strip() for value in block_types[:5] if str(value).strip())
+        if block_type:
+            meta_parts.append(f"block_type={block_type}")
+        heading_text = str(item.get("headingText") or "").strip()
+        if heading_text:
+            meta_parts.append(f"heading={heading_text}")
+        meta = f" {' '.join(meta_parts)}" if meta_parts else ""
         content = str(item.get("content") or "").strip() or "(empty chunk)"
-        lines.append(f"[{cid}] page={page_no} label={label}\n{content}")
+        lines.append(f"[{cid}] page={page_no} label={label}{meta}\n{content}")
     return "\n\n".join(lines) + "\n"
 
 

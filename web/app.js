@@ -38,6 +38,7 @@ const state = {
   qaChunkContext: null,
   vectorSearchResults: [],
   vectorIndexStatus: null,
+  processPollTimers: {},
   chatHistoryVisible: false,
   citedChunkKeys: [],
   chunkPress: {
@@ -48,6 +49,7 @@ const state = {
     pointerId: null,
     mode: null,
   },
+  retrievalMode: "rag",
 };
 
 let suppressScrollSync = false;
@@ -932,38 +934,94 @@ function isPdfParsedView(doc) {
 
 function updateParseOcrButton() {
   const btn = $("#btnParseOcr");
+  const progress = $("#docProcessProgress");
   if (!btn) return;
   const doc = getSelectedDoc();
   const proj = state.projectsCatalog.find((p) => p.id === state.currentProjectId);
   const disk = proj?.storage === "disk" && state.appPhase === "workspace";
   if (!doc?.isPdf || !disk) {
     btn.disabled = true;
+    btn.hidden = false;
+    if (progress) progress.hidden = true;
     btn.textContent = "解析";
     btn.title = "请先选择本地项目中的 PDF 文档";
     return;
   }
-  btn.disabled = false;
   const hasChunkPayload =
     Array.isArray(doc.ocrBlocksByPage) &&
     doc.ocrBlocksByPage.length > 0 &&
     doc.ocrBlocksByPage.every((pg) => Array.isArray(pg?.chunks));
-  if (!doc.ocrParsed) {
-    btn.textContent = "解析";
-    btn.title = "GLM-OCR 解析（首次），每页生成版面可视化（框+标签）";
+  const processStatus = doc.processStatus || {};
+  renderProcessStatus(processStatus);
+  if (processStatus.status === "running") {
+    btn.hidden = true;
+    if (progress) progress.hidden = false;
     return;
   }
-  if (!hasChunkPayload) {
-    btn.textContent = "瑙ｆ瀽";
-    btn.title = "补齐 chunk 框数据并切换为解析视图";
+  if (doc.ocrParsed && hasChunkPayload) {
+    btn.hidden = true;
+    if (progress) progress.hidden = false;
+    renderViewSwitcher(doc);
     return;
   }
-  if (doc.pdfViewMode === "parsed") {
-    btn.textContent = "原文";
-    btn.title = "切换为整页原图";
-  } else {
-    btn.textContent = "解析";
-    btn.title = "切换为版面可视化";
+  btn.hidden = false;
+  if (progress) progress.hidden = true;
+  btn.disabled = false;
+  btn.textContent = "解析";
+  btn.title = "Start OCR / chunk / LAD processing";
+}
+
+function renderProcessStatus(processStatus) {
+  const wrapper = $("#docProcessProgress");
+  if (wrapper) {
+    wrapper.classList.remove("is-view-switcher");
+    wrapper.style.setProperty("--view-index", "0");
   }
+  const fill = $("#docProcessFill");
+  const progress = Math.max(0, Math.min(100, Number(processStatus?.progress || 0)));
+  if (fill) fill.style.width = `${progress}%`;
+  const stages = processStatus?.stages || {};
+  const labels = { ocr: "OCR", chunk: "CHUNK", lad: "LAD" };
+  [
+    ["ocr", $("#stageOcr")],
+    ["chunk", $("#stageChunk")],
+    ["lad", $("#stageLad")],
+  ].forEach(([key, el]) => {
+    if (!el) return;
+    const status = stages?.[key]?.status || "pending";
+    el.textContent = labels[key];
+    el.classList.toggle("is-running", status === "running");
+    el.classList.toggle("is-done", status === "done");
+    el.classList.toggle("is-error", status === "error");
+    el.classList.remove("is-active");
+  });
+}
+
+function renderViewSwitcher(doc) {
+  const wrapper = $("#docProcessProgress");
+  const mode = doc?.pdfViewMode || "original";
+  const order = ["original", "parsed", "graph"];
+  const labels = {
+    original: "Original",
+    parsed: "Parsed",
+    graph: "Graph",
+  };
+  if (wrapper) {
+    wrapper.classList.add("is-view-switcher");
+    wrapper.style.setProperty("--view-index", String(Math.max(0, order.indexOf(mode))));
+  }
+  const fill = $("#docProcessFill");
+  if (fill) fill.style.width = "33.3333%";
+  [
+    ["original", $("#stageOcr")],
+    ["parsed", $("#stageChunk")],
+    ["graph", $("#stageLad")],
+  ].forEach(([key, button]) => {
+    if (!button) return;
+    button.textContent = labels[key];
+    button.classList.remove("is-running", "is-done", "is-error");
+    button.classList.toggle("is-active", mode === key);
+  });
 }
 
 // 兜底示例数据：即使你直接双击打开 index.html（没有跑本地 server）也能正常展示。
@@ -1544,7 +1602,13 @@ async function handleParseOcrClick() {
     }
     const data = await res.json();
     const updated = data.doc;
-  if (updated) {
+    if (data.processStatus) {
+      mergeProcessedDoc(updated, data.processStatus);
+      pollDocProcessStatus(doc.id);
+      updateParseOcrButton();
+      return;
+    }
+    if (updated) {
       const idx = state.docs.findIndex((d) => d.id === doc.id);
       if (idx >= 0) {
         state.docs[idx] = { ...state.docs[idx], ...updated };
@@ -1566,6 +1630,105 @@ async function handleParseOcrClick() {
   } finally {
     updateParseOcrButton();
   }
+}
+
+async function startProcessingDoc(docId) {
+  if (!docId || !isDiskWorkspaceProject()) return;
+  try {
+    const data = await startDocProcessApi(docId);
+    mergeProcessedDoc(data.doc, data.processStatus);
+    pollDocProcessStatus(docId);
+  } catch (err) {
+    console.warn("[app] start process", err);
+    alert(err instanceof Error ? err.message : "启动处理失败");
+  }
+}
+
+function mergeProcessedDoc(updatedDoc, processStatus) {
+  const docId = updatedDoc?.id || state.selectedDocId;
+  if (!docId) return null;
+  const idx = state.docs.findIndex((d) => d.id === docId);
+  if (idx < 0) return null;
+  const before = state.docs[idx];
+  const beforeParsed = Boolean(before?.ocrParsed);
+  const beforeMode = before?.pdfViewMode || "";
+  const beforeChunkReady =
+    Array.isArray(before?.ocrBlocksByPage) &&
+    before.ocrBlocksByPage.length > 0 &&
+    before.ocrBlocksByPage.every((pg) => Array.isArray(pg?.chunks));
+  state.docs[idx] = {
+    ...before,
+    ...(updatedDoc || {}),
+    ...(processStatus ? { processStatus } : {}),
+  };
+  const doc = state.docs[idx];
+  if (doc.ocrParsed && doc.pdfViewMode !== "original" && doc.pdfViewMode !== "graph") {
+    doc.pdfViewMode = "parsed";
+  }
+  const afterMode = doc.pdfViewMode || "";
+  const afterChunkReady =
+    Array.isArray(doc?.ocrBlocksByPage) &&
+    doc.ocrBlocksByPage.length > 0 &&
+    doc.ocrBlocksByPage.every((pg) => Array.isArray(pg?.chunks));
+  state.filteredDocs = state.docs.slice();
+  return {
+    doc,
+    becameParsed: !beforeParsed && Boolean(doc.ocrParsed),
+    becameChunkReady: !beforeChunkReady && afterChunkReady,
+    viewModeChanged: beforeMode !== afterMode,
+  };
+}
+
+function pollDocProcessStatus(docId) {
+  if (!docId || state.processPollTimers[docId]) return;
+  const tick = async () => {
+    try {
+      const data = await fetchDocProcessStatusApi(docId);
+      const mergeInfo = mergeProcessedDoc(data.doc, data.processStatus);
+      const doc = mergeInfo?.doc || state.docs.find((d) => d.id === docId);
+      if (docId === state.selectedDocId) {
+        const shouldRenderDocument =
+          Boolean(mergeInfo?.becameParsed || mergeInfo?.becameChunkReady || mergeInfo?.viewModeChanged);
+        if (shouldRenderDocument) {
+          renderDocHeader();
+          renderDocumentContinuous();
+          renderFileList();
+        } else {
+          updateParseOcrButton();
+        }
+        if (doc?.ocrParsed && shouldRenderDocument) {
+          void refreshChunkExplorerForDoc(docId, { keepPage: true }).catch((err) => console.warn("[app] refresh chunks", err));
+        }
+      }
+      const status = data.processStatus?.status;
+      if (status === "done" || status === "error") {
+        clearInterval(state.processPollTimers[docId]);
+        delete state.processPollTimers[docId];
+        await saveWorkspaceToDisk();
+      }
+    } catch (err) {
+      console.warn("[app] poll process", err);
+      clearInterval(state.processPollTimers[docId]);
+      delete state.processPollTimers[docId];
+    }
+  };
+  state.processPollTimers[docId] = setInterval(tick, 1600);
+  void tick();
+}
+
+function setDocumentPdfViewMode(mode) {
+  const doc = getSelectedDoc();
+  if (!doc?.isPdf) return;
+  doc.pdfViewMode = mode;
+  clearChunkSelection();
+  state.activeChunkDetail = null;
+  state.activeChunkNeighbors = null;
+  state.qaChunkContext = null;
+  state.currentPage = 1;
+  renderDocHeader();
+  renderDocumentContinuous();
+  updateParseOcrButton();
+  void saveWorkspaceToDisk();
 }
 
 async function deleteDocument(docId) {
@@ -1663,6 +1826,10 @@ function setSelectedDoc(docId, { keepMessages = false } = {}) {
   if (isDiskWorkspaceProject() && docId) {
     void loadDocConversations(docId, { render: !keepMessages });
     void refreshChunkExplorerForDoc(docId, { keepPage: false }).catch((err) => console.warn("[app] load chunks", err));
+    const doc = state.docs.find((d) => d.id === docId);
+    if (doc?.processStatus?.status === "running") {
+      pollDocProcessStatus(docId);
+    }
   }
   if (state.viewMode === "document") {
     renderDocHeader();
@@ -1687,8 +1854,9 @@ function renderDocHeader() {
   $("#viewerHint").style.display = "none";
   $("#docName").textContent = doc.name;
   if (doc.isPdf && doc.ocrParsed) {
+    const viewLabel = doc.pdfViewMode === "graph" ? "图谱视图 · " : doc.pdfViewMode === "parsed" ? "解析视图 · " : "原文视图 · ";
     $("#docSubmeta").textContent =
-      (doc.pdfViewMode === "parsed" ? "解析视图 · " : "原文视图 · ") +
+      viewLabel +
       (doc.docSummary || `Created: ${formatDate(doc.createdAt)}`);
   } else {
     $("#docSubmeta").textContent = doc.docSummary || `Created: ${formatDate(doc.createdAt)}`;
@@ -1736,6 +1904,20 @@ function renderDocumentContinuous() {
   document.documentElement.style.setProperty("--zoom", String(state.zoom));
 
   if (doc && doc.isPdf) {
+    if (doc.pdfViewMode === "graph") {
+      pagesWrap.innerHTML = "";
+      delete pagesWrap.dataset.pdfDocId;
+      delete pagesWrap.dataset.pdfViewKey;
+      const frame = document.createElement("iframe");
+      frame.className = "lad-graph-frame";
+      frame.title = "LAD graph";
+      frame.src = `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(doc.id)}/lad-graph.html`;
+      pagesWrap.appendChild(frame);
+      $("#pageTotal").textContent = "/ 1";
+      $("#pageNum").value = "1";
+      renderViewSwitcher(doc);
+      return;
+    }
     const images = doc.pdfPageImages;
     const pageCount =
       doc.pdfNumPages ||
@@ -2165,7 +2347,7 @@ async function askSelectionApi(docId, question) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, chunkContext }),
+      body: JSON.stringify({ question, chunkContext, retrievalMode: state.retrievalMode }),
     }
   );
   const data = await res.json().catch(() => ({}));
@@ -2217,6 +2399,30 @@ async function fetchVectorIndexStatusApi() {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(typeof data.detail === "string" ? data.detail : `加载索引状态失败 (${res.status})`);
+  }
+  return data;
+}
+
+async function startDocProcessApi(docId) {
+  const res = await fetch(
+    `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}/ocr-parse`,
+    { method: "POST" }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(typeof data.detail === "string" ? data.detail : `启动处理失败 (${res.status})`);
+  }
+  return data;
+}
+
+async function fetchDocProcessStatusApi(docId) {
+  const res = await fetch(
+    `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(docId)}/process-status`,
+    { cache: "no-store" }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(typeof data.detail === "string" ? data.detail : `获取处理状态失败 (${res.status})`);
   }
   return data;
 }
@@ -2747,8 +2953,34 @@ function setupEventHandlers() {
   if (btnParseOcr) {
     btnParseOcr.addEventListener("click", () => void handleParseOcrClick());
   }
+  ["stageOcr", "stageChunk", "stageLad"].forEach((id) => {
+    $(`#${id}`)?.addEventListener("click", (event) => {
+      const doc = getSelectedDoc();
+      const target = event.currentTarget;
+      const mode = target?.dataset?.viewMode;
+      const ready =
+        doc?.isPdf &&
+        doc.ocrParsed &&
+        Array.isArray(doc.ocrBlocksByPage) &&
+        doc.ocrBlocksByPage.length > 0 &&
+        doc.ocrBlocksByPage.every((pg) => Array.isArray(pg?.chunks));
+      if (!ready || !mode) return;
+      setDocumentPdfViewMode(mode);
+    });
+  });
 
   $("#btnUpload").addEventListener("click", () => $("#fileInput").click());
+
+  const btnMode = $("#btnRetrievalMode");
+  if (btnMode) {
+    btnMode.addEventListener("click", () => {
+      const next = state.retrievalMode === "rag" ? "lad" : "rag";
+      state.retrievalMode = next;
+      btnMode.dataset.mode = next;
+      const label = btnMode.querySelector(".retrieval-mode-label");
+      if (label) label.textContent = next.toUpperCase();
+    });
+  }
 
   $("#fileInput").addEventListener("change", async (e) => {
     const f = e.target.files?.[0];

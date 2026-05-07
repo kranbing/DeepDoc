@@ -19,6 +19,7 @@ import os
 import re
 import shutil
 import sys
+import threading
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
@@ -35,6 +36,7 @@ from backend.logging_config import logger
 from backend.ocr_quality import evaluate_ocr_quality
 from backend.rag.config import RAG_TOP_K
 from backend.rag.service import ask_rag_with_selection, build_rag_context
+from backend.rag.lad_service import build_lad_context
 from backend.services.chunk_store import (
     chunk_page_summary,
     flatten_document_chunks,
@@ -42,6 +44,12 @@ from backend.services.chunk_store import (
     get_neighbor_chunks,
     get_page_chunks,
     save_document_chunks,
+)
+from backend.services.lad_store import (
+    expand_lad_related_chunks,
+    read_lad_chunks,
+    read_preferred_lad_chunks,
+    save_lad_artifacts,
 )
 from backend.services.overview_service import ensure_document_overview, upsert_document_overview
 from backend.services.project_store import (
@@ -90,6 +98,8 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_PROJECTS = ROOT / "data" / "projects"
 WEB_DIR = ROOT / "web"
 
+_PROCESS_JOBS: Dict[str, Dict[str, Any]] = {}
+_PROCESS_JOBS_LOCK = threading.Lock()
 
 
 def _utc_now() -> str:
@@ -191,6 +201,79 @@ def _workspace_doc_or_404(project_dir: Path, doc_id: str) -> Dict[str, Any]:
     if not isinstance(doc, dict):
         raise HTTPException(status_code=404, detail="文档不存在")
     return doc
+
+
+def _process_job_key(project_id: str, doc_id: str) -> str:
+    return f"{project_id}:{doc_id}"
+
+
+def _default_process_status() -> Dict[str, Any]:
+    return {
+        "status": "idle",
+        "phase": "pending",
+        "progress": 0,
+        "stages": {
+            "ocr": {"status": "pending", "progress": 0, "message": "等待 OCR"},
+            "chunk": {"status": "pending", "progress": 0, "message": "等待 chunk"},
+            "lad": {"status": "pending", "progress": 0, "message": "等待 LAD"},
+        },
+        "updatedAt": _utc_now(),
+    }
+
+
+def _set_process_status(project_id: str, doc_id: str, patch: Dict[str, Any]) -> Dict[str, Any]:
+    key = _process_job_key(project_id, doc_id)
+    with _PROCESS_JOBS_LOCK:
+        current = _PROCESS_JOBS.get(key) or _default_process_status()
+        stages = dict(current.get("stages") or {})
+        patch_stages = patch.pop("stages", None)
+        if isinstance(patch_stages, dict):
+            for stage, stage_patch in patch_stages.items():
+                base = dict(stages.get(stage) or {})
+                if isinstance(stage_patch, dict):
+                    base.update(stage_patch)
+                stages[stage] = base
+        current.update(patch)
+        current["stages"] = stages
+        current["updatedAt"] = _utc_now()
+        _PROCESS_JOBS[key] = current
+        return dict(current)
+
+
+def _get_process_status(project_id: str, doc_id: str, doc: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    key = _process_job_key(project_id, doc_id)
+    with _PROCESS_JOBS_LOCK:
+        job = _PROCESS_JOBS.get(key)
+        if isinstance(job, dict):
+            return dict(job)
+    if isinstance(doc, dict) and isinstance(doc.get("processStatus"), dict):
+        return dict(doc["processStatus"])
+    return _default_process_status()
+
+
+def _replace_workspace_doc(project_dir: Path, doc_id: str, doc: Dict[str, Any]) -> None:
+    ws = read_workspace(project_dir)
+    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
+    for i, item in enumerate(docs):
+        if isinstance(item, dict) and item.get("id") == doc_id:
+            docs[i] = doc
+            break
+    ws["docs"] = docs
+    write_workspace(project_dir, ws)
+
+
+def _persist_doc_process_status(project_dir: Path, doc_id: str, status: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    ws = read_workspace(project_dir)
+    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
+    for idx, item in enumerate(docs):
+        if isinstance(item, dict) and item.get("id") == doc_id:
+            doc = dict(item)
+            doc["processStatus"] = status
+            docs[idx] = doc
+            ws["docs"] = docs
+            write_workspace(project_dir, ws)
+            return doc
+    return None
 
 
 def _safe_pdf_doc_id(doc_id: str) -> bool:
@@ -665,6 +748,7 @@ class CreateProjectBody(BaseModel):
 class AskSelectionBody(BaseModel):
     question: str = Field(..., min_length=1, max_length=4000)
     chunkContext: Optional[Dict[str, Any]] = None
+    retrievalMode: Optional[str] = Field("rag", pattern="^(rag|lad)$")
 
 
 class VectorSearchBody(BaseModel):
@@ -861,6 +945,38 @@ def list_document_chunks_by_page(project_id: str, doc_id: str) -> Dict[str, Any]
         "totalChunks": int(payload.get("totalChunks") or 0),
         "pages": [page for page in pages if isinstance(page, dict)],
     }
+
+
+@app.get("/api/projects/{project_id}/docs/{doc_id}/lad-graph.html")
+def get_document_lad_graph_page(project_id: str, doc_id: str) -> FileResponse:
+    if not _safe_workspace_doc_id(doc_id):
+        raise HTTPException(status_code=400, detail="非法文档 ID")
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    _workspace_doc_or_404(pdir, doc_id)
+    html_path = ROOT / "test" / "lad_test" / "lad_graph.html"
+    if not html_path.is_file():
+        raise HTTPException(status_code=404, detail="图结构页面不存在")
+    return FileResponse(html_path, media_type="text/html; charset=utf-8")
+
+
+@app.get("/api/projects/{project_id}/docs/{doc_id}/lad_chunk.json")
+def get_document_lad_chunk_json(project_id: str, doc_id: str) -> Dict[str, Any]:
+    if not _safe_workspace_doc_id(doc_id):
+        raise HTTPException(status_code=400, detail="非法文档 ID")
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    doc = _workspace_doc_or_404(pdir, doc_id)
+    lad_payload = read_lad_chunks(pdir, doc_id)
+    if (not isinstance(lad_payload, dict) or str(lad_payload.get("status") or "") != "ready") and doc.get("ocrParsed"):
+        chunk_payload = ensure_doc_chunks_ready(pdir, doc)
+        artifacts = save_lad_artifacts(pdir, doc_id, chunk_payload)
+        lad_payload = artifacts.get("ladChunk") if isinstance(artifacts, dict) else lad_payload
+    if not isinstance(lad_payload, dict) or str(lad_payload.get("status") or "") != "ready":
+        raise HTTPException(status_code=404, detail="lad_chunk.json 尚未生成")
+    return lad_payload
 
 
 @app.get("/api/projects/{project_id}/docs/{doc_id}/chunks/{chunk_id}")
@@ -1071,6 +1187,102 @@ def _rank_selected_and_retrieval_chunks(
     return ranked[: max(1, int(limit or 5))]
 
 
+def _question_is_complex(question: str) -> bool:
+    q = str(question or "")
+    markers = (
+        "哪些",
+        "什么",
+        "如何",
+        "流程",
+        "步骤",
+        "模块",
+        "功能",
+        "维度",
+        "关键",
+        "创新",
+        "区别",
+        "为什么",
+        "怎么",
+    )
+    return any(m in q for m in markers)
+
+
+def _adaptive_retrieval_params(question: str, has_manual_selected: bool) -> Tuple[int, int]:
+    is_complex = _question_is_complex(question)
+    if has_manual_selected:
+        return (12 if is_complex else 8), (6 if is_complex else 5)
+    return (10 if is_complex else 6), (6 if is_complex else 5)
+
+
+def _merge_retrieval_chunks(*groups: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    merged: Dict[str, Dict[str, Any]] = {}
+    for group in groups:
+        for item in group:
+            if not isinstance(item, dict):
+                continue
+            cid = str(item.get("chunkId") or item.get("chunkKey") or "").strip()
+            if not cid:
+                continue
+            prev = merged.get(cid)
+            if not prev:
+                merged[cid] = item
+                continue
+            if float(item.get("score") or 0.0) > float(prev.get("score") or 0.0):
+                merged[cid] = item
+    return sorted(
+        merged.values(),
+        key=lambda item: (
+            -float(item.get("score") or 0.0),
+            int(item.get("pageNo") or 0),
+            int(item.get("index") or 0),
+        ),
+    )
+
+
+def _collect_neighbor_chunks_from_current(
+    chunk_payload: Optional[Dict[str, Any]],
+    current_chunks: List[Dict[str, Any]],
+    *,
+    max_neighbors: int,
+) -> List[Dict[str, Any]]:
+    if not isinstance(chunk_payload, dict):
+        return []
+    lad_related = expand_lad_related_chunks(chunk_payload, current_chunks, max_items=max_neighbors)
+    if lad_related:
+        return normalize_chunk_context_items(lad_related[:max_neighbors])
+    source_ids: List[str] = []
+    for chunk in current_chunks:
+        source_chunk_ids = chunk.get("sourceChunkIds") if isinstance(chunk.get("sourceChunkIds"), list) else []
+        if source_chunk_ids:
+            source_ids.extend(str(cid).strip() for cid in source_chunk_ids if str(cid).strip())
+            continue
+        cid = str(chunk.get("chunkId") or chunk.get("chunkKey") or "").strip()
+        if cid:
+            source_ids.append(cid)
+    seen: set[str] = set()
+    neighbors: List[Dict[str, Any]] = []
+    for src in source_ids:
+        if src in seen:
+            continue
+        seen.add(src)
+        bundle = get_neighbor_chunks(chunk_payload, src, radius=1)
+        for side in ("previous", "next"):
+            group = bundle.get(side) if isinstance(bundle, dict) else []
+            if not isinstance(group, list):
+                continue
+            for item in group:
+                if not isinstance(item, dict):
+                    continue
+                cid = str(item.get("chunkId") or item.get("chunkKey") or "").strip()
+                if not cid or cid in seen:
+                    continue
+                seen.add(cid)
+                neighbors.append(item)
+                if len(neighbors) >= max_neighbors:
+                    return normalize_chunk_context_items(neighbors)
+    return normalize_chunk_context_items(neighbors)
+
+
 @app.post("/api/projects/{project_id}/docs/{doc_id}/ask-selection")
 def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[str, Any]:
     pdir = DATA_PROJECTS / project_id
@@ -1101,19 +1313,27 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
     chunk_payload: Optional[Dict[str, Any]] = None
     if doc.get("ocrParsed"):
         try:
-            chunk_payload = ensure_doc_chunks_ready(pdir, doc)
+            ensure_doc_chunks_ready(pdir, doc)
+            chunk_payload = read_preferred_lad_chunks(pdir, doc_id)
         except HTTPException:
             chunk_payload = None
 
-    final_top_n = 5
-    retrieval_fetch_k = 8
+    retrieval_mode = (body.retrievalMode or "rag").strip().lower()
     selected_chunks: List[Dict[str, Any]] = []
     neighbor_chunks: List[Dict[str, Any]] = []
     retrieval_chunks: List[Dict[str, Any]] = []
     current_chunks: List[Dict[str, Any]] = []
     support_chunks: List[Dict[str, Any]] = []
+    context_source = ""
 
-    if has_manual_selected:
+    if retrieval_mode == "lad" and chunk_payload and not has_manual_selected:
+        current_chunks, support_chunks, doc_overview, context_source = build_lad_context(
+            ROOT, pdir, doc, question,
+        )
+        retrieval_chunks = []
+        logger.info("ask_selection using LAD mode | doc_id=%s", doc_id)
+    elif has_manual_selected:
+        retrieval_fetch_k, final_top_n = _adaptive_retrieval_params(question, has_manual_selected)
         selected_chunks = normalize_chunk_context_items(selected_items)
         if not selected_chunks:
             selected_chunks, _ = expand_selected_with_neighbors(doc, selected_items)
@@ -1124,32 +1344,58 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
                 retrieval_chunks = normalize_chunk_context_items(search_result.get("results"))
             except HTTPException:
                 retrieval_chunks = []
+            top_score = float((retrieval_chunks[0].get("score") if retrieval_chunks else 0.0) or 0.0)
+            retry_fetch_k = min(20, retrieval_fetch_k + 4)
+            if retry_fetch_k > retrieval_fetch_k and top_score < 0.2:
+                retry_res = search_project_vector_index(pdir, question, top_k=retry_fetch_k, doc_id=doc_id)
+                retry_chunks = normalize_chunk_context_items(retry_res.get("results"))
+                retrieval_chunks = _merge_retrieval_chunks(retrieval_chunks, retry_chunks)
         current_chunks = _rank_selected_and_retrieval_chunks(
             selected_chunks,
             retrieval_chunks,
             limit=final_top_n,
         )
-        context_source = "selection_rag_top5"
+        neighbor_chunks = _collect_neighbor_chunks_from_current(
+            chunk_payload,
+            current_chunks[:2],
+            max_neighbors=6 if _question_is_complex(question) else 4,
+        )
+        support_chunks = dedupe_chunk_items(retrieval_chunks[final_top_n:], neighbor_chunks)
+        context_source = "selection_rag_hybrid"
     else:
+        retrieval_fetch_k, final_top_n = _adaptive_retrieval_params(question, has_manual_selected)
         if chunk_payload:
             try:
-                search_result = search_project_vector_index(pdir, question, top_k=final_top_n, doc_id=doc_id)
+                search_result = search_project_vector_index(pdir, question, top_k=retrieval_fetch_k, doc_id=doc_id)
                 retrieval_chunks = normalize_chunk_context_items(search_result.get("results"))
             except HTTPException:
                 retrieval_chunks = []
+            top_score = float((retrieval_chunks[0].get("score") if retrieval_chunks else 0.0) or 0.0)
+            retry_fetch_k = min(20, retrieval_fetch_k + 4)
+            if retry_fetch_k > retrieval_fetch_k and top_score < 0.2:
+                retry_res = search_project_vector_index(pdir, question, top_k=retry_fetch_k, doc_id=doc_id)
+                retry_chunks = normalize_chunk_context_items(retry_res.get("results"))
+                retrieval_chunks = _merge_retrieval_chunks(retrieval_chunks, retry_chunks)
         current_chunks = retrieval_chunks[:final_top_n]
-        context_source = "rag_only"
-    doc_overview = read_document_overview(pdir, doc_id)
-    if not isinstance(doc_overview, dict) or str(doc_overview.get("status") or "") != "ready":
-        doc_overview = ensure_document_overview(ROOT, pdir, doc)
+        neighbor_chunks = _collect_neighbor_chunks_from_current(
+            chunk_payload,
+            current_chunks[:2],
+            max_neighbors=6 if _question_is_complex(question) else 4,
+        )
+        support_chunks = dedupe_chunk_items(retrieval_chunks[final_top_n:], neighbor_chunks)
+        context_source = "rag_hybrid_dynamic"
+    if retrieval_mode != "lad" or not chunk_payload or has_manual_selected:
+        doc_overview = read_document_overview(pdir, doc_id)
+        if not isinstance(doc_overview, dict) or str(doc_overview.get("status") or "") != "ready":
+            doc_overview = ensure_document_overview(ROOT, pdir, doc)
     logger.info(
-        "rag_ask pipeline | project_id=%s | doc_id=%s | current=%s | support=%s | retrieval=%s | top_k=%s",
+        "rag_ask pipeline | project_id=%s | doc_id=%s | mode=%s | current=%s | support=%s | context_source=%s",
         project_id,
         doc_id,
+        retrieval_mode,
         len(current_chunks),
         len(support_chunks),
-        len(retrieval_chunks),
-        final_top_n,
+        context_source,
     )
     result = ask_rag_with_selection(
         ROOT,
@@ -1167,7 +1413,7 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
     result["chunk_context"] = serialize_chunk_context_payload(
         source=context_source,
         current_chunks=current_chunks,
-        neighbor_chunks=neighbor_chunks,
+        neighbor_chunks=support_chunks,
         retrieval_chunks=retrieval_chunks,
     )
     logger.info(
@@ -1295,6 +1541,173 @@ def delete_project_doc(project_id: str, doc_id: str) -> Dict[str, Any]:
     return {"status": "deleted", "selectedDocId": sel}
 
 
+def _run_doc_process_job(project_id: str, doc_id: str) -> None:
+    pdir = DATA_PROJECTS / project_id
+    try:
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "running",
+                "phase": "ocr",
+                "progress": 8,
+                "stages": {
+                    "ocr": {"status": "running", "progress": 20, "message": "OCR 解析中"},
+                    "chunk": {"status": "pending", "progress": 0, "message": "等待 OCR 完成"},
+                    "lad": {"status": "pending", "progress": 0, "message": "等待 chunk 完成"},
+                },
+            },
+        )
+        _persist_doc_process_status(pdir, doc_id, status)
+
+        ws = read_workspace(pdir)
+        docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
+        doc = next((d for d in docs if isinstance(d, dict) and d.get("id") == doc_id), None)
+        if not isinstance(doc, dict):
+            raise RuntimeError("文档不存在")
+        if not doc.get("isPdf"):
+            raise RuntimeError("仅支持 PDF 文档")
+
+        existing_pages = doc.get("ocrBlocksByPage")
+        has_chunk_payload = (
+            isinstance(existing_pages, list)
+            and len(existing_pages) > 0
+            and all(isinstance(page, dict) and isinstance(page.get("chunks"), list) for page in existing_pages)
+        )
+        if not (doc.get("ocrParsed") and has_chunk_payload):
+            fn = doc.get("pdfFileName")
+            if not isinstance(fn, str) or not re.match(r"^[\w.\-]+$", fn):
+                raise RuntimeError("缺少 PDF 文件信息")
+            pdf_base = (pdir / "uploads" / "pdfs").resolve()
+            pdf_path = (pdf_base / fn).resolve()
+            pdf_path.relative_to(pdf_base)
+            if not pdf_path.is_file():
+                raise RuntimeError("PDF 文件不存在")
+
+            page_dir = pdir / "uploads" / "pdf_pages" / doc_id
+            if not page_dir.is_dir() or not any(page_dir.glob("page_*.png")):
+                raise RuntimeError("缺少页面预览图，请重新上传 PDF")
+
+            out_dir = pdir / "uploads" / "ocr_blocks" / doc_id
+            parser = get_glm_ocr_parser()
+            ocr_blocks_by_page, quality_report = _parse_pdf_with_quality_retry(
+                pdf_path, page_dir, out_dir, parser
+            )
+            if not ocr_blocks_by_page:
+                raise RuntimeError("未生成任何版面可视化图")
+            doc["ocrParsed"] = True
+            doc["ocrBlocksByPage"] = ocr_blocks_by_page
+            doc["pdfViewMode"] = "parsed"
+            attach_ocr_quality_report(doc)
+            doc["ocrQualityReport"]["retry"] = quality_report.get("retry", {})
+            persist_document_quality_report(project_id, pdir, doc)
+        elif not isinstance(doc.get("ocrQualityReport"), dict):
+            attach_ocr_quality_report(doc)
+            persist_document_quality_report(project_id, pdir, doc)
+
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "running",
+                "phase": "chunk",
+                "progress": 55,
+                "stages": {
+                    "ocr": {"status": "done", "progress": 100, "message": "OCR 完成"},
+                    "chunk": {"status": "running", "progress": 60, "message": "生成版面 chunk"},
+                },
+            },
+        )
+        doc["processStatus"] = status
+        _replace_workspace_doc(pdir, doc_id, doc)
+
+        chunk_payload = save_document_chunks(pdir, doc)
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "running",
+                "phase": "lad",
+                "progress": 78,
+                "stages": {
+                    "chunk": {"status": "done", "progress": 100, "message": "chunk 已可展示"},
+                    "lad": {"status": "running", "progress": 35, "message": "生成 LAD 结构化产物"},
+                },
+            },
+        )
+        doc["processStatus"] = status
+        _replace_workspace_doc(pdir, doc_id, doc)
+
+        lad_artifacts = save_lad_artifacts(pdir, doc_id, chunk_payload)
+        doc["ladReady"] = True
+        doc["ladGeneratedAt"] = lad_artifacts["ladChunk"].get("generatedAt")
+        doc["ladChunkPath"] = f"data/projects/{project_id}/documents/{doc_id}/lad_chunk.json"
+        doc["ladGraphPath"] = f"data/projects/{project_id}/documents/{doc_id}/lad_graph.json"
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "running",
+                "phase": "lad",
+                "progress": 88,
+                "stages": {
+                    "lad": {"status": "running", "progress": 80, "message": "LAD 完成，更新概览与索引"},
+                },
+            },
+        )
+        doc["processStatus"] = status
+        _replace_workspace_doc(pdir, doc_id, doc)
+
+        overview = upsert_document_overview(ROOT, pdir, doc)
+        try:
+            update_project_vector_index(pdir, doc_id)
+        except HTTPException:
+            pass
+        doc["hasOverview"] = True
+        doc["overviewGeneratedAt"] = overview.get("generatedAt")
+        doc["overviewPath"] = f"data/projects/{project_id}/documents/{doc_id}/overview.json"
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "done",
+                "phase": "done",
+                "progress": 100,
+                "stages": {
+                    "lad": {"status": "done", "progress": 100, "message": "LAD/索引后台处理完成"},
+                },
+            },
+        )
+        doc["processStatus"] = status
+        _replace_workspace_doc(pdir, doc_id, doc)
+    except Exception as exc:
+        logger.exception("document process job failed | project_id=%s | doc_id=%s", project_id, doc_id)
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "error",
+                "phase": "error",
+                "progress": 100,
+                "error": str(exc),
+            },
+        )
+        _persist_doc_process_status(pdir, doc_id, status)
+
+
+def _start_doc_process_job(project_id: str, doc_id: str) -> Dict[str, Any]:
+    current = _get_process_status(project_id, doc_id)
+    if current.get("status") == "running":
+        return current
+    _set_process_status(project_id, doc_id, _default_process_status())
+    status = _set_process_status(project_id, doc_id, {"status": "running", "phase": "queued", "progress": 2})
+    pdir = DATA_PROJECTS / project_id
+    _persist_doc_process_status(pdir, doc_id, status)
+    thread = threading.Thread(target=_run_doc_process_job, args=(project_id, doc_id), daemon=True)
+    thread.start()
+    return status
+
+
 @app.post("/api/projects/{project_id}/docs/{doc_id}/ocr-parse")
 def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
     """对 PDF 调用 GLM-OCR 解析，每页生成版面可视化图（layout_vis 样式）到 ocr_blocks，更新工作区（首次解析；已解析则直接返回）。"""
@@ -1303,107 +1716,11 @@ def ocr_parse_document(project_id: str, doc_id: str) -> Dict[str, Any]:
     pdir = DATA_PROJECTS / project_id
     if not pdir.is_dir() or not (pdir / "meta.json").is_file():
         raise HTTPException(status_code=404, detail="项目不存在")
-    ws = read_workspace(pdir)
-    docs = ws.get("docs") if isinstance(ws.get("docs"), list) else []
-    doc = next((d for d in docs if isinstance(d, dict) and d.get("id") == doc_id), None)
-    if not doc:
-        raise HTTPException(status_code=404, detail="文档不存在")
+    doc = _workspace_doc_or_404(pdir, doc_id)
     if not doc.get("isPdf"):
         raise HTTPException(status_code=400, detail="仅支持 PDF 文档")
-    existing_pages = doc.get("ocrBlocksByPage")
-    has_chunk_payload = (
-        isinstance(existing_pages, list)
-        and len(existing_pages) > 0
-        and all(
-            isinstance(page, dict) and isinstance(page.get("chunks"), list)
-            for page in existing_pages
-        )
-    )
-    if doc.get("ocrParsed") and has_chunk_payload:
-        changed = False
-        if not isinstance(doc.get("ocrQualityReport"), dict):
-            attach_ocr_quality_report(doc)
-            changed = True
-        persist_document_quality_report(project_id, pdir, doc)
-        overview = ensure_document_overview(ROOT, pdir, doc)
-        save_document_chunks(pdir, doc)
-        try:
-            update_project_vector_index(pdir, doc_id)
-        except HTTPException:
-            pass
-        doc["hasOverview"] = True
-        doc["overviewGeneratedAt"] = overview.get("generatedAt")
-        doc["overviewPath"] = f"data/projects/{project_id}/documents/{doc_id}/overview.json"
-        changed = True
-        if changed:
-            save_document_chunks(pdir, doc)
-            try:
-                update_project_vector_index(pdir, doc_id)
-            except HTTPException:
-                pass
-            for i, d in enumerate(docs):
-                if isinstance(d, dict) and d.get("id") == doc_id:
-                    docs[i] = doc
-                    break
-            ws["docs"] = docs
-            write_workspace(pdir, ws)
-        return {"status": "already_parsed", "doc": doc}
-
-    fn = doc.get("pdfFileName")
-    if not isinstance(fn, str) or not re.match(r"^[\w.\-]+$", fn):
-        raise HTTPException(status_code=400, detail="缺少 PDF 文件信息")
-    pdf_base = (pdir / "uploads" / "pdfs").resolve()
-    pdf_path = (pdf_base / fn).resolve()
-    try:
-        pdf_path.relative_to(pdf_base)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="PDF 文件不存在")
-    if not pdf_path.is_file():
-        raise HTTPException(status_code=404, detail="PDF 文件不存在")
-
-    page_dir = pdir / "uploads" / "pdf_pages" / doc_id
-    if not page_dir.is_dir() or not any(page_dir.glob("page_*.png")):
-        raise HTTPException(status_code=400, detail="缺少页面预览图，请重新上传该 PDF。")
-
-    out_dir = pdir / "uploads" / "ocr_blocks" / doc_id
-    try:
-        parser = get_glm_ocr_parser()
-        ocr_blocks_by_page, quality_report = _parse_pdf_with_quality_retry(
-            pdf_path, page_dir, out_dir, parser
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        if out_dir.exists():
-            shutil.rmtree(out_dir, ignore_errors=True)
-        raise HTTPException(status_code=500, detail=f"解析失败：{e!s}")
-    if not ocr_blocks_by_page:
-        if out_dir.exists():
-            shutil.rmtree(out_dir, ignore_errors=True)
-        raise HTTPException(status_code=500, detail="未生成任何版面可视化图")
-
-    doc["ocrParsed"] = True
-    doc["ocrBlocksByPage"] = ocr_blocks_by_page
-    doc["pdfViewMode"] = "parsed"
-    attach_ocr_quality_report(doc)
-    doc["ocrQualityReport"]["retry"] = quality_report.get("retry", {})
-    persist_document_quality_report(project_id, pdir, doc)
-    overview = upsert_document_overview(ROOT, pdir, doc)
-    save_document_chunks(pdir, doc)
-    try:
-        update_project_vector_index(pdir, doc_id)
-    except HTTPException:
-        pass
-    doc["hasOverview"] = True
-    doc["overviewGeneratedAt"] = overview.get("generatedAt")
-    doc["overviewPath"] = f"data/projects/{project_id}/documents/{doc_id}/overview.json"
-    for i, d in enumerate(docs):
-        if isinstance(d, dict) and d.get("id") == doc_id:
-            docs[i] = doc
-            break
-    ws["docs"] = docs
-    write_workspace(pdir, ws)
-    return {"status": "ok", "doc": doc}
+    status = _start_doc_process_job(project_id, doc_id)
+    return {"status": status.get("status") or "running", "processStatus": status, "doc": doc}
 
 
 @app.post("/api/projects/{project_id}/docs/{doc_id}/ocr-evaluate")
@@ -1448,6 +1765,18 @@ def evaluate_ocr_document(project_id: str, doc_id: str) -> Dict[str, Any]:
     ws["docs"] = docs
     write_workspace(pdir, ws)
     return {"status": "ok", "report": report, "doc": doc}
+
+
+@app.get("/api/projects/{project_id}/docs/{doc_id}/process-status")
+def get_document_process_status(project_id: str, doc_id: str) -> Dict[str, Any]:
+    if not _safe_workspace_doc_id(doc_id):
+        raise HTTPException(status_code=400, detail="非法文档 ID")
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    doc = _workspace_doc_or_404(pdir, doc_id)
+    status = _get_process_status(project_id, doc_id, doc)
+    return {"status": status.get("status") or "idle", "processStatus": status, "doc": doc}
 
 
 @app.post("/api/projects/{project_id}/upload/pdf")
