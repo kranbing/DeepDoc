@@ -1911,7 +1911,7 @@ function renderDocumentContinuous() {
       const frame = document.createElement("iframe");
       frame.className = "lad-graph-frame";
       frame.title = "LAD graph";
-      frame.src = `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(doc.id)}/lad-graph.html`;
+      frame.src = `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/docs/${encodeURIComponent(doc.id)}/lad-graph.html?embed=radial`;
       pagesWrap.appendChild(frame);
       $("#pageTotal").textContent = "/ 1";
       $("#pageNum").value = "1";

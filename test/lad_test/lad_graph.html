@@ -443,6 +443,46 @@
         grid-template-columns: 1fr;
       }
     }
+
+    body.embed-radial {
+      background: #f7fafb;
+    }
+
+    body.embed-radial .app {
+      display: flex;
+      height: 100vh;
+      min-height: 0;
+      padding: 0;
+      gap: 0;
+    }
+
+    body.embed-radial .sidebar,
+    body.embed-radial .detail {
+      display: none;
+    }
+
+    body.embed-radial .canvas-panel {
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    body.embed-radial .graph-topbar {
+      padding: 8px 10px;
+    }
+
+    body.embed-radial #hierarchyViewBtn,
+    body.embed-radial #radialViewBtn,
+    body.embed-radial #showDocBtn {
+      display: none;
+    }
+
+    body.embed-radial .graph-wrap {
+      min-height: 0;
+    }
   </style>
 </head>
 <body>
@@ -499,6 +539,12 @@
   </main>
 
   <script>
+    const embedMode = new URLSearchParams(window.location.search).get("embed");
+    const isRadialEmbed = embedMode === "radial";
+    if (isRadialEmbed) {
+      document.body.classList.add("embed-radial");
+    }
+
     const state = {
       data: null,
       sectionsById: new Map(),
@@ -507,7 +553,7 @@
       chunksBySection: new Map(),
       selected: null,
       currentSectionId: null,
-      graphMode: "hierarchy",
+      graphMode: isRadialEmbed ? "radial" : "hierarchy",
       radialExpandedId: "__document__",
       radialHighlightId: "__document__",
       radialAnimation: null,
