@@ -70,6 +70,7 @@ from backend.services.qa_service import (
     serialize_chunk_context_payload,
     session_context_summary,
 )
+from backend.services.model_config import model_config_for_task
 from backend.services.session_service import (
     append_qa_turn,
     compact_session_if_needed,
@@ -86,6 +87,7 @@ from backend.services.session_service import (
     write_qa_compactions,
     write_qa_sessions,
 )
+from backend.services.task_dispatcher import dispatch_task
 from backend.services.vector_store import (
     delete_doc_from_vector_index,
     read_vector_manifest,
@@ -748,7 +750,7 @@ class CreateProjectBody(BaseModel):
 class AskSelectionBody(BaseModel):
     question: str = Field(..., min_length=1, max_length=4000)
     chunkContext: Optional[Dict[str, Any]] = None
-    retrievalMode: Optional[str] = Field("rag", pattern="^(rag|lad)$")
+    retrievalMode: Optional[str] = Field("auto", pattern="^(auto|rag|lad)$")
 
 
 class VectorSearchBody(BaseModel):
@@ -1096,6 +1098,8 @@ def rag_ask(project_id: str, doc_id: str, body: RagAskBody) -> Dict[str, Any]:
     start = datetime.now(timezone.utc)
     doc = _workspace_doc_or_404(pdir, doc_id)
     question = body.question.strip()
+    task_route = dispatch_task(question, requested_retrieval_mode="rag")
+    model_config = model_config_for_task(task_route.task_type)
     top_k = int(body.topK or RAG_TOP_K)
     current_chunks, support_chunks, doc_overview, context_source = build_rag_context(
         ROOT,
@@ -1116,6 +1120,8 @@ def rag_ask(project_id: str, doc_id: str, body: RagAskBody) -> Dict[str, Any]:
         recent_turns=[],
         manual_selected=False,
         context_source=context_source,
+        task_route=task_route,
+        model_config=model_config,
     )
     elapsed_ms = int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
     logger.info(
@@ -1132,6 +1138,8 @@ def rag_ask(project_id: str, doc_id: str, body: RagAskBody) -> Dict[str, Any]:
             "overlap": 100,
             "topK": top_k,
         },
+        "task_route": task_route.to_dict(),
+        "model_config": model_config.to_dict(),
         "chunk_context": serialize_chunk_context_payload(
             source=context_source,
             current_chunks=current_chunks,
@@ -1310,6 +1318,13 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
     compaction_map = read_qa_compactions(pdir).get("sessions")
     compaction = compaction_map.get(str(session.get("id") or "")) if isinstance(compaction_map, dict) else None
     question = body.question.strip()
+    requested_retrieval_mode = (body.retrievalMode or "auto").strip().lower()
+    task_route = dispatch_task(
+        question,
+        selected_items=selected_items,
+        requested_retrieval_mode=requested_retrieval_mode,
+    )
+    model_config = model_config_for_task(task_route.task_type)
     chunk_payload: Optional[Dict[str, Any]] = None
     if doc.get("ocrParsed"):
         try:
@@ -1318,7 +1333,7 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
         except HTTPException:
             chunk_payload = None
 
-    retrieval_mode = (body.retrievalMode or "rag").strip().lower()
+    retrieval_mode = task_route.retrieval_mode
     selected_chunks: List[Dict[str, Any]] = []
     neighbor_chunks: List[Dict[str, Any]] = []
     retrieval_chunks: List[Dict[str, Any]] = []
@@ -1409,6 +1424,8 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
         recent_turns=session_recent_turns(session),
         manual_selected=has_manual_selected,
         context_source=context_source,
+        task_route=task_route,
+        model_config=model_config,
     )
     result["chunk_context"] = serialize_chunk_context_payload(
         source=context_source,
@@ -1451,6 +1468,8 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
         "selected_chunks": current_chunks,
         "neighbor_chunks": support_chunks,
         "chunk_context": result["chunk_context"],
+        "task_route": task_route.to_dict(),
+        "model_config": model_config.to_dict(),
         "session": serialize_session(session, compacted or compaction),
     }
 

@@ -7,7 +7,10 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 from fastapi import HTTPException
 
 from backend.clients.deepseek_client import deepseek_chat_json
+from backend.services.evidence_trace import build_evidence_trace
+from backend.services.model_config import ModelConfig
 from backend.services.chunk_store import read_document_chunks, save_document_chunks
+from backend.services.task_dispatcher import TaskRoute
 
 
 def chunk_key(item: Dict[str, Any]) -> str:
@@ -416,6 +419,8 @@ def ask_deepseek_with_selection_v2(
     recent_turns: Optional[List[Dict[str, Any]]] = None,
     manual_selected: bool = False,
     context_source: str = "",
+    task_route: Optional[TaskRoute] = None,
+    model_config: Optional[ModelConfig] = None,
 ) -> Dict[str, Any]:
     allowed_ids: List[str] = []
     for group in (current_items, support_items):
@@ -430,6 +435,8 @@ def ask_deepseek_with_selection_v2(
         if role and text:
             history_lines.append(f"{role}: {text}")
 
+    task_instruction = task_route.prompt_template if task_route else ""
+    response_contract = task_route.response_contract if task_route else ""
     if manual_selected:
         system_prompt = (
             "You are a document QA assistant for Chinese PDFs. Follow these rules strictly: "
@@ -452,14 +459,28 @@ def ask_deepseek_with_selection_v2(
             "6) Return exactly one JSON object with keys: cited_chunk_ids, answer, follow_up_questions. "
             "7) answer should be concise, factual, and in Chinese unless the document itself is clearly English."
         )
+    if task_route and task_route.system_prompt:
+        system_prompt = f"{task_route.system_prompt} {system_prompt}"
+    if task_instruction:
+        system_prompt += f" Task-specific instruction: {task_instruction}"
+    if response_contract:
+        system_prompt += f" Response contract: {response_contract}"
     prompt_parts = [
         f"Document: {doc_name}",
         f"Question: {question}",
-        "Response requirements: return JSON only; answer should prefer supported facts first, then mention any missing detail explicitly; do not add extra explanation outside JSON.",
+        response_contract
+        or "Response requirements: return JSON only; answer should prefer supported facts first, then mention any missing detail explicitly; do not add extra explanation outside JSON.",
         "If the answer is a list/process, preserve the document's structure and keep the wording close to the source.",
     ]
     if context_source:
         prompt_parts.append(f"Context source: {context_source}")
+    if task_route:
+        prompt_parts.append(
+            "Task route:\n"
+            f"task_type={task_route.task_type}\n"
+            f"retrieval_mode={task_route.retrieval_mode}\n"
+            f"dispatch_reason={task_route.reason}"
+        )
     if current_items:
         prompt_parts.append(_format_chunks_for_prompt(current_items, "ranked_chunks"))
     if support_items:
@@ -472,9 +493,35 @@ def ask_deepseek_with_selection_v2(
     if overview_text:
         prompt_parts.append(overview_text)
     prompt_parts.append("Return JSON only.")
-    payload = deepseek_chat_json(root, system_prompt, "\n\n".join(prompt_parts), temperature=0.2)
+    if model_config:
+        payload = deepseek_chat_json(
+            root,
+            system_prompt,
+            "\n\n".join(prompt_parts),
+            model=model_config.model,
+            temperature=model_config.temperature,
+            top_p=model_config.top_p,
+            max_tokens=model_config.max_tokens,
+            timeout_seconds=model_config.timeout_seconds,
+            max_retries=model_config.max_retries,
+        )
+    else:
+        payload = deepseek_chat_json(root, system_prompt, "\n\n".join(prompt_parts), temperature=0.2)
     try:
-        return normalize_qa_response(payload, allowed_ids)
+        normalized = normalize_qa_response(payload, allowed_ids)
+        trace_context = serialize_chunk_context_payload(
+            source=context_source or "qa_service",
+            current_chunks=current_items,
+            neighbor_chunks=support_items,
+            retrieval_chunks=[],
+        )
+        normalized["structured_answer"] = payload
+        normalized["evidence_trace"] = build_evidence_trace(payload, trace_context)
+        if task_route:
+            normalized["task_route"] = task_route.to_dict()
+        if model_config:
+            normalized["model_config"] = model_config.to_dict()
+        return normalized
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"DeepSeek response parse failed: {exc!s}") from exc
 

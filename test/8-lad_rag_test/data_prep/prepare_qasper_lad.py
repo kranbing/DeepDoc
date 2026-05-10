@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_QASPER_PATH = ROOT / "test" / "Qasper_after" / "validation.json"
-DEFAULT_OUT_DIR = ROOT / "test" / "lad_rag_test" / "data"
+DEFAULT_OUT_DIR = ROOT / "test" / "8-lad_rag_test" / "data"
 
 
 def utc_now() -> str:

@@ -630,6 +630,10 @@ body {
   justify-content: space-between;
 }
 
+.doc-top[hidden] {
+  display: none;
+}
+
 .doc-meta {
   min-width: 220px;
 }

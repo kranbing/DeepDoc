@@ -17,6 +17,8 @@ from backend.services.qa_service import (
     normalize_chunk_context_items,
     serialize_chunk_context_payload,
 )
+from backend.services.model_config import ModelConfig
+from backend.services.task_dispatcher import TaskRoute
 from backend.services.vector_store import search_project_vector_index
 from backend.rag.config import RAG_TOP_K
 
@@ -196,6 +198,8 @@ def ask_rag_with_selection(
     recent_turns: Optional[List[Dict[str, Any]]] = None,
     manual_selected: bool = False,
     context_source: str = "",
+    task_route: Optional[TaskRoute] = None,
+    model_config: Optional[ModelConfig] = None,
 ) -> Dict[str, Any]:
     start = datetime.now(timezone.utc)
     logger.info(
@@ -216,6 +220,8 @@ def ask_rag_with_selection(
         recent_turns=recent_turns,
         manual_selected=manual_selected,
         context_source=context_source,
+        task_route=task_route,
+        model_config=model_config,
     )
     result["chunk_context"] = serialize_chunk_context_payload(
         source=context_source or "auto_retrieval",

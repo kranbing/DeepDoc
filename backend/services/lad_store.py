@@ -9,7 +9,8 @@ from backend.services.project_store import document_dir, read_json, utc_now, wri
 
 
 HEADING_PREFIX_RE = re.compile(r"^\s{0,3}(#{1,6})\s+(.+?)\s*$")
-DECIMAL_HEADING_RE = re.compile(r"^\s*(\d+(?:\.\d+){0,6})(?:[.)])?\s+(\S.{0,120})$")
+DECIMAL_HEADING_RE = re.compile(r"^\s*(\d+(?:\.\d+){0,6})([.)])?\s+(\S.{0,120})$")
+COMPACT_DECIMAL_HEADING_RE = re.compile(r"^\s*(\d+\.\d+(?:\.\d+){0,5})([.)])?(\S.{0,120})$")
 ZH_CHAPTER_RE = re.compile(r"^\s*\u7b2c[\u4e00-\u9fff\d]+[\u7ae0\u8282\u7bc7]\s*\S.{0,120}$")
 EN_CHAPTER_RE = re.compile(r"^\s*(chapter|section|part)\s+[A-Za-z0-9IVXLCDM]+[.:\-\s]+.{1,120}$", re.I)
 APPENDIX_RE = re.compile(r"^\s*(appendix|\u9644\u5f55)\s*[A-Za-z\d\u4e00-\u9fff]*[.:\-\s]+.{0,120}$", re.I)
@@ -114,11 +115,41 @@ def _normalized_heading_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _decimal_level(text: str) -> Optional[int]:
+def _decimal_match(text: str) -> Optional[re.Match[str]]:
     match = DECIMAL_HEADING_RE.match(text)
+    if match:
+        return match
+    return COMPACT_DECIMAL_HEADING_RE.match(text)
+
+
+def _decimal_level(text: str) -> Optional[int]:
+    match = _decimal_match(text)
     if not match:
         return None
     return max(1, min(match.group(1).count(".") + 1, 6))
+
+
+def _is_plain_decimal_marker(match: re.Match[str]) -> bool:
+    return "." not in match.group(1)
+
+
+def _sentence_punctuation_count(text: str) -> int:
+    return len(re.findall(r"[。！？!?；;]", text))
+
+
+def _is_numbered_body_text(text: str, features: Dict[str, Any], match: re.Match[str]) -> bool:
+    if not _is_plain_decimal_marker(match):
+        return False
+    delimiter = str(match.group(2) or "")
+    if delimiter == ")":
+        return False
+    tail = str(match.group(3) or "")
+    return (
+        features["lineCount"] > 2
+        or len(text) > 72
+        or len(tail) > 64
+        or _sentence_punctuation_count(tail) >= 1
+    )
 
 
 def detect_heading(chunk: Dict[str, Any], profile: str) -> Dict[str, Any]:
@@ -138,11 +169,21 @@ def detect_heading(chunk: Dict[str, Any], profile: str) -> Dict[str, Any]:
         level = len(markdown.group(1))
         pattern = "markdown"
         score += 0.72
+    decimal_match = _decimal_match(text)
     decimal_level = _decimal_level(text)
-    if decimal_level:
-        level = decimal_level
-        pattern = "decimal"
-        score += 0.78
+    if decimal_level and decimal_match:
+        if _is_numbered_body_text(text, features, decimal_match):
+            level = None
+            pattern = "numbered_body"
+            score -= 0.2
+        elif _is_plain_decimal_marker(decimal_match):
+            level = -1
+            pattern = "attached"
+            score += 0.56
+        else:
+            level = decimal_level
+            pattern = "decimal"
+            score += 0.78
     elif ZH_CHAPTER_RE.match(text) or EN_CHAPTER_RE.match(text) or APPENDIX_RE.match(text):
         level = 1
         pattern = "chapter"

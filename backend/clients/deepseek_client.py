@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 from urllib import error as urlerror
@@ -48,14 +49,22 @@ def deepseek_chat_json(
     system_prompt: str,
     user_prompt: str,
     *,
+    model: str = "deepseek-chat",
     temperature: float = 0.2,
+    top_p: float = 0.9,
+    max_tokens: int = 768,
+    timeout_seconds: int = 120,
+    max_retries: int = 2,
 ) -> Dict[str, Any]:
     api_key = deepseek_api_key(root)
     if not api_key:
-        raise HTTPException(status_code=503, detail="未配置 DEEPSEEK_API_KEY 或 backend/.deepseek_api_key")
+        raise HTTPException(status_code=503, detail="Missing DEEPSEEK_API_KEY or backend/.deepseek_api_key")
+
     body = {
-        "model": "deepseek-chat",
+        "model": model,
         "temperature": temperature,
+        "top_p": top_p,
+        "max_tokens": max_tokens,
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": system_prompt},
@@ -71,17 +80,37 @@ def deepseek_chat_json(
         },
         method="POST",
     )
-    try:
-        with urlrequest.urlopen(request, timeout=120) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-    except urlerror.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="ignore")
-        raise HTTPException(status_code=502, detail=f"DeepSeek API 错误: {detail[:400]}") from exc
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"DeepSeek 请求失败: {exc!s}") from exc
+
+    raw: Dict[str, Any] = {}
+    attempts = max(1, int(max_retries or 0) + 1)
+    for attempt in range(attempts):
+        try:
+            with urlrequest.urlopen(request, timeout=max(1, int(timeout_seconds or 120))) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+            break
+        except urlerror.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="ignore")
+            status = int(getattr(exc, "code", 0) or 0)
+            retryable = status == 429 or 500 <= status < 600
+            if retryable and attempt < attempts - 1:
+                time.sleep(min(8.0, 0.8 * (2**attempt)))
+                continue
+            raise HTTPException(status_code=502, detail=f"DeepSeek API error status={status}: {detail[:400]}") from exc
+        except TimeoutError as exc:
+            if attempt < attempts - 1:
+                time.sleep(min(8.0, 0.8 * (2**attempt)))
+                continue
+            raise HTTPException(status_code=504, detail=f"DeepSeek request timeout after {timeout_seconds}s") from exc
+        except Exception as exc:
+            if attempt < attempts - 1:
+                time.sleep(min(8.0, 0.8 * (2**attempt)))
+                continue
+            raise HTTPException(status_code=502, detail=f"DeepSeek request failed: {exc!s}") from exc
 
     try:
         message = raw["choices"][0]["message"]["content"]
+        if not str(message or "").strip():
+            raise ValueError("empty model content")
         return extract_json_object(str(message))
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"DeepSeek 返回解析失败: {exc!s}") from exc
+        raise HTTPException(status_code=502, detail=f"DeepSeek response parse failed: {exc!s}") from exc

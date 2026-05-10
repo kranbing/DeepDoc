@@ -868,7 +868,8 @@
 
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", "12");
-        text.setAttribute("y", node.meta ? "20" : Math.max(22, Math.round(node.h / 2 + 4)));
+        text.setAttribute("y", node.meta || node.labelLines ? "20" : Math.max(22, Math.round(node.h / 2 + 4)));
+        text.__labelLines = node.labelLines;
         addWrappedText(text, node.label, node.w - 22, node.maxLines || 2);
 
         group.append(rect, text);
@@ -883,9 +884,15 @@
           event.stopPropagation();
           selectGraphNodeFromPoint(event.clientX, event.clientY);
         });
+        group.addEventListener("dblclick", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          jumpToSourceChunk(node);
+        });
         group.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") selectGraphNode(node);
         });
+        group.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title")).textContent = node.fullLabel || node.label;
         svg.appendChild(group);
       }
 
@@ -1101,9 +1108,11 @@
         visibleSectionIds,
         parentId
       } = options;
-      const label = section.title || section.sectionId;
-      const width = compactLabelWidth(label, depth === 1 ? 96 : 76, depth === 1 ? 172 : 148);
-      const height = 34;
+      const fullLabel = section.title || section.sectionId;
+      const label = displaySectionLabel(section);
+      const labelBox = radialLabelBox(label, depth);
+      const width = labelBox.width;
+      const height = labelBox.height;
       const radius = 170 + depth * 138;
       const childSections = getChildSections(section.sectionId).filter(child => visibleSectionIds.has(child.sectionId));
       const node = {
@@ -1111,13 +1120,15 @@
         kind: "section",
         item: section,
         label,
+        fullLabel,
         meta: "",
         className: childSections.length ? "section" : "heading",
         x: centerX + Math.cos(angle) * radius - width / 2,
         y: centerY + Math.sin(angle) * radius - height / 2,
         w: width,
         h: height,
-        maxLines: 1,
+        maxLines: labelBox.lines.length,
+        labelLines: labelBox.lines,
         depth
       };
       nodes.push(node);
@@ -1206,16 +1217,22 @@
       const side = targetCenter.x >= rootCenter.x ? 1 : -1;
       const startX = targetCenter.x;
       const startY = rootCenter.y;
-      const stepX = 160;
+      const MIN_LEVEL_GAP = 40;
 
       function siblingGap(depthFromTarget) {
         if (depthFromTarget <= 1) return 22;
         return 28;
       }
 
-      function leafBand(depthFromTarget) {
-        if (depthFromTarget <= 1) return 24;
-        return 30;
+      function levelGap(parentId, childId) {
+        const pw = (byId.get(parentId) || {}).w || 120;
+        const cw = (byId.get(childId) || {}).w || 120;
+        return pw / 2 + cw / 2 + MIN_LEVEL_GAP;
+      }
+
+      function nodeHeightOf(sectionId) {
+        const node = byId.get(sectionId);
+        return node ? node.h : 34;
       }
 
       function sortedChildren(sectionId) {
@@ -1226,23 +1243,24 @@
 
       function subtreeHeight(sectionId, depthFromTarget) {
         const children = sortedChildren(sectionId);
+        const selfH = nodeHeightOf(sectionId);
         if (!children.length) {
-          return leafBand(depthFromTarget);
+          return selfH;
         }
         const gap = siblingGap(depthFromTarget + 1);
         const blocks = children.map(child => subtreeHeight(child.sectionId, depthFromTarget + 1));
         const total = blocks.reduce((sum, item) => sum + item, 0) + gap * Math.max(0, blocks.length - 1);
-        return Math.max(leafBand(depthFromTarget), total);
+        return Math.max(selfH, total);
       }
 
-      function layoutBranch(sectionId, depthFromTarget, anchorY) {
+      function layoutBranch(sectionId, depthFromTarget, anchorY, parentX) {
         const children = sortedChildren(sectionId);
         if (!children.length) return;
-        const xCenter = startX + side * (stepX * depthFromTarget);
         const gap = siblingGap(depthFromTarget);
         const blocks = children.map(child => ({
           child,
-          h: subtreeHeight(child.sectionId, depthFromTarget)
+          h: subtreeHeight(child.sectionId, depthFromTarget),
+          xCenter: parentX + side * levelGap(sectionId, child.sectionId)
         }));
         const totalHeight = blocks.reduce((sum, item) => sum + item.h, 0) + gap * Math.max(0, blocks.length - 1);
         let cursor = anchorY - totalHeight / 2;
@@ -1250,45 +1268,64 @@
           const node = byId.get(child.sectionId);
           if (!node) return;
           const blockHeight = blocks[index].h;
+          const xCenter = blocks[index].xCenter;
           const yCenter = cursor + blockHeight / 2;
           node.x = xCenter - node.w / 2;
           node.y = yCenter - node.h / 2;
-          layoutBranch(child.sectionId, depthFromTarget + 1, yCenter);
+          layoutBranch(child.sectionId, depthFromTarget + 1, yCenter, xCenter);
           cursor += blockHeight + gap;
         });
       }
 
       target.y = startY - target.h / 2;
-      layoutBranch(targetId, 1, startY);
+      layoutBranch(targetId, 1, startY, startX);
     }
 
     function pushOtherBranchesAway(nodes, targetId) {
       const focusIds = collectSubtreeIds(targetId);
       const focusNodes = nodes.filter(node => node.id === "__document__" || focusIds.has(node.id));
       if (!focusNodes.length) return;
-      const bounds = focusNodes.reduce((box, node) => ({
-        minX: Math.min(box.minX, node.x),
-        minY: Math.min(box.minY, node.y),
-        maxX: Math.max(box.maxX, node.x + node.w),
-        maxY: Math.max(box.maxY, node.y + node.h)
-      }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
-      const focusCenterY = (bounds.minY + bounds.maxY) / 2;
+      const PADDING = 16;
 
-      for (let pass = 0; pass < 2; pass += 1) {
+      function focusBounds() {
+        return focusNodes.reduce((box, node) => ({
+          minX: Math.min(box.minX, node.x - PADDING),
+          minY: Math.min(box.minY, node.y - PADDING),
+          maxX: Math.max(box.maxX, node.x + node.w + PADDING),
+          maxY: Math.max(box.maxY, node.y + node.h + PADDING)
+        }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+      }
+
+      const focusCenterY = focusNodes.reduce((sum, n) => sum + n.y + n.h / 2, 0) / focusNodes.length;
+      const focusCenterX = focusNodes.reduce((sum, n) => sum + n.x + n.w / 2, 0) / focusNodes.length;
+
+      for (let pass = 0; pass < 4; pass += 1) {
+        const fb = focusBounds();
+        let moved = false;
         for (const node of nodes) {
           if (node.kind !== "section") continue;
           if (focusIds.has(node.id) || node.id === "__document__") continue;
-          const overlap = rectsOverlap(
+          if (!rectsOverlap(
             { x: node.x, y: node.y, w: node.w, h: node.h },
-            { x: bounds.minX - 20, y: bounds.minY - 24, w: bounds.maxX - bounds.minX + 40, h: bounds.maxY - bounds.minY + 48 }
-          );
-          if (!overlap) continue;
+            fb
+          )) continue;
           const center = nodeCenter(node);
-          const vertical = center.y >= focusCenterY ? 1 : -1;
-          node.y += vertical * 60;
-          const horizontal = center.x >= (bounds.minX + bounds.maxX) / 2 ? 1 : -1;
-          node.x += horizontal * 28;
+          const overlapLeft = (node.x + node.w) - fb.minX;
+          const overlapRight = fb.maxX - node.x;
+          const overlapTop = (node.y + node.h) - fb.minY;
+          const overlapBottom = fb.maxY - node.y;
+          const pushX = Math.min(overlapLeft, overlapRight) + PADDING;
+          const pushY = Math.min(overlapTop, overlapBottom) + PADDING;
+          if (pushY <= pushX) {
+            const dirY = center.y >= focusCenterY ? 1 : -1;
+            node.y += dirY * pushY;
+          } else {
+            const dirX = center.x >= focusCenterX ? 1 : -1;
+            node.x += dirX * pushX;
+          }
+          moved = true;
         }
+        if (!moved) break;
       }
     }
 
@@ -1349,6 +1386,63 @@
         return sum + (/[\u0000-\u00ff]/.test(ch) ? 7 : 13);
       }, 0);
       return clamp(length + 28, minWidth, maxWidth);
+    }
+
+    function firstSentence(text) {
+      const value = String(text || "").replace(/\s+/g, " ").trim();
+      const match = value.match(/^(.+?[。！？!?；;])/);
+      return (match ? match[1] : value).trim();
+    }
+
+    function displaySectionLabel(section) {
+      const title = String(section?.title || section?.sectionId || "").replace(/\s+/g, " ").trim();
+      if (section?.structureRole === "attached_subheading" || title.length > 48) {
+        return firstSentence(title) || title;
+      }
+      return title;
+    }
+
+    function splitLabelPrefix(label) {
+      const text = String(label || "").replace(/\s+/g, " ").trim();
+      const match = text.match(/^((?:\d+(?:\.\d+)*[.)]?|[（(]?[一二三四五六七八九十百]+[）)、.]?|[（(]?\d+[）)])\s*)(.*)$/);
+      if (!match) return { prefix: "", body: text };
+      return { prefix: match[1] || "", body: match[2] || "" };
+    }
+
+    function displayCharLength(text) {
+      return Array.from(String(text || "")).reduce((sum, ch) => {
+        return sum + (/[\u0000-\u00ff]/.test(ch) ? 0.55 : 1);
+      }, 0);
+    }
+
+    function wrapLabelLines(label, maxWidth, maxLines = 2) {
+      const text = String(label || "").replace(/\s+/g, " ").trim() || "(empty)";
+      const { body } = splitLabelPrefix(text);
+      if (displayCharLength(body || text) <= 8) return [text];
+      const chars = Array.from(text);
+      const approxChars = Math.max(8, Math.floor(maxWidth / 12));
+      const lines = [];
+      for (let i = 0; i < chars.length && lines.length < maxLines; i += approxChars) {
+        lines.push(chars.slice(i, i + approxChars).join(""));
+      }
+      if (chars.length > approxChars * maxLines && lines.length) {
+        const last = lines.length - 1;
+        lines[last] = `${lines[last].slice(0, Math.max(1, lines[last].length - 1))}…`;
+      }
+      return lines.length ? lines : ["(empty)"];
+    }
+
+    function radialLabelBox(label, depth) {
+      const { body } = splitLabelPrefix(label);
+      const bodyLength = displayCharLength(body || label);
+      const maxLines = bodyLength > 22 ? 3 : bodyLength > 8 ? 2 : 1;
+      const width = compactLabelWidth(label, depth === 1 ? 132 : 120, depth === 1 ? 280 : 260);
+      const lines = wrapLabelLines(label, width - 24, maxLines);
+      return {
+        width,
+        lines,
+        height: Math.max(34, 18 + lines.length * 16)
+      };
     }
 
     function getDocumentTitle() {
@@ -1756,6 +1850,17 @@
     }
 
     function addWrappedText(textEl, value, maxWidth, maxLines) {
+      const wrappedLines = textEl.__labelLines || wrapLabelLines(value, maxWidth, maxLines || 2);
+      for (let line = 0; line < Math.min(wrappedLines.length, maxLines || wrappedLines.length); line += 1) {
+        const part = wrappedLines[line];
+        if (!part) break;
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        tspan.setAttribute("x", "12");
+        tspan.setAttribute("dy", line === 0 ? "0" : "16");
+        tspan.textContent = part;
+        textEl.appendChild(tspan);
+      }
+      return;
       const text = String(value || "").replace(/\s+/g, " ").trim() || "(empty)";
       const chars = Array.from(text);
       const approxChars = Math.max(8, Math.floor(maxWidth / 12));
@@ -1770,6 +1875,22 @@
           : part;
         textEl.appendChild(tspan);
       }
+    }
+
+    function jumpToSourceChunk(node) {
+      if (!node || !node.item) return;
+      const chunkId = node.kind === "section"
+        ? node.item.chunkId
+        : node.kind === "chunk"
+          ? node.item.chunkId
+          : null;
+      if (!chunkId) return;
+      window.parent?.postMessage({
+        type: "deepdoc:jumpToChunk",
+        docId: state.data?.docId || "",
+        chunkId,
+        pageNo: node.item.pageNo || null
+      }, window.location.origin);
     }
 
     function selectGraphNode(node) {

@@ -1,0 +1,36 @@
+{
+  "round": 1,
+  "description": "Baseline prompts for QASPER task-type evaluation.",
+  "prompts": {
+    "local_evidence_qa": {
+      "strategy": "LADRAG",
+      "prompt": "You are answering a question about an academic paper. Use only the provided local chunks. Give a concise answer and cite the chunk ids that support it.",
+      "prompt_zh": "你正在回答一篇学术论文相关问题。只能使用给定的局部 chunk，给出简洁答案，并引用支撑答案的 chunk 编号。"
+    },
+    "multi_evidence_qa": {
+      "strategy": "RAG",
+      "prompt": "You are answering a question about an academic paper. Combine evidence from the retrieved chunks when needed. Give a concise answer and cite supporting chunk ids.",
+      "prompt_zh": "你正在回答一篇学术论文相关问题。必要时综合多个检索 chunk 中的证据，给出简洁答案，并引用支撑答案的 chunk 编号。"
+    },
+    "method_qa": {
+      "strategy": "RAG",
+      "prompt": "Identify the method, model, system, or experimental setup described in the retrieved chunks. Answer with the key technical details and cite chunk ids.",
+      "prompt_zh": "识别检索 chunk 中描述的方法、模型、系统或实验设置。回答关键技术细节，并引用对应的 chunk 编号。"
+    },
+    "comparison_qa": {
+      "strategy": "RAG",
+      "prompt": "Compare the approaches, baselines, datasets, or results asked about in the question. Use the retrieved chunks and cite chunk ids.",
+      "prompt_zh": "比较问题中涉及的方法、基线、数据集或结果。只能依据检索 chunk 作答，并引用相关 chunk 编号。"
+    },
+    "dataset_qa": {
+      "strategy": "LADRAG",
+      "prompt": "Answer questions about datasets, evaluation data, or benchmarks using the local evidence chunks. Include dataset names, sizes, languages, or settings when available, and cite chunk ids.",
+      "prompt_zh": "使用局部证据 chunk 回答数据集、评测数据或基准相关问题。在证据支持时给出数据集名称、规模、语言或实验设置，并引用 chunk 编号。"
+    },
+    "fact_qa": {
+      "strategy": "LADRAG",
+      "prompt": "Answer the factual question using the provided chunks. Keep the answer short and cite the chunk ids that contain the facts.",
+      "prompt_zh": "使用给定 chunk 回答事实型问题。答案保持简短，并引用包含事实依据的 chunk 编号。"
+    }
+  }
+}

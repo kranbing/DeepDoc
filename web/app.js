@@ -49,7 +49,7 @@ const state = {
     pointerId: null,
     mode: null,
   },
-  retrievalMode: "rag",
+  retrievalMode: "auto",
 };
 
 let suppressScrollSync = false;
@@ -825,6 +825,20 @@ async function focusChunkById(chunkId, { source = "chunk_browser", retrievalChun
   }
 }
 
+async function handleLadGraphJumpMessage(payload) {
+  const doc = getSelectedDoc();
+  const chunkId = String(payload?.chunkId || "").trim();
+  if (!doc?.id || !chunkId) return;
+  if (payload?.docId && String(payload.docId) !== String(doc.id)) return;
+  setViewMode("document");
+  if (doc.isPdf) {
+    doc.pdfViewMode = "parsed";
+    state.currentPage = Number(payload?.pageNo) || state.currentPage || 1;
+    $("#pageNum").value = String(state.currentPage);
+  }
+  await focusChunkById(chunkId, { source: "lad_graph" });
+}
+
 async function refreshChunkExplorerForDoc(docId, { keepPage = true } = {}) {
   if (!docId || !isDiskWorkspaceProject()) return;
   const pageData = await fetchDocChunksByPageApi(docId);
@@ -930,6 +944,13 @@ function isPdfParsedView(doc) {
     doc.ocrBlocksByPage?.length &&
     getParsedPdfPages(doc).length > 0
   );
+}
+
+function updateDocumentStatusBarVisibility(doc = getSelectedDoc()) {
+  const top = document.querySelector(".doc-top");
+  if (!top) return;
+  const hideForGraph = !!(state.viewMode === "document" && doc?.isPdf && doc.pdfViewMode === "graph");
+  top.hidden = hideForGraph;
 }
 
 function updateParseOcrButton() {
@@ -1248,6 +1269,7 @@ function setViewMode(mode) {
 
 /** 中间顶栏标题：文档名 / 数据库名 / 交付物文件名 */
 function renderCenterHeader() {
+  updateDocumentStatusBarVisibility();
   if (state.viewMode === "database") {
     const db = getSelectedDb();
     if (!db) {
@@ -1842,6 +1864,7 @@ function setSelectedDoc(docId, { keepMessages = false } = {}) {
 
 function renderDocHeader() {
   const doc = getSelectedDoc();
+  updateDocumentStatusBarVisibility(doc);
   if (!doc) {
     $("#docName").textContent = "请选择一个文件";
     $("#docSubmeta").textContent = "-";
@@ -1902,6 +1925,7 @@ function renderDocumentContinuous() {
   const pagesWrap = $("#pages");
 
   document.documentElement.style.setProperty("--zoom", String(state.zoom));
+  updateDocumentStatusBarVisibility(doc);
 
   if (doc && doc.isPdf) {
     if (doc.pdfViewMode === "graph") {
@@ -1916,6 +1940,7 @@ function renderDocumentContinuous() {
       $("#pageTotal").textContent = "/ 1";
       $("#pageNum").value = "1";
       renderViewSwitcher(doc);
+      renderChunkInspector();
       return;
     }
     const images = doc.pdfPageImages;
@@ -2723,6 +2748,15 @@ function setupEventHandlers() {
     }).catch(() => {});
   });
 
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin) return;
+    const payload = event.data;
+    if (!payload || payload.type !== "deepdoc:jumpToChunk") return;
+    void handleLadGraphJumpMessage(payload).catch((err) => {
+      console.warn("[app] LAD graph chunk jump failed", err);
+    });
+  });
+
   $("#fileSearch").addEventListener("input", () => {
     const q = $("#fileSearch").value.trim().toLowerCase();
     if (!q) state.filteredDocs = state.docs.slice();
@@ -2973,12 +3007,22 @@ function setupEventHandlers() {
 
   const btnMode = $("#btnRetrievalMode");
   if (btnMode) {
-    btnMode.addEventListener("click", () => {
-      const next = state.retrievalMode === "rag" ? "lad" : "rag";
-      state.retrievalMode = next;
-      btnMode.dataset.mode = next;
+    const applyRetrievalModeLabel = () => {
+      btnMode.dataset.mode = state.retrievalMode;
       const label = btnMode.querySelector(".retrieval-mode-label");
-      if (label) label.textContent = next.toUpperCase();
+      if (label) label.textContent = state.retrievalMode.toUpperCase();
+      btnMode.title =
+        state.retrievalMode === "auto"
+          ? "AUTO: 自动判断任务类型并选择 RAG/LADRAG"
+          : `${state.retrievalMode.toUpperCase()}: 强制使用该检索模式`;
+    };
+    applyRetrievalModeLabel();
+    btnMode.addEventListener("click", () => {
+      const modes = ["auto", "rag", "lad"];
+      const now = modes.indexOf(state.retrievalMode);
+      const next = modes[(now + 1) % modes.length];
+      state.retrievalMode = next;
+      applyRetrievalModeLabel();
     });
   }
 

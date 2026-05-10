@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 ROOT = Path(__file__).resolve().parents[3]
-LAD_DATA_DIR = ROOT / "test" / "lad_rag_test" / "data"
+LAD_DATA_DIR = ROOT / "test" / "8-lad_rag_test" / "data"
 REPORT_JSON_PATH = Path(__file__).parent / "lad_rag_structural_report.json"
 REPORT_MD_PATH = Path(__file__).parent / "lad_rag_structural_report.md"
 

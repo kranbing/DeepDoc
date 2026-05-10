@@ -1,0 +1,571 @@
+{
+  "generatedAt": "2026-05-10T16:10:01.745219",
+  "testset": "D:\\AI\\ceate_design\\DeepDoc-main\\test\\8-lad_rag_test\\data\\qasper_lad_testset.json",
+  "configs": {
+    "stable": {
+      "model": "deepseek-chat",
+      "temperature": 0.1,
+      "top_p": 0.8,
+      "max_tokens": 512,
+      "timeout_seconds": 120,
+      "max_retries": 2
+    },
+    "balanced": {
+      "model": "deepseek-chat",
+      "temperature": 0.2,
+      "top_p": 0.9,
+      "max_tokens": 768,
+      "timeout_seconds": 120,
+      "max_retries": 2
+    },
+    "exploratory": {
+      "model": "deepseek-chat",
+      "temperature": 0.35,
+      "top_p": 0.95,
+      "max_tokens": 1100,
+      "timeout_seconds": 120,
+      "max_retries": 2
+    }
+  },
+  "summary": [
+    {
+      "mode": "balanced",
+      "total": 6,
+      "error_rate": 0.0,
+      "format_valid_rate": 1.0,
+      "citation_present_rate": 1.0,
+      "avg_latency_ms": 1968.83,
+      "avg_answer_length": 184.0
+    },
+    {
+      "mode": "exploratory",
+      "total": 6,
+      "error_rate": 0.0,
+      "format_valid_rate": 1.0,
+      "citation_present_rate": 1.0,
+      "avg_latency_ms": 2001.33,
+      "avg_answer_length": 131.17
+    },
+    {
+      "mode": "stable",
+      "total": 6,
+      "error_rate": 0.0,
+      "format_valid_rate": 1.0,
+      "citation_present_rate": 1.0,
+      "avg_latency_ms": 2032.33,
+      "avg_answer_length": 159.67
+    }
+  ],
+  "rows": [
+    {
+      "case_id": "qasper_0001",
+      "question": "which multilingual approaches do they compare with?",
+      "mode": "stable",
+      "task_type": "comparison_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_5"
+      ],
+      "answer_length": 137,
+      "answer": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+      "raw_response": {
+        "answer": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 2211,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0001",
+      "question": "which multilingual approaches do they compare with?",
+      "mode": "balanced",
+      "task_type": "comparison_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_5"
+      ],
+      "answer_length": 137,
+      "answer": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+      "raw_response": {
+        "answer": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1795,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0001",
+      "question": "which multilingual approaches do they compare with?",
+      "mode": "exploratory",
+      "task_type": "comparison_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_5"
+      ],
+      "answer_length": 100,
+      "answer": "They compare with pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+      "raw_response": {
+        "answer": "They compare with pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1948,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0002",
+      "question": "what are the pivot-based baselines?",
+      "mode": "stable",
+      "task_type": "comparison_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_6"
+      ],
+      "answer_length": 311,
+      "answer": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+      "raw_response": {
+        "answer": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_6"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 2561,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0002",
+      "question": "what are the pivot-based baselines?",
+      "mode": "balanced",
+      "task_type": "comparison_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 3,
+      "cited_chunk_ids": [
+        "evidence_2",
+        "evidence_4",
+        "evidence_6"
+      ],
+      "answer_length": 424,
+      "answer": "The pivot-based baselines are pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps, using MNMT to translate source to pivot then to target in two separate steps with each step receiving supervised signal of parallel corpora (evidence_2, evidence_4). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+      "raw_response": {
+        "answer": "The pivot-based baselines are pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps, using MNMT to translate source to pivot then to target in two separate steps with each step receiving supervised signal of parallel corpora (evidence_2, evidence_4). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+        "cited_chunk_ids": [
+          "evidence_2",
+          "evidence_4",
+          "evidence_6"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 2683,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0002",
+      "question": "what are the pivot-based baselines?",
+      "mode": "exploratory",
+      "task_type": "comparison_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_6"
+      ],
+      "answer_length": 311,
+      "answer": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+      "raw_response": {
+        "answer": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_6"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 2791,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0003",
+      "question": "which datasets did they experiment with?",
+      "mode": "stable",
+      "task_type": "dataset_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_3",
+        "evidence_4"
+      ],
+      "answer_length": 20,
+      "answer": "Europarl and MultiUN",
+      "raw_response": {
+        "answer": "Europarl and MultiUN",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_3",
+          "evidence_4"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1610,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0003",
+      "question": "which datasets did they experiment with?",
+      "mode": "balanced",
+      "task_type": "dataset_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_3",
+        "evidence_4"
+      ],
+      "answer_length": 20,
+      "answer": "Europarl and MultiUN",
+      "raw_response": {
+        "answer": "Europarl and MultiUN",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_3",
+          "evidence_4"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1528,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0003",
+      "question": "which datasets did they experiment with?",
+      "mode": "exploratory",
+      "task_type": "dataset_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_3",
+        "evidence_4"
+      ],
+      "answer_length": 20,
+      "answer": "Europarl and MultiUN",
+      "raw_response": {
+        "answer": "Europarl and MultiUN",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_3",
+          "evidence_4"
+        ],
+        "follow_up_questions": null
+      },
+      "latency_ms": 1349,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0004",
+      "question": "what language pairs are explored?",
+      "mode": "stable",
+      "task_type": "fact_qa",
+      "retrieval_mode": "lad",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_5"
+      ],
+      "answer_length": 406,
+      "answer": "The language pairs explored are: French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr), Romanian-English-German (Ro-En-De) for Europarl; and English-Arabic (En-Ar), English-Spanish (En-Es), English-Russian (En-Ru), and zero-shot pairs Arabic-Spanish (Ar-Es), Arabic-Russian (Ar-Ru), Spanish-Arabic (Es-Ar), Spanish-Russian (Es-Ru), Russian-Arabic (Ru-Ar), Russian-Spanish (Ru-Es) for MultiUN.",
+      "raw_response": {
+        "answer": "The language pairs explored are: French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr), Romanian-English-German (Ro-En-De) for Europarl; and English-Arabic (En-Ar), English-Spanish (En-Es), English-Russian (En-Ru), and zero-shot pairs Arabic-Spanish (Ar-Es), Arabic-Russian (Ar-Ru), Spanish-Arabic (Es-Ar), Spanish-Russian (Es-Ru), Russian-Arabic (Ru-Ar), Russian-Spanish (Ru-Es) for MultiUN.",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 3188,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0004",
+      "question": "what language pairs are explored?",
+      "mode": "balanced",
+      "task_type": "fact_qa",
+      "retrieval_mode": "lad",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_5"
+      ],
+      "answer_length": 424,
+      "answer": "The language pairs explored are: for MultiUN corpus: Arabic-English, Spanish-English, Russian-English, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. For Europarl corpus: French-English, English-Spanish, French-Spanish (zero-shot), German-English, English-French, German-French (zero-shot), Romanian-English, English-German, Romanian-German (zero-shot).",
+      "raw_response": {
+        "answer": "The language pairs explored are: for MultiUN corpus: Arabic-English, Spanish-English, Russian-English, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. For Europarl corpus: French-English, English-Spanish, French-Spanish (zero-shot), German-English, English-French, German-French (zero-shot), Romanian-English, English-German, Romanian-German (zero-shot).",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 3038,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0004",
+      "question": "what language pairs are explored?",
+      "mode": "exploratory",
+      "task_type": "fact_qa",
+      "retrieval_mode": "lad",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 4,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2",
+        "evidence_4",
+        "evidence_5"
+      ],
+      "answer_length": 272,
+      "answer": "MultiUN corpus: English-Arabic, English-Spanish, English-Russian, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. Europarl corpus: French-English-Spanish, German-English-French, Romanian-English-German.",
+      "raw_response": {
+        "answer": "MultiUN corpus: English-Arabic, English-Spanish, English-Russian, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. Europarl corpus: French-English-Spanish, German-English-French, Romanian-English-German.",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 2358,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0005",
+      "question": "what ner models were evaluated?",
+      "mode": "stable",
+      "task_type": "method_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 1,
+      "cited_chunk_ids": [
+        "evidence_1"
+      ],
+      "answer_length": 77,
+      "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+      "raw_response": {
+        "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+        "cited_chunk_ids": [
+          "evidence_1"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1452,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0005",
+      "question": "what ner models were evaluated?",
+      "mode": "balanced",
+      "task_type": "method_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 2,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_5"
+      ],
+      "answer_length": 92,
+      "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF) were evaluated.",
+      "raw_response": {
+        "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF) were evaluated.",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_5"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1581,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0005",
+      "question": "what ner models were evaluated?",
+      "mode": "exploratory",
+      "task_type": "method_qa",
+      "retrieval_mode": "rag",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 1,
+      "cited_chunk_ids": [
+        "evidence_1"
+      ],
+      "answer_length": 77,
+      "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+      "raw_response": {
+        "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+        "cited_chunk_ids": [
+          "evidence_1"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1607,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0006",
+      "question": "what is the source of the news sentences?",
+      "mode": "stable",
+      "task_type": "fact_qa",
+      "retrieval_mode": "lad",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 2,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2"
+      ],
+      "answer_length": 7,
+      "answer": "ilur.am",
+      "raw_response": {
+        "answer": "ilur.am",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1172,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0006",
+      "question": "what is the source of the news sentences?",
+      "mode": "balanced",
+      "task_type": "fact_qa",
+      "retrieval_mode": "lad",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 2,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2"
+      ],
+      "answer_length": 7,
+      "answer": "ilur.am",
+      "raw_response": {
+        "answer": "ilur.am",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1188,
+      "error": ""
+    },
+    {
+      "case_id": "qasper_0006",
+      "question": "what is the source of the news sentences?",
+      "mode": "exploratory",
+      "task_type": "fact_qa",
+      "retrieval_mode": "lad",
+      "format_valid": true,
+      "citation_field_present": true,
+      "citation_count": 2,
+      "cited_chunk_ids": [
+        "evidence_1",
+        "evidence_2"
+      ],
+      "answer_length": 7,
+      "answer": "ilur.am",
+      "raw_response": {
+        "answer": "ilur.am",
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2"
+        ],
+        "follow_up_questions": []
+      },
+      "latency_ms": 1955,
+      "error": ""
+    }
+  ]
+}
