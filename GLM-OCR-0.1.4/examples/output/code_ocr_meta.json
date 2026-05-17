@@ -1,0 +1,10 @@
+{
+  "usage": {
+    "prompt_tokens": 510,
+    "total_tokens": 1032,
+    "completion_tokens": 522,
+    "prompt_tokens_details": null
+  },
+  "model": "glm-ocr",
+  "image": "D:\\AI\\创新设计\\deep-doc\\GLM-OCR-0.1.4\\examples\\source\\code.png"
+}

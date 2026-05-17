@@ -1,0 +1,171 @@
+{
+  "builder_name": "qasper",
+  "citation": "@inproceedings{Dasigi2021ADO,\n  title={A Dataset of Information-Seeking Questions and Answers Anchored in Research Papers},\n  author={Pradeep Dasigi and Kyle Lo and Iz Beltagy and Arman Cohan and Noah A. Smith and Matt Gardner},\n  year={2021}\n}\n",
+  "config_name": "qasper",
+  "dataset_name": "qasper",
+  "dataset_size": 53855530,
+  "description": "A dataset containing 1585 papers with 5049 information-seeking questions asked by regular readers of NLP papers, and answered by a separate set of NLP practitioners.\n",
+  "download_checksums": {
+    "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz": {
+      "num_bytes": 10835856,
+      "checksum": null
+    },
+    "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz": {
+      "num_bytes": 3865061,
+      "checksum": null
+    }
+  },
+  "download_size": 14700917,
+  "features": {
+    "id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "title": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "abstract": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "full_text": {
+      "feature": {
+        "section_name": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "paragraphs": [
+          {
+            "dtype": "string",
+            "_type": "Value"
+          }
+        ]
+      },
+      "_type": "Sequence"
+    },
+    "qas": {
+      "feature": {
+        "question": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "question_id": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "nlp_background": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "topic_background": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "paper_read": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "search_query": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "question_writer": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "answers": {
+          "feature": {
+            "answer": {
+              "unanswerable": {
+                "dtype": "bool",
+                "_type": "Value"
+              },
+              "extractive_spans": {
+                "feature": {
+                  "dtype": "string",
+                  "_type": "Value"
+                },
+                "_type": "Sequence"
+              },
+              "yes_no": {
+                "dtype": "bool",
+                "_type": "Value"
+              },
+              "free_form_answer": {
+                "dtype": "string",
+                "_type": "Value"
+              },
+              "evidence": {
+                "feature": {
+                  "dtype": "string",
+                  "_type": "Value"
+                },
+                "_type": "Sequence"
+              },
+              "highlighted_evidence": {
+                "feature": {
+                  "dtype": "string",
+                  "_type": "Value"
+                },
+                "_type": "Sequence"
+              }
+            },
+            "annotation_id": {
+              "dtype": "string",
+              "_type": "Value"
+            },
+            "worker_id": {
+              "dtype": "string",
+              "_type": "Value"
+            }
+          },
+          "_type": "Sequence"
+        }
+      },
+      "_type": "Sequence"
+    },
+    "figures_and_tables": {
+      "feature": {
+        "caption": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "file": {
+          "dtype": "string",
+          "_type": "Value"
+        }
+      },
+      "_type": "Sequence"
+    }
+  },
+  "homepage": "https://allenai.org/data/qasper",
+  "license": "CC BY 4.0",
+  "size_in_bytes": 68556447,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 28466446,
+      "num_examples": 888,
+      "dataset_name": "qasper"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 9900193,
+      "num_examples": 281,
+      "dataset_name": "qasper"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 15488891,
+      "num_examples": 416,
+      "dataset_name": "qasper"
+    }
+  },
+  "version": {
+    "version_str": "0.3.0",
+    "major": 0,
+    "minor": 3,
+    "patch": 0
+  }
+}

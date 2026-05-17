@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(conda run *)",
+      "Bash(curl -s http://127.0.0.1:8765/api/kg/graph.json)",
+      "Bash(curl -s http://127.0.0.1:8765/api/kg/graph.html)",
+      "Bash(pkill -f \"uvicorn backend.main:app\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8765/api/kg/graph.json)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 27276)",
+      "Bash(taskkill //F //PID 30288)",
+      "Bash(python -c ' *)",
+      "Bash(curl -sI \"https://cdn.bootcdn.net/ajax/libs/d3/7.9.0/d3.min.js\")",
+      "Bash(tasklist)",
+      "Bash(taskkill //F //PID 9256)",
+      "Bash(PYTHONIOENCODING=utf-8 conda run --no-banner -n deepdoc python test/run_kg_pipeline.py)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/miniconda/envs/deepdoc/python.exe test/run_kg_pipeline.py)",
+      "Bash(taskkill //F //PID 30460)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/miniconda/envs/deepdoc/python.exe -m uvicorn backend.main:app --host 127.0.0.1 --port 8765)",
+      "Bash(taskkill //F //PID 28856)",
+      "Read(//c/Users/Leander/.claude/**)",
+      "WebSearch",
+      "WebFetch(domain:observablehq.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/miniconda/envs/deepdoc/python.exe -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 D:/miniconda/envs/deepdoc/python.exe *)"
+    ]
+  }
+}

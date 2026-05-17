@@ -1,0 +1,9 @@
+{
+  "source": "D:\\AI\\ceate_design\\DeepDoc-main\\test\\Qasper",
+  "generated_from": "allenai/qasper",
+  "splits": [
+    "train",
+    "validation",
+    "test"
+  ]
+}

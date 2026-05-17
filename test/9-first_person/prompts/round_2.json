@@ -1,0 +1,96 @@
+{
+  "round": 2,
+  "description": "Revised prompts after round-1 errors: stricter evidence use, structured output, and explicit insufficient-evidence behavior.",
+  "prompts": {
+    "local_evidence_qa": {
+      "strategy": "LADRAG",
+      "changed_from_previous": [
+        "Added a strict local-only rule to reduce answers from unrelated chunks.",
+        "Required structured JSON with answer, cited_chunk_ids, confidence, and insufficient_evidence.",
+        "Added explicit refusal when the local chunks do not support the answer."
+      ],
+      "changed_from_previous_zh": [
+        "增加“只能使用局部 chunk”的严格约束，减少无关 chunk 导致的回答偏移。",
+        "要求结构化 JSON 输出，字段包括 answer、cited_chunk_ids、confidence、insufficient_evidence。",
+        "增加证据不足时的显式拒答规则。"
+      ],
+      "prompt": "Use only the provided local chunks. Do not use outside knowledge. Return JSON with keys: answer, cited_chunk_ids, confidence, insufficient_evidence. If the answer is not directly supported by the chunks, set insufficient_evidence=true and explain the missing evidence in answer.",
+      "prompt_zh": "只能使用给定的局部 chunk，不得使用外部知识。返回 JSON，字段包括 answer、cited_chunk_ids、confidence、insufficient_evidence。如果答案不能被 chunk 直接支持，将 insufficient_evidence 设为 true，并在 answer 中说明缺少什么证据。"
+    },
+    "multi_evidence_qa": {
+      "strategy": "RAG",
+      "changed_from_previous": [
+        "Added an instruction to merge evidence across chunks instead of relying on the first hit.",
+        "Required at least two cited chunks when the question needs multiple facts.",
+        "Added a missing-evidence flag for partial retrieval coverage."
+      ],
+      "changed_from_previous_zh": [
+        "增加跨 chunk 综合证据的要求，避免只依赖第一个命中 chunk。",
+        "当问题需要多个事实时，要求引用多个支撑 chunk。",
+        "增加部分证据缺失时的标记和说明。"
+      ],
+      "prompt": "Use the retrieved chunks to synthesize an answer across all relevant evidence. Return JSON with keys: answer, cited_chunk_ids, evidence_summary, confidence, insufficient_evidence. For multi-part questions, cite every chunk that supports a distinct part. If some required evidence is missing, state that explicitly.",
+      "prompt_zh": "使用检索到的 chunk 综合所有相关证据作答。返回 JSON，字段包括 answer、cited_chunk_ids、evidence_summary、confidence、insufficient_evidence。对于多部分问题，每个独立事实都要引用对应支撑 chunk。如果部分必要证据缺失，需要明确说明。"
+    },
+    "method_qa": {
+      "strategy": "RAG",
+      "changed_from_previous": [
+        "Separated method components from experimental settings.",
+        "Added output fields that make omissions easier to detect.",
+        "Added a rule to avoid over-generalizing from background sections."
+      ],
+      "changed_from_previous_zh": [
+        "将方法组成与实验设置拆开，减少回答遗漏。",
+        "增加结构化字段，便于检查模型是否覆盖关键技术点。",
+        "增加区分本文方法与相关工作/背景内容的约束。"
+      ],
+      "prompt": "Answer the method question using retrieved chunks only. Return JSON with keys: answer, method_components, experimental_settings, cited_chunk_ids, confidence, insufficient_evidence. Distinguish the paper's proposed method from related work or background.",
+      "prompt_zh": "只能使用检索 chunk 回答方法类问题。返回 JSON，字段包括 answer、method_components、experimental_settings、cited_chunk_ids、confidence、insufficient_evidence。需要区分论文提出的方法、相关工作和背景内容。"
+    },
+    "comparison_qa": {
+      "strategy": "RAG",
+      "changed_from_previous": [
+        "Added side-by-side comparison structure.",
+        "Required evidence for each compared item.",
+        "Added fallback when only one side of the comparison is retrieved."
+      ],
+      "changed_from_previous_zh": [
+        "增加并列比较结构，避免比较维度混乱。",
+        "要求每个被比较对象都必须有对应证据。",
+        "当只检索到一侧证据时，要求说明缺失，而不是自行推断。"
+      ],
+      "prompt": "Compare only the items supported by the retrieved chunks. Return JSON with keys: answer, compared_items, comparison_basis, cited_chunk_ids, confidence, insufficient_evidence. Cite evidence for each compared item. If one side is missing, say so instead of inferring it.",
+      "prompt_zh": "只比较检索 chunk 中有证据支持的对象。返回 JSON，字段包括 answer、compared_items、comparison_basis、cited_chunk_ids、confidence、insufficient_evidence。每个比较对象都要引用证据。如果某一侧证据缺失，需要说明缺失，而不是推断。"
+    },
+    "dataset_qa": {
+      "strategy": "LADRAG",
+      "changed_from_previous": [
+        "Added dataset-specific slots to reduce vague answers.",
+        "Kept LAD-RAG because QASPER dataset questions are usually local and evidence-limited.",
+        "Added strict citation requirements."
+      ],
+      "changed_from_previous_zh": [
+        "增加数据集专用字段，减少泛泛而谈的回答。",
+        "保留 LAD-RAG，因为 QASPER 中数据集问题通常具有局部证据特征。",
+        "加强引用要求，避免无依据补充数据集属性。"
+      ],
+      "prompt": "Use only local chunks about datasets, benchmarks, or evaluation settings. Return JSON with keys: answer, dataset_names, dataset_properties, cited_chunk_ids, confidence, insufficient_evidence. Include names, sizes, languages, splits, or metrics only when directly supported.",
+      "prompt_zh": "只能使用关于数据集、基准或评测设置的局部 chunk。返回 JSON，字段包括 answer、dataset_names、dataset_properties、cited_chunk_ids、confidence、insufficient_evidence。只有在证据直接支持时，才写入名称、规模、语言、划分或指标。"
+    },
+    "fact_qa": {
+      "strategy": "LADRAG",
+      "changed_from_previous": [
+        "Added short-answer constraint.",
+        "Required one or more cited chunks.",
+        "Added direct unsupported-answer handling."
+      ],
+      "changed_from_previous_zh": [
+        "增加一到两句话的短答案约束。",
+        "要求至少引用一个支撑 chunk。",
+        "增加无证据支撑时的处理方式。"
+      ],
+      "prompt": "Answer the factual question in one or two sentences using only the provided chunks. Return JSON with keys: answer, cited_chunk_ids, confidence, insufficient_evidence. Do not add unstated details. If no cited chunk supports the answer, set insufficient_evidence=true.",
+      "prompt_zh": "只使用给定 chunk，用一到两句话回答事实型问题。返回 JSON，字段包括 answer、cited_chunk_ids、confidence、insufficient_evidence。不要添加证据中没有的信息。如果没有任何引用 chunk 支撑答案，将 insufficient_evidence 设为 true。"
+    }
+  }
+}

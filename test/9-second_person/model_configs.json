@@ -1,0 +1,26 @@
+{
+  "stable": {
+    "model": "deepseek-chat",
+    "temperature": 0.1,
+    "top_p": 0.8,
+    "max_tokens": 512,
+    "timeout_seconds": 120,
+    "max_retries": 2
+  },
+  "balanced": {
+    "model": "deepseek-chat",
+    "temperature": 0.2,
+    "top_p": 0.9,
+    "max_tokens": 768,
+    "timeout_seconds": 120,
+    "max_retries": 2
+  },
+  "exploratory": {
+    "model": "deepseek-chat",
+    "temperature": 0.35,
+    "top_p": 0.95,
+    "max_tokens": 1100,
+    "timeout_seconds": 120,
+    "max_retries": 2
+  }
+}

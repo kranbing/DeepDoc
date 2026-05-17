@@ -1,0 +1,2206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LAD Chunk Graph</title>
+  <style>
+    :root {
+      --bg: #eef2f3;
+      --panel: #ffffff;
+      --ink: #1f2a2e;
+      --muted: #66747b;
+      --line: #d6dee2;
+      --accent: #0f766e;
+      --accent-2: #b45309;
+      --section: #1d4ed8;
+      --chunk: #475569;
+      --heading: #0f766e;
+      --image: #7c3aed;
+      --shadow: 0 12px 36px rgba(24, 39, 46, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "Noto Sans SC", "Segoe UI", sans-serif;
+      background:
+        linear-gradient(115deg, rgba(15, 118, 110, 0.08), transparent 36%),
+        linear-gradient(245deg, rgba(180, 83, 9, 0.08), transparent 32%),
+        var(--bg);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 320px minmax(420px, 1fr) 360px;
+      gap: 14px;
+      height: 100vh;
+      padding: 14px;
+    }
+
+    .panel {
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar,
+    .detail {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 116px;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px;
+      background: #f8fafb;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tree {
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .tree-item {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 6px;
+      align-items: center;
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      padding: 7px 8px;
+      color: var(--ink);
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .tree-item:hover,
+    .tree-item.active {
+      background: #e6f3f1;
+    }
+
+    .tree-item .toggle {
+      width: 18px;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .tree-item .label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .tree-item .count {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .children {
+      display: none;
+      padding-left: 14px;
+    }
+
+    .children.open {
+      display: block;
+    }
+
+    .canvas-panel {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+    }
+
+    .graph-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .graph-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 730;
+    }
+
+    .graph-actions {
+      display: flex;
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 10px;
+      color: var(--ink);
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      border-color: #93c5bd;
+      background: #eef8f6;
+    }
+
+    .btn.active {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .icon-btn {
+      width: 38px;
+      padding: 7px 0;
+      font-weight: 760;
+      text-align: center;
+    }
+
+    .graph-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(#dbe4e8 1px, transparent 1px),
+        linear-gradient(90deg, #dbe4e8 1px, transparent 1px),
+        #f7fafb;
+      background-size: 28px 28px;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    svg.panning {
+      cursor: grabbing;
+    }
+
+    .edge {
+      stroke: #9aaab2;
+      stroke-width: 1.4;
+      fill: none;
+    }
+
+    .edge.parent {
+      stroke: #9aaab2;
+      stroke-width: 1.6;
+    }
+
+    .edge.next {
+      stroke-dasharray: 5 4;
+    }
+
+    .edge.dim {
+      opacity: 0.12;
+    }
+
+    .edge.branch-focus {
+      stroke: #7f8d96;
+      stroke-width: 2.4;
+      stroke-dasharray: none;
+      opacity: 1;
+    }
+
+    .node {
+      cursor: pointer;
+      transition: opacity 160ms ease;
+    }
+
+    .node.dim {
+      opacity: 0.22;
+    }
+
+    .node rect {
+      transition: stroke-width 160ms ease, filter 160ms ease;
+    }
+
+    .node rect {
+      stroke-width: 1.6;
+      filter: drop-shadow(0 5px 10px rgba(31, 42, 46, 0.12));
+    }
+
+    .node text {
+      fill: #fff;
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .node.section rect {
+      fill: var(--section);
+      stroke: #1e40af;
+    }
+
+    .node.heading rect {
+      fill: var(--heading);
+      stroke: #115e59;
+    }
+
+    .node.image rect {
+      fill: var(--image);
+      stroke: #5b21b6;
+    }
+
+    .node.chunk rect {
+      fill: var(--chunk);
+      stroke: #334155;
+    }
+
+    .node.branch-focus rect {
+      filter: drop-shadow(0 8px 14px rgba(31, 42, 46, 0.16));
+    }
+
+    .empty {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty.show {
+      display: flex;
+    }
+
+    .detail-body {
+      flex: 1;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid #edf1f3;
+      font-size: 13px;
+    }
+
+    .kv span:first-child {
+      color: var(--muted);
+    }
+
+    .content-box {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      min-height: 180px;
+      max-height: 48vh;
+      overflow: auto;
+      background: #f8fafb;
+      white-space: pre-wrap;
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: var(--accent);
+      background: #effaf8;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .pill:disabled {
+      color: var(--muted);
+      background: #f4f6f7;
+      cursor: default;
+    }
+
+    .load-error {
+      margin-top: 10px;
+      color: #991b1b;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1120px) {
+      .app {
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: minmax(420px, 1fr) 360px;
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .detail {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+      }
+
+      .panel {
+        min-height: 360px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    body.embed-radial {
+      background: #f7fafb;
+    }
+
+    body.embed-radial .app {
+      display: flex;
+      height: 100vh;
+      min-height: 0;
+      padding: 0;
+      gap: 0;
+    }
+
+    body.embed-radial .sidebar,
+    body.embed-radial .detail {
+      display: none;
+    }
+
+    body.embed-radial .canvas-panel {
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    body.embed-radial .graph-topbar {
+      padding: 8px 10px;
+    }
+
+    body.embed-radial #hierarchyViewBtn,
+    body.embed-radial #radialViewBtn,
+    body.embed-radial #showDocBtn {
+      display: none;
+    }
+
+    body.embed-radial .graph-wrap {
+      min-height: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel sidebar">
+      <div class="header">
+        <h1 class="title">LAD Chunk Graph</h1>
+        <div id="docMeta" class="subtitle">正在加载 lad_chunk.json</div>
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="搜索章节或 chunk 内容" />
+          <select id="typeFilter" aria-label="类型筛选">
+            <option value="all">全部类型</option>
+            <option value="heading">标题</option>
+            <option value="text">文本</option>
+            <option value="image">图像</option>
+            <option value="table">表格</option>
+          </select>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong id="statChunks">0</strong><span>Chunks</span></div>
+          <div class="stat"><strong id="statSections">0</strong><span>Sections</span></div>
+          <div class="stat"><strong id="statPages">0</strong><span>Pages</span></div>
+        </div>
+        <div id="loadError" class="load-error"></div>
+      </div>
+      <div id="tree" class="tree"></div>
+    </section>
+
+    <section class="panel canvas-panel">
+      <div class="graph-topbar">
+        <div id="graphTitle" class="graph-title">选择左侧章节或节点</div>
+        <div class="graph-actions">
+          <button id="hierarchyViewBtn" class="btn active" type="button">层级</button>
+          <button id="radialViewBtn" class="btn" type="button">放射</button>
+          <button id="zoomOutBtn" class="btn icon-btn" type="button" title="缩小">−</button>
+          <button id="zoomInBtn" class="btn icon-btn" type="button" title="放大">+</button>
+          <button id="fitBtn" class="btn" type="button">适配</button>
+          <button id="showDocBtn" class="btn" type="button">文档</button>
+        </div>
+      </div>
+      <div class="graph-wrap">
+        <svg id="graph" role="img" aria-label="LAD chunk graph"></svg>
+        <div id="emptyState" class="empty">没有匹配的节点。调整搜索词或类型筛选后重试。</div>
+      </div>
+    </section>
+
+    <section class="panel detail">
+      <div class="header">
+        <h2 id="detailTitle" class="title">节点详情</h2>
+        <div id="detailSub" class="subtitle">点击章节或 chunk 查看结构字段和内容。</div>
+      </div>
+      <div id="detailBody" class="detail-body"></div>
+    </section>
+  </main>
+
+  <script>
+    const embedMode = new URLSearchParams(window.location.search).get("embed");
+    const isRadialEmbed = embedMode === "radial";
+    if (isRadialEmbed) {
+      document.body.classList.add("embed-radial");
+    }
+
+    const state = {
+      data: null,
+      sectionsById: new Map(),
+      sectionChildren: new Map(),
+      chunksById: new Map(),
+      chunksBySection: new Map(),
+      selected: null,
+      currentSectionId: null,
+      graphMode: isRadialEmbed ? "radial" : "hierarchy",
+      radialExpandedId: "__document__",
+      radialHighlightId: "__document__",
+      radialAnimation: null,
+      radialRecenterOnRoot: true,
+      renderedNodes: [],
+      suppressNextClick: false,
+      baseViewBox: null,
+      viewBox: null,
+      pan: null
+    };
+
+    const els = {
+      docMeta: document.getElementById("docMeta"),
+      searchInput: document.getElementById("searchInput"),
+      typeFilter: document.getElementById("typeFilter"),
+      statChunks: document.getElementById("statChunks"),
+      statSections: document.getElementById("statSections"),
+      statPages: document.getElementById("statPages"),
+      loadError: document.getElementById("loadError"),
+      tree: document.getElementById("tree"),
+      graph: document.getElementById("graph"),
+      graphTitle: document.getElementById("graphTitle"),
+      detailTitle: document.getElementById("detailTitle"),
+      detailSub: document.getElementById("detailSub"),
+      detailBody: document.getElementById("detailBody"),
+      emptyState: document.getElementById("emptyState"),
+      hierarchyViewBtn: document.getElementById("hierarchyViewBtn"),
+      radialViewBtn: document.getElementById("radialViewBtn"),
+      fitBtn: document.getElementById("fitBtn"),
+      zoomInBtn: document.getElementById("zoomInBtn"),
+      zoomOutBtn: document.getElementById("zoomOutBtn"),
+      showDocBtn: document.getElementById("showDocBtn")
+    };
+
+    init();
+
+    async function init() {
+      bindEvents();
+      try {
+        const response = await fetch("lad_chunk.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        loadData(data);
+      } catch (error) {
+        els.loadError.textContent = "无法自动读取 lad_chunk.json。请通过本地 HTTP 服务打开本页面，例如 python -m http.server 8766。";
+        console.error(error);
+      }
+    }
+
+    function bindEvents() {
+      els.searchInput.addEventListener("input", () => renderAll());
+      els.typeFilter.addEventListener("change", () => renderAll());
+      els.hierarchyViewBtn.addEventListener("click", () => setGraphMode("hierarchy"));
+      els.radialViewBtn.addEventListener("click", () => setGraphMode("radial"));
+      els.fitBtn.addEventListener("click", () => fitGraph());
+      els.zoomInBtn.addEventListener("click", () => zoomGraph(0.82));
+      els.zoomOutBtn.addEventListener("click", () => zoomGraph(1.22));
+      els.graph.addEventListener("wheel", onGraphWheel, { passive: false });
+      els.graph.addEventListener("pointerdown", onGraphPointerDown);
+      els.graph.addEventListener("pointermove", onGraphPointerMove);
+      els.graph.addEventListener("pointerup", onGraphPointerUp);
+      els.graph.addEventListener("pointerleave", onGraphPointerUp);
+      els.graph.addEventListener("click", onGraphClick);
+      els.showDocBtn.addEventListener("click", () => {
+        state.currentSectionId = null;
+        state.selected = { kind: "document", item: state.data };
+        if (state.graphMode === "radial") {
+          startRadialRelayout("__document__");
+        }
+        renderAll();
+        showDocumentDetail();
+      });
+    }
+
+    function setGraphMode(mode) {
+      state.graphMode = mode;
+      els.hierarchyViewBtn.classList.toggle("active", mode === "hierarchy");
+      els.radialViewBtn.classList.toggle("active", mode === "radial");
+      if (mode === "radial") {
+        state.currentSectionId = null;
+        state.selected = { kind: "document", item: state.data };
+        state.radialExpandedId = "__document__";
+        state.radialHighlightId = "__document__";
+        state.radialRecenterOnRoot = true;
+        showDocumentDetail();
+      } else {
+        stopRadialAnimation();
+      }
+      renderAll();
+    }
+
+    function loadData(data) {
+      state.data = data;
+      state.sectionsById.clear();
+      state.sectionChildren.clear();
+      state.chunksById.clear();
+      state.chunksBySection.clear();
+
+      for (const section of data.structure?.sections || []) {
+        state.sectionsById.set(section.sectionId, section);
+        const parentId = section.parentId || "__root";
+        if (!state.sectionChildren.has(parentId)) {
+          state.sectionChildren.set(parentId, []);
+        }
+        state.sectionChildren.get(parentId).push(section);
+      }
+      for (const chunk of data.chunks || []) {
+        state.chunksById.set(chunk.chunkId, chunk);
+        const sectionId = chunk.sectionId || "__none";
+        if (!state.chunksBySection.has(sectionId)) {
+          state.chunksBySection.set(sectionId, []);
+        }
+        state.chunksBySection.get(sectionId).push(chunk);
+      }
+
+      els.docMeta.textContent = `${data.docName || data.docId || "Document"} · ${data.sourceChunkPath || ""}`;
+      els.statChunks.textContent = data.totalChunks || 0;
+      els.statSections.textContent = data.structure?.sectionCount || 0;
+      els.statPages.textContent = data.pageCount || 0;
+
+      const firstSection = data.structure?.sections?.[0];
+      state.currentSectionId = firstSection?.sectionId || null;
+      state.selected = firstSection ? { kind: "section", item: firstSection } : { kind: "document", item: data };
+      renderAll();
+      showSelectionDetail();
+    }
+
+    function renderAll() {
+      if (!state.data) return;
+      renderTree();
+      renderGraph();
+    }
+
+    function currentQuery() {
+      return els.searchInput.value.trim().toLowerCase();
+    }
+
+    function currentType() {
+      return els.typeFilter.value;
+    }
+
+    function matchChunk(chunk) {
+      const type = currentType();
+      const isHeading = Boolean(chunk.isHeading);
+      if (type === "heading" && !isHeading) return false;
+      if (type !== "all" && type !== "heading" && chunk.blockType !== type) return false;
+
+      const q = currentQuery();
+      if (!q) return true;
+      const haystack = [
+        chunk.chunkId,
+        chunk.cleanText,
+        chunk.sectionPathText,
+        chunk.headingText,
+        chunk.blockType
+      ].join(" ").toLowerCase();
+      return haystack.includes(q);
+    }
+
+    function matchSection(section) {
+      const q = currentQuery();
+      if (!q) return true;
+      const sectionChunks = state.chunksBySection.get(section.sectionId) || [];
+      return `${section.title} ${section.sectionId}`.toLowerCase().includes(q)
+        || sectionChunks.some(matchChunk);
+    }
+
+    function renderTree() {
+      els.tree.innerHTML = "";
+      const sections = state.data.structure?.sections || [];
+      const roots = buildSectionTree(sections);
+      const fragment = document.createDocumentFragment();
+      for (const root of roots) {
+        appendTreeNode(fragment, root, 0);
+      }
+      els.tree.appendChild(fragment);
+    }
+
+    function buildSectionTree(sections) {
+      const nodes = new Map();
+      const roots = [];
+      for (const section of sections) {
+        nodes.set(section.sectionId, { section, children: [] });
+      }
+      for (const node of nodes.values()) {
+        const parent = node.section.parentId ? nodes.get(node.section.parentId) : null;
+        if (parent) parent.children.push(node);
+        else roots.push(node);
+      }
+      return roots;
+    }
+
+    function appendTreeNode(parentEl, node, depth) {
+      if (!matchSection(node.section)) return;
+
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "tree-item";
+      if (state.currentSectionId === node.section.sectionId) row.classList.add("active");
+      row.style.paddingLeft = `${8 + depth * 12}px`;
+
+      const toggle = document.createElement("span");
+      toggle.className = "toggle";
+      toggle.textContent = node.children.length ? "▸" : "";
+
+      const label = document.createElement("span");
+      label.className = "label";
+      label.textContent = node.section.title || node.section.sectionId;
+
+      const count = document.createElement("span");
+      count.className = "count";
+      count.textContent = `${(state.chunksBySection.get(node.section.sectionId) || []).length}`;
+
+      row.append(toggle, label, count);
+      parentEl.appendChild(row);
+
+      const children = document.createElement("div");
+      children.className = "children";
+      if (state.currentSectionId === node.section.sectionId || containsSelectedSection(node)) {
+        children.classList.add("open");
+        if (node.children.length) toggle.textContent = "▾";
+      }
+      parentEl.appendChild(children);
+
+      row.addEventListener("click", () => {
+        const isOpen = children.classList.toggle("open");
+        toggle.textContent = node.children.length ? (isOpen ? "▾" : "▸") : "";
+        state.currentSectionId = node.section.sectionId;
+        state.selected = { kind: "section", item: node.section };
+        renderGraph();
+        showSelectionDetail();
+        document.querySelectorAll(".tree-item.active").forEach(item => item.classList.remove("active"));
+        row.classList.add("active");
+      });
+
+      for (const child of node.children) {
+        appendTreeNode(children, child, depth + 1);
+      }
+    }
+
+    function containsSelectedSection(node) {
+      if (!state.currentSectionId) return false;
+      if (node.section.sectionId === state.currentSectionId) return true;
+      return node.children.some(containsSelectedSection);
+    }
+
+    function renderGraph() {
+      const svg = els.graph;
+      svg.innerHTML = "";
+
+      const graphData = state.graphMode === "radial" ? buildRadialGraph() : buildHierarchyGraph();
+      const layered = applyBranchLayering(graphData.nodes, graphData.edges);
+      const nodes = layered.nodes;
+      const edges = layered.edges;
+      state.renderedNodes = nodes;
+      els.emptyState.classList.toggle("show", nodes.length === 0);
+      if (!nodes.length) return;
+
+      const width = graphData.width || Math.max(960, nodes.length * 72);
+      const height = graphData.height || Math.max(640, Math.ceil(nodes.length / 5) * 110 + 120);
+      const previousViewBox = state.viewBox ? { ...state.viewBox } : null;
+      resetGraphView(width, height);
+
+      for (const edge of edges) {
+        if (state.graphMode === "radial" && edge.type !== "parent") continue;
+        const from = nodes.find(node => node.id === edge.from);
+        const to = nodes.find(node => node.id === edge.to);
+        if (!from || !to) continue;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute(
+          "class",
+          `edge ${edge.type}${isDimBranchEdge(edge) ? " dim" : ""}${isHighlightedBranchEdge(edge) ? " branch-focus" : ""}`
+        );
+        if (edge.layout === "radial") {
+          const fromIsRoot = from.id === "__document__";
+          const toIsLevel1 = to.kind === "section" && Number(to.depth || 1) === 1;
+          const fromPoint = (fromIsRoot && toIsLevel1)
+            ? nodeCenter(from)
+            : { x: from.x + from.w, y: from.y + from.h / 2 };
+          const toPoint = (fromIsRoot && toIsLevel1)
+            ? nodeCenter(to)
+            : { x: to.x, y: to.y + to.h / 2 };
+          path.setAttribute("d", `M ${fromPoint.x} ${fromPoint.y} L ${toPoint.x} ${toPoint.y}`);
+        } else {
+          const fromCenter = nodeCenter(from);
+          const toCenter = nodeCenter(to);
+          const x1 = from.x + from.w;
+          const y1 = from.y + from.h / 2;
+          const x2 = to.x;
+          const y2 = to.y + to.h / 2;
+          const mid = x1 + Math.max(40, (x2 - x1) / 2);
+          path.setAttribute("d", `M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}`);
+        }
+        svg.appendChild(path);
+      }
+
+      for (const node of nodes) {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute(
+          "class",
+          `node ${node.className}${isDimBranchNode(node) ? " dim" : ""}`
+        );
+        group.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+        group.setAttribute("tabindex", "0");
+
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("width", node.w);
+        rect.setAttribute("height", node.h);
+        rect.setAttribute("rx", "8");
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", "12");
+        text.setAttribute("y", node.meta || node.labelLines ? "20" : Math.max(22, Math.round(node.h / 2 + 4)));
+        text.__labelLines = node.labelLines;
+        addWrappedText(text, node.label, node.w - 22, node.maxLines || 2);
+
+        group.append(rect, text);
+        if (node.meta) {
+          const meta = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          meta.setAttribute("x", "12");
+          meta.setAttribute("y", node.h - 10);
+          meta.textContent = node.meta;
+          group.appendChild(meta);
+        }
+        group.addEventListener("click", event => {
+          event.stopPropagation();
+          selectGraphNodeFromPoint(event.clientX, event.clientY);
+        });
+        group.addEventListener("dblclick", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          jumpToSourceChunk(node);
+        });
+        group.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") selectGraphNode(node);
+        });
+        group.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title")).textContent = node.fullLabel || node.label;
+        svg.appendChild(group);
+      }
+
+      if (state.graphMode === "radial") {
+        if (previousViewBox) {
+          state.viewBox = previousViewBox;
+        }
+        if (!previousViewBox || state.radialRecenterOnRoot) {
+          centerViewOnNode("__document__", 0.62);
+          state.radialRecenterOnRoot = false;
+        }
+      }
+      applyGraphView();
+    }
+
+    function nodeCenter(node) {
+      return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
+    }
+
+    function buildHierarchyGraph() {
+      const nodes = buildGraphNodes();
+      return {
+        nodes,
+        edges: buildGraphEdges(nodes),
+        width: Math.max(960, nodes.length * 72),
+        height: Math.max(640, Math.ceil(nodes.length / 5) * 110 + 120)
+      };
+    }
+
+    function buildRadialGraph() {
+      if (state.radialAnimation) {
+        const frame = sampleRadialAnimation(state.radialAnimation);
+        if (frame.finished) {
+          state.radialAnimation = null;
+        }
+        els.graphTitle.textContent = `${getDocumentTitle()} · 放射结构`;
+        return {
+          nodes: frame.nodes,
+          edges: state.radialAnimation?.edges || frame.edges || [],
+          width: state.radialAnimation?.width || frame.width,
+          height: state.radialAnimation?.height || frame.height
+        };
+      }
+      const stable = computeRadialLayout({
+        expandedId: state.radialExpandedId,
+        alignTargetId: state.radialExpandedId
+      });
+      els.graphTitle.textContent = `${getDocumentTitle()} · 放射结构`;
+      return stable;
+    }
+
+    function computeRadialLayout(options) {
+      const { expandedId, alignTargetId } = options;
+      const allSections = state.data.structure?.sections || [];
+      const centerX = 1200;
+      const centerY = 900;
+      const title = getDocumentTitle();
+      // Default radial view: only show root + first-level sections.
+      const visibleSectionIds = buildVisibleSectionIdSet(allSections, 1);
+      if (expandedId && expandedId !== "__document__") {
+        for (const sectionId of collectAncestorSectionIds(expandedId)) {
+          visibleSectionIds.add(sectionId);
+        }
+        for (const sectionId of collectSubtreeIds(expandedId)) {
+          visibleSectionIds.add(sectionId);
+        }
+      }
+      const roots = getChildSections("__root").filter(section => visibleSectionIds.has(section.sectionId));
+
+      // Compute leaf counts bottom-up and allocate angular spans proportional to leaf counts
+      const rootsWithAngles = computeLeafCountsAndRootAngles(roots, visibleSectionIds, Math.PI * 2);
+
+      const { nodes, edges } = createRadialGraphLayout({
+        roots: rootsWithAngles,
+        centerX,
+        centerY,
+        visibleSectionIds,
+        title
+      });
+
+      if (alignTargetId && alignTargetId !== "__document__") {
+        alignSubtreeOnDiameterArc(nodes, alignTargetId, centerX, centerY);
+      }
+      if (expandedId && expandedId !== "__document__") {
+        expandSubtreeHierarchy(nodes, expandedId, visibleSectionIds, centerX, centerY);
+        pushOtherBranchesAway(nodes, expandedId);
+      }
+
+      const bounds = graphBounds(nodes, 260);
+      const width = Math.max(1800, bounds.width);
+      const height = Math.max(1400, bounds.height);
+      const dx = Math.max(160, -bounds.minX + 160);
+      const dy = Math.max(160, -bounds.minY + 160);
+      for (const node of nodes) {
+        node.x += dx;
+        node.y += dy;
+      }
+
+      return { nodes, edges, width, height };
+    }
+
+    function createRadialGraphLayout(options) {
+      const {
+        // roots is now an array of { section, angle, span }
+        roots,
+        centerX,
+        centerY,
+        visibleSectionIds,
+        title
+      } = options;
+      const nodeMap = new Map();
+      const edges = [];
+      const nodes = [];
+      const titleWidth = compactLabelWidth(title, 150, 260);
+      nodes.push({
+        id: "__document__",
+        kind: "document",
+        item: state.data,
+        label: title,
+        meta: "",
+        className: "section",
+        x: centerX - titleWidth / 2,
+        y: centerY - 23,
+        w: titleWidth,
+        h: 46,
+        maxLines: 1
+      });
+      nodeMap.set("__document__", nodes[0]);
+
+      roots.forEach(entry => {
+        const section = entry.section;
+        const angle = entry.angle;
+        const span = (entry.span || (Math.PI * 2 / Math.max(1, roots.length))) * 0.42;
+        placeRadialSectionTree({
+          section,
+          angle,
+          span,
+          depth: 1,
+          centerX,
+          centerY,
+          nodes,
+          nodeMap,
+          edges,
+          visibleSectionIds,
+          parentId: "__document__"
+        });
+      });
+      return { nodes, edges };
+    }
+
+    function graphBounds(nodes, padding) {
+      const minX = Math.min(...nodes.map(node => node.x)) - padding;
+      const minY = Math.min(...nodes.map(node => node.y)) - padding;
+      const maxX = Math.max(...nodes.map(node => node.x + node.w)) + padding;
+      const maxY = Math.max(...nodes.map(node => node.y + node.h)) + padding;
+      return {
+        minX,
+        minY,
+        maxX,
+        maxY,
+        width: maxX - minX,
+        height: maxY - minY
+      };
+    }
+
+    // Compute leaf counts bottom-up for given root sections and allocate angular spans.
+    function computeLeafCountsAndRootAngles(rootSections, visibleSectionIds, totalAngle) {
+      const counts = new Map();
+
+      function dfs(section) {
+        const children = getChildSections(section.sectionId).filter(child => visibleSectionIds.has(child.sectionId));
+        if (!children.length) {
+          counts.set(section.sectionId, 1);
+          return 1;
+        }
+        let sum = 0;
+        for (const c of children) sum += dfs(c);
+        counts.set(section.sectionId, Math.max(1, sum));
+        return counts.get(section.sectionId);
+      }
+
+      let total = 0;
+      const rootInfo = [];
+      for (const r of rootSections) {
+        const c = dfs(r);
+        rootInfo.push({ section: r, count: c });
+        total += c;
+      }
+      if (!total) total = rootInfo.length || 1;
+
+      // Assign spans proportional to leaf counts, with a small minimum to avoid zero-width
+      const minSpan = Math.PI * 0.03;
+      let cursor = -Math.PI / 2; // start at top
+      return rootInfo.map(info => {
+        const span = Math.max(minSpan, (info.count / total) * (totalAngle || Math.PI * 2));
+        const angle = cursor + span / 2;
+        cursor += span;
+        return { section: info.section, angle, span };
+      });
+    }
+
+    function placeRadialSectionTree(options) {
+      const {
+        section,
+        angle,
+        span,
+        depth,
+        centerX,
+        centerY,
+        nodes,
+        nodeMap,
+        edges,
+        visibleSectionIds,
+        parentId
+      } = options;
+      const fullLabel = section.title || section.sectionId;
+      const label = displaySectionLabel(section);
+      const labelBox = radialLabelBox(label, depth);
+      const width = labelBox.width;
+      const height = labelBox.height;
+      const radius = 170 + depth * 138;
+      const childSections = getChildSections(section.sectionId).filter(child => visibleSectionIds.has(child.sectionId));
+      const node = {
+        id: section.sectionId,
+        kind: "section",
+        item: section,
+        label,
+        fullLabel,
+        meta: "",
+        className: childSections.length ? "section" : "heading",
+        x: centerX + Math.cos(angle) * radius - width / 2,
+        y: centerY + Math.sin(angle) * radius - height / 2,
+        w: width,
+        h: height,
+        maxLines: labelBox.lines.length,
+        labelLines: labelBox.lines,
+        depth
+      };
+      nodes.push(node);
+      nodeMap.set(section.sectionId, node);
+      edges.push({ from: parentId, to: section.sectionId, type: "parent", layout: "radial" });
+
+      const childPlacements = childSections.length
+        ? childSectionPlacements(childSections.length, span)
+        : [];
+      childSections.forEach((child, idx) => {
+        const placement = childPlacements[idx];
+        placeRadialSectionTree({
+          section: child,
+          angle: angle + placement.offset,
+          span: placement.span,
+          depth: depth + placement.depthStep,
+          centerX,
+          centerY,
+          nodes,
+          nodeMap,
+          edges,
+          visibleSectionIds,
+          parentId: section.sectionId
+        });
+      });
+    }
+
+    function childSectionPlacements(count, span) {
+      if (count <= 0) return [];
+      const maxSpan = Math.PI * 0.48;
+      const childSpan = Math.min(span * 0.66, maxSpan);
+      if (count <= 3) {
+        return Array.from({ length: count }, (_, idx) => ({
+          offset: count === 1 ? 0 : (idx - (count - 1) / 2) * (childSpan / (count - 1)),
+          span: count === 1 ? childSpan * 0.72 : childSpan / Math.max(1, count - 1),
+          depthStep: 1
+        }));
+      }
+
+      const cols = Math.min(4, Math.ceil(Math.sqrt(count * 1.1)));
+      const rows = Math.ceil(count / cols);
+      const step = childSpan / Math.max(1, cols - 1);
+      const placements = [];
+      for (let idx = 0; idx < count; idx += 1) {
+        const row = Math.floor(idx / cols);
+        const col = idx % cols;
+        const itemsInRow = Math.min(cols, count - row * cols);
+        const rowOffset = (cols - itemsInRow) * step * 0.5;
+        placements.push({
+          offset: -childSpan / 2 + col * step + rowOffset + (row % 2 ? step * 0.18 : 0),
+          span: step * 0.8,
+          depthStep: 1 + row * 0.52
+        });
+      }
+      return placements;
+    }
+
+    function alignSubtreeOnDiameterArc(nodes, targetId, centerX, centerY) {
+      if (!targetId || targetId === "__document__") return;
+      const root = nodes.find(node => node.id === "__document__");
+      const target = nodes.find(node => node.id === targetId);
+      if (!root || !target) return;
+      const rootCenter = nodeCenter(root);
+      const targetCenter = nodeCenter(target);
+      const side = targetCenter.x >= rootCenter.x ? 1 : -1;
+      const goalAngle = side > 0 ? 0 : Math.PI;
+
+      for (const node of nodes) {
+        if (node.kind !== "section") continue;
+        if (!(node.id === targetId || isSectionInBranch(node.id, targetId))) continue;
+        const center = nodeCenter(node);
+        const radius = Math.hypot(center.x - centerX, center.y - centerY);
+        node.x = centerX + Math.cos(goalAngle) * radius - node.w / 2;
+        node.y = centerY + Math.sin(goalAngle) * radius - node.h / 2;
+      }
+    }
+
+    function expandSubtreeHierarchy(nodes, targetId, visibleSectionIds, centerX, centerY) {
+      const root = nodes.find(node => node.id === "__document__");
+      const target = nodes.find(node => node.id === targetId);
+      if (!root || !target) return;
+
+      const byId = new Map(nodes.map(node => [node.id, node]));
+      const rootCenter = nodeCenter(root);
+      const targetCenter = nodeCenter(target);
+      const side = targetCenter.x >= rootCenter.x ? 1 : -1;
+      const startX = targetCenter.x;
+      const startY = rootCenter.y;
+      const MIN_LEVEL_GAP = 40;
+
+      function siblingGap(depthFromTarget) {
+        if (depthFromTarget <= 1) return 22;
+        return 28;
+      }
+
+      function levelGap(parentId, childId) {
+        const pw = (byId.get(parentId) || {}).w || 120;
+        const cw = (byId.get(childId) || {}).w || 120;
+        return pw / 2 + cw / 2 + MIN_LEVEL_GAP;
+      }
+
+      function nodeHeightOf(sectionId) {
+        const node = byId.get(sectionId);
+        return node ? node.h : 34;
+      }
+
+      function sortedChildren(sectionId) {
+        return getChildSections(sectionId)
+          .filter(child => visibleSectionIds.has(child.sectionId) && byId.has(child.sectionId))
+          .sort((a, b) => sectionOrder(a) - sectionOrder(b));
+      }
+
+      function subtreeHeight(sectionId, depthFromTarget) {
+        const children = sortedChildren(sectionId);
+        const selfH = nodeHeightOf(sectionId);
+        if (!children.length) {
+          return selfH;
+        }
+        const gap = siblingGap(depthFromTarget + 1);
+        const blocks = children.map(child => subtreeHeight(child.sectionId, depthFromTarget + 1));
+        const total = blocks.reduce((sum, item) => sum + item, 0) + gap * Math.max(0, blocks.length - 1);
+        return Math.max(selfH, total);
+      }
+
+      function layoutBranch(sectionId, depthFromTarget, anchorY, parentX) {
+        const children = sortedChildren(sectionId);
+        if (!children.length) return;
+        const gap = siblingGap(depthFromTarget);
+        const blocks = children.map(child => ({
+          child,
+          h: subtreeHeight(child.sectionId, depthFromTarget),
+          xCenter: parentX + side * levelGap(sectionId, child.sectionId)
+        }));
+        const totalHeight = blocks.reduce((sum, item) => sum + item.h, 0) + gap * Math.max(0, blocks.length - 1);
+        let cursor = anchorY - totalHeight / 2;
+        children.forEach((child, index) => {
+          const node = byId.get(child.sectionId);
+          if (!node) return;
+          const blockHeight = blocks[index].h;
+          const xCenter = blocks[index].xCenter;
+          const yCenter = cursor + blockHeight / 2;
+          node.x = xCenter - node.w / 2;
+          node.y = yCenter - node.h / 2;
+          layoutBranch(child.sectionId, depthFromTarget + 1, yCenter, xCenter);
+          cursor += blockHeight + gap;
+        });
+      }
+
+      target.y = startY - target.h / 2;
+      layoutBranch(targetId, 1, startY, startX);
+    }
+
+    function pushOtherBranchesAway(nodes, targetId) {
+      const focusIds = collectSubtreeIds(targetId);
+      const focusNodes = nodes.filter(node => node.id === "__document__" || focusIds.has(node.id));
+      if (!focusNodes.length) return;
+      const PADDING = 16;
+
+      function focusBounds() {
+        return focusNodes.reduce((box, node) => ({
+          minX: Math.min(box.minX, node.x - PADDING),
+          minY: Math.min(box.minY, node.y - PADDING),
+          maxX: Math.max(box.maxX, node.x + node.w + PADDING),
+          maxY: Math.max(box.maxY, node.y + node.h + PADDING)
+        }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+      }
+
+      const focusCenterY = focusNodes.reduce((sum, n) => sum + n.y + n.h / 2, 0) / focusNodes.length;
+      const focusCenterX = focusNodes.reduce((sum, n) => sum + n.x + n.w / 2, 0) / focusNodes.length;
+
+      for (let pass = 0; pass < 4; pass += 1) {
+        const fb = focusBounds();
+        let moved = false;
+        for (const node of nodes) {
+          if (node.kind !== "section") continue;
+          if (focusIds.has(node.id) || node.id === "__document__") continue;
+          if (!rectsOverlap(
+            { x: node.x, y: node.y, w: node.w, h: node.h },
+            fb
+          )) continue;
+          const center = nodeCenter(node);
+          const overlapLeft = (node.x + node.w) - fb.minX;
+          const overlapRight = fb.maxX - node.x;
+          const overlapTop = (node.y + node.h) - fb.minY;
+          const overlapBottom = fb.maxY - node.y;
+          const pushX = Math.min(overlapLeft, overlapRight) + PADDING;
+          const pushY = Math.min(overlapTop, overlapBottom) + PADDING;
+          if (pushY <= pushX) {
+            const dirY = center.y >= focusCenterY ? 1 : -1;
+            node.y += dirY * pushY;
+          } else {
+            const dirX = center.x >= focusCenterX ? 1 : -1;
+            node.x += dirX * pushX;
+          }
+          moved = true;
+        }
+        if (!moved) break;
+      }
+    }
+
+    function rectsOverlap(a, b) {
+      return !(
+        a.x + a.w < b.x
+        || b.x + b.w < a.x
+        || a.y + a.h < b.y
+        || b.y + b.h < a.y
+      );
+    }
+
+    function collectSubtreeIds(rootId) {
+      const ids = new Set();
+      if (!rootId || rootId === "__document__") return ids;
+      const queue = [rootId];
+      while (queue.length) {
+        const id = queue.shift();
+        if (!id || ids.has(id)) continue;
+        ids.add(id);
+        for (const child of getChildSections(id)) {
+          queue.push(child.sectionId);
+        }
+      }
+      return ids;
+    }
+
+    function collectAncestorSectionIds(sectionId) {
+      const ids = new Set();
+      let current = state.sectionsById.get(sectionId);
+      while (current) {
+        ids.add(current.sectionId);
+        current = current.parentId ? state.sectionsById.get(current.parentId) : null;
+      }
+      return ids;
+    }
+
+    function sectionOrder(section) {
+      return Number(section.globalIndex || 0);
+    }
+
+    function buildVisibleSectionIdSet(sections, maxDepth) {
+      const ids = new Set();
+      for (const section of sections) {
+        if (!matchSection(section)) continue;
+        if (maxDepth !== undefined && section.level > maxDepth) continue;
+        let current = section;
+        while (current) {
+          ids.add(current.sectionId);
+          current = current.parentId ? state.sectionsById.get(current.parentId) : null;
+        }
+      }
+      return ids;
+    }
+
+    function compactLabelWidth(label, minWidth, maxWidth) {
+      const length = Array.from(String(label || "")).reduce((sum, ch) => {
+        return sum + (/[\u0000-\u00ff]/.test(ch) ? 7 : 13);
+      }, 0);
+      return clamp(length + 28, minWidth, maxWidth);
+    }
+
+    function firstSentence(text) {
+      const value = String(text || "").replace(/\s+/g, " ").trim();
+      const match = value.match(/^(.+?[。！？!?；;])/);
+      return (match ? match[1] : value).trim();
+    }
+
+    function displaySectionLabel(section) {
+      const title = String(section?.title || section?.sectionId || "").replace(/\s+/g, " ").trim();
+      if (section?.structureRole === "attached_subheading" || title.length > 48) {
+        return firstSentence(title) || title;
+      }
+      return title;
+    }
+
+    function splitLabelPrefix(label) {
+      const text = String(label || "").replace(/\s+/g, " ").trim();
+      const match = text.match(/^((?:\d+(?:\.\d+)*[.)]?|[（(]?[一二三四五六七八九十百]+[）)、.]?|[（(]?\d+[）)])\s*)(.*)$/);
+      if (!match) return { prefix: "", body: text };
+      return { prefix: match[1] || "", body: match[2] || "" };
+    }
+
+    function displayCharLength(text) {
+      return Array.from(String(text || "")).reduce((sum, ch) => {
+        return sum + (/[\u0000-\u00ff]/.test(ch) ? 0.55 : 1);
+      }, 0);
+    }
+
+    function wrapLabelLines(label, maxWidth, maxLines = 2) {
+      const text = String(label || "").replace(/\s+/g, " ").trim() || "(empty)";
+      const { body } = splitLabelPrefix(text);
+      if (displayCharLength(body || text) <= 8) return [text];
+      const chars = Array.from(text);
+      const approxChars = Math.max(8, Math.floor(maxWidth / 12));
+      const lines = [];
+      for (let i = 0; i < chars.length && lines.length < maxLines; i += approxChars) {
+        lines.push(chars.slice(i, i + approxChars).join(""));
+      }
+      if (chars.length > approxChars * maxLines && lines.length) {
+        const last = lines.length - 1;
+        lines[last] = `${lines[last].slice(0, Math.max(1, lines[last].length - 1))}…`;
+      }
+      return lines.length ? lines : ["(empty)"];
+    }
+
+    function radialLabelBox(label, depth) {
+      const { body } = splitLabelPrefix(label);
+      const bodyLength = displayCharLength(body || label);
+      const maxLines = bodyLength > 22 ? 3 : bodyLength > 8 ? 2 : 1;
+      const width = compactLabelWidth(label, depth === 1 ? 132 : 120, depth === 1 ? 280 : 260);
+      const lines = wrapLabelLines(label, width - 24, maxLines);
+      return {
+        width,
+        lines,
+        height: Math.max(34, 18 + lines.length * 16)
+      };
+    }
+
+    function getDocumentTitle() {
+      const first = state.data.structure?.sections?.[0]?.title;
+      if (first) return first;
+      return state.data.docName || state.data.docId || "Document";
+    }
+
+    function applyBranchLayering(nodes, edges) {
+      if (state.graphMode !== "radial" || !state.radialHighlightId) {
+        return { nodes, edges };
+      }
+      return {
+        nodes: [...nodes].sort((a, b) => Number(isHighlightedBranchNode(a)) - Number(isHighlightedBranchNode(b))),
+        edges: [...edges].sort((a, b) => Number(isHighlightedBranchEdge(a)) - Number(isHighlightedBranchEdge(b)))
+      };
+    }
+
+    function isHighlightedBranchNode(node) {
+      if (state.graphMode !== "radial" || !state.radialHighlightId) return false;
+      if (node.kind === "document") return true;
+      if (node.kind === "section") {
+        return isSectionInFocusedContext(node.item.sectionId, state.radialHighlightId);
+      }
+      if (node.kind === "chunk") {
+        return isSectionInFocusedContext(node.item.sectionId, state.radialHighlightId);
+      }
+      return false;
+    }
+
+    function isDimBranchNode(node) {
+      if (state.graphMode !== "radial" || !state.radialHighlightId) return false;
+      if (node.kind === "document") return false;
+      return !isHighlightedBranchNode(node);
+    }
+
+    function isHighlightedBranchEdge(edge) {
+      if (state.graphMode !== "radial" || !state.radialHighlightId) return false;
+      return isEdgeInFocusedContext(edge, state.radialHighlightId);
+    }
+
+    function isDimBranchEdge(edge) {
+      if (state.graphMode !== "radial" || !state.radialHighlightId) return false;
+      return !isHighlightedBranchEdge(edge);
+    }
+
+    function isEdgeInFocusedContext(edge, focusedSectionId) {
+      return (
+        isNodeIdInFocusedContext(edge.to, focusedSectionId)
+        && (edge.from === "__document__" || isNodeIdInFocusedContext(edge.from, focusedSectionId))
+      );
+    }
+
+    function isNodeIdInFocusedContext(nodeId, focusedSectionId) {
+      if (nodeId === "__document__") return true;
+      if (state.sectionsById.has(nodeId)) {
+        return isSectionInFocusedContext(nodeId, focusedSectionId);
+      }
+      const chunk = state.chunksById.get(nodeId);
+      return chunk ? isSectionInFocusedContext(chunk.sectionId, focusedSectionId) : false;
+    }
+
+    function isSectionInFocusedContext(sectionId, focusedSectionId) {
+      if (!sectionId || !focusedSectionId) return false;
+      if (focusedSectionId === "__document__") return true;
+      return (
+        sectionId === focusedSectionId
+        || isSectionInBranch(sectionId, focusedSectionId)
+        || isSectionInBranch(focusedSectionId, sectionId)
+      );
+    }
+
+    function isSectionInBranch(sectionId, branchId) {
+      if (!sectionId || !branchId) return false;
+      let current = state.sectionsById.get(sectionId);
+      while (current) {
+        if (current.sectionId === branchId) return true;
+        current = current.parentId ? state.sectionsById.get(current.parentId) : null;
+      }
+      return false;
+    }
+
+    function radialTargetForNode(node) {
+      if (!node || node.kind === "document") return "__document__";
+      if (node.kind === "section") return node.item.sectionId;
+      if (node.kind === "chunk" && node.item.sectionId) return node.item.sectionId;
+      return "__document__";
+    }
+
+    function makeNodeMap(nodes) {
+      const map = new Map();
+      for (const node of nodes) {
+        map.set(node.id, { ...node });
+      }
+      return map;
+    }
+
+    function buildAnimationStartMap(targetMap, fallbackMap) {
+      const currentMap = makeNodeMap(state.renderedNodes);
+      const startMap = new Map();
+      for (const [id, targetNode] of targetMap.entries()) {
+        const currentNode = currentMap.get(id) || fallbackMap.get(id) || targetNode;
+        startMap.set(id, { ...targetNode, x: currentNode.x, y: currentNode.y, w: currentNode.w, h: currentNode.h });
+      }
+      return startMap;
+    }
+
+    function interpolateNodeMaps(fromMap, toMap, t) {
+      const nodes = [];
+      for (const [id, toNode] of toMap.entries()) {
+        const fromNode = fromMap.get(id) || toNode;
+        nodes.push({
+          ...toNode,
+          x: fromNode.x + (toNode.x - fromNode.x) * t,
+          y: fromNode.y + (toNode.y - fromNode.y) * t,
+          w: fromNode.w + (toNode.w - fromNode.w) * t,
+          h: fromNode.h + (toNode.h - fromNode.h) * t
+        });
+      }
+      return nodes;
+    }
+
+    function interpolateNodeMapsArc(fromMap, toMap, t, rootCenter, arcNodeIds) {
+      const nodes = [];
+      for (const [id, toNode] of toMap.entries()) {
+        const fromNode = fromMap.get(id) || toNode;
+        const width = fromNode.w + (toNode.w - fromNode.w) * t;
+        const height = fromNode.h + (toNode.h - fromNode.h) * t;
+        if (!arcNodeIds.has(id)) {
+          nodes.push({
+            ...toNode,
+            x: fromNode.x + (toNode.x - fromNode.x) * t,
+            y: fromNode.y + (toNode.y - fromNode.y) * t,
+            w: width,
+            h: height
+          });
+          continue;
+        }
+        const fromCenter = nodeCenter(fromNode);
+        const toCenter = nodeCenter(toNode);
+        const r1 = Math.hypot(fromCenter.x - rootCenter.x, fromCenter.y - rootCenter.y);
+        const r2 = Math.hypot(toCenter.x - rootCenter.x, toCenter.y - rootCenter.y);
+        const a1 = Math.atan2(fromCenter.y - rootCenter.y, fromCenter.x - rootCenter.x);
+        const a2 = Math.atan2(toCenter.y - rootCenter.y, toCenter.x - rootCenter.x);
+        let delta = a2 - a1;
+        if (delta > Math.PI) delta -= Math.PI * 2;
+        if (delta < -Math.PI) delta += Math.PI * 2;
+        const radius = r1 + (r2 - r1) * t;
+        const angle = a1 + delta * t;
+        const cx = rootCenter.x + Math.cos(angle) * radius;
+        const cy = rootCenter.y + Math.sin(angle) * radius;
+        nodes.push({
+          ...toNode,
+          x: cx - width / 2,
+          y: cy - height / 2,
+          w: width,
+          h: height
+        });
+      }
+      return nodes;
+    }
+
+    function sampleRadialAnimation(animation) {
+      const elapsed = performance.now() - animation.startTime;
+      const split = animation.phase1Duration;
+      const total = split + animation.phase2Duration;
+      if (elapsed >= total) {
+        return {
+          nodes: Array.from(animation.toMap.values()).map(node => ({ ...node })),
+          edges: animation.edges,
+          width: animation.width,
+          height: animation.height,
+          finished: true
+        };
+      }
+      if (elapsed <= split) {
+        const t = easeInOut(clamp(elapsed / split, 0, 1));
+        return {
+          nodes: interpolateNodeMapsArc(
+            animation.fromMap,
+            animation.phase1Map,
+            t,
+            animation.rootCenter,
+            animation.arcNodeIds
+          ),
+          edges: animation.edges,
+          width: animation.width,
+          height: animation.height,
+          finished: false
+        };
+      }
+      const t = easeInOut(clamp((elapsed - split) / animation.phase2Duration, 0, 1));
+      return {
+        nodes: interpolateNodeMaps(animation.phase1Map, animation.toMap, t),
+        edges: animation.edges,
+        width: animation.width,
+        height: animation.height,
+        finished: false
+      };
+    }
+
+    function easeInOut(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    function startRadialRelayout(targetId) {
+      const nextTarget = (targetId && (targetId === "__document__" || state.sectionsById.has(targetId)))
+        ? targetId
+        : "__document__";
+      state.radialExpandedId = nextTarget;
+      state.radialHighlightId = nextTarget;
+      stopRadialAnimation();
+      const phase1Layout = computeRadialLayout({ expandedId: null, alignTargetId: nextTarget });
+      const finalLayout = computeRadialLayout({ expandedId: nextTarget, alignTargetId: nextTarget });
+      const phase1Map = makeNodeMap(phase1Layout.nodes);
+      const targetMap = makeNodeMap(finalLayout.nodes);
+      const rootNode = phase1Map.get("__document__");
+      const rootCenter = rootNode ? nodeCenter(rootNode) : { x: 0, y: 0 };
+      const arcNodeIds = collectSubtreeIds(nextTarget);
+      if (nextTarget === "__document__") {
+        for (const node of phase1Layout.nodes) {
+          if (node.kind === "section") arcNodeIds.add(node.id);
+        }
+      }
+      arcNodeIds.add(nextTarget);
+      state.radialAnimation = {
+        targetId: nextTarget,
+        startTime: performance.now(),
+        phase1Duration: 280,
+        phase2Duration: 360,
+        fromMap: buildAnimationStartMap(targetMap, phase1Map),
+        phase1Map,
+        toMap: targetMap,
+        edges: finalLayout.edges,
+        width: finalLayout.width,
+        height: finalLayout.height,
+        rootCenter,
+        arcNodeIds,
+        rafId: null
+      };
+      queueRadialAnimationFrame();
+      renderGraph();
+    }
+
+    function stopRadialAnimation() {
+      if (!state.radialAnimation) return;
+      if (state.radialAnimation.rafId) {
+        cancelAnimationFrame(state.radialAnimation.rafId);
+      }
+      state.radialAnimation = null;
+    }
+
+    function queueRadialAnimationFrame() {
+      if (!state.radialAnimation || state.radialAnimation.rafId) return;
+      state.radialAnimation.rafId = requestAnimationFrame(onRadialAnimationFrame);
+    }
+
+    function onRadialAnimationFrame() {
+      if (!state.radialAnimation) return;
+      state.radialAnimation.rafId = null;
+      const animation = state.radialAnimation;
+      const elapsed = performance.now() - animation.startTime;
+      const total = animation.phase1Duration + animation.phase2Duration;
+      renderGraph();
+      if (state.radialAnimation && elapsed < total) {
+        queueRadialAnimationFrame();
+      }
+    }
+
+    function buildGraphNodes() {
+      const selectedSection = state.currentSectionId ? state.sectionsById.get(state.currentSectionId) : null;
+      const nodes = [];
+      const childSections = getVisibleChildSections(selectedSection);
+      const leafMode = selectedSection && childSections.length === 0;
+
+      if (selectedSection && matchSection(selectedSection)) {
+        nodes.push({
+          id: selectedSection.sectionId,
+          kind: "section",
+          item: selectedSection,
+          label: selectedSection.title || selectedSection.sectionId,
+          meta: `section · p${selectedSection.pageNo}`,
+          className: "section",
+          x: 40,
+          y: 60,
+          w: 230,
+          h: 70
+        });
+      }
+
+      if (!selectedSection) {
+        const roots = getVisibleRootSections().slice(0, 80);
+        roots.forEach((section, idx) => {
+          const col = idx % 3;
+          const row = Math.floor(idx / 3);
+          nodes.push(sectionGraphNode(section, 80 + col * 285, 54 + row * 116));
+        });
+        els.graphTitle.textContent = "文档章节结构";
+        return nodes;
+      }
+
+      if (!leafMode) {
+        childSections.slice(0, 90).forEach((section, idx) => {
+          const col = idx % 3;
+          const row = Math.floor(idx / 3);
+          nodes.push(sectionGraphNode(section, 330 + col * 250, 38 + row * 112));
+        });
+        els.graphTitle.textContent = `${selectedSection.title || selectedSection.sectionId} · 子章节`;
+        return nodes;
+      }
+
+      const filteredChunks = (state.chunksBySection.get(selectedSection.sectionId) || [])
+        .filter(chunk => matchChunk(chunk) && !chunk.isHeading)
+        .slice(0, 90);
+
+      filteredChunks.forEach((chunk, idx) => {
+        const col = idx % 4;
+        const row = Math.floor(idx / 4);
+        nodes.push({
+          id: chunk.chunkId,
+          kind: "chunk",
+          item: chunk,
+          label: chunk.headingText || chunk.cleanText || chunk.chunkId,
+          meta: `${chunk.chunkId} · p${chunk.pageNo} · ${chunk.blockType}`,
+          className: chunk.isHeading ? "heading" : chunk.blockType === "image" ? "image" : "chunk",
+          x: 330 + col * 250,
+          y: 38 + row * 112,
+          w: 210,
+          h: 72
+        });
+      });
+
+      els.graphTitle.textContent = `${selectedSection.title || selectedSection.sectionId} · 文字块`;
+      return nodes;
+    }
+
+    function sectionGraphNode(section, x, y) {
+      const childCount = getChildSections(section.sectionId).length;
+      const chunkCount = (state.chunksBySection.get(section.sectionId) || []).filter(chunk => !chunk.isHeading).length;
+      return {
+        id: section.sectionId,
+        kind: "section",
+        item: section,
+        label: section.title || section.sectionId,
+        meta: childCount ? `${childCount} sections · p${section.pageNo}` : `${chunkCount} chunks · p${section.pageNo}`,
+        className: childCount ? "section" : "heading",
+        x,
+        y,
+        w: 220,
+        h: 72
+      };
+    }
+
+    function buildGraphEdges(nodes) {
+      const nodeIds = new Set(nodes.map(node => node.id));
+      const edges = [];
+      const selectedSection = state.currentSectionId ? state.sectionsById.get(state.currentSectionId) : null;
+      if (!selectedSection) {
+        for (const section of state.sectionChildren.get("__root") || []) {
+          if (section.parentId && nodeIds.has(section.parentId) && nodeIds.has(section.sectionId)) {
+            edges.push({ from: section.parentId, to: section.sectionId, type: "parent" });
+          }
+        }
+        return edges;
+      }
+
+      if (selectedSection && nodeIds.has(selectedSection.sectionId)) {
+        const childSections = getVisibleChildSections(selectedSection);
+        if (childSections.length) {
+          for (const section of childSections) {
+            if (nodeIds.has(section.sectionId)) {
+              edges.push({ from: selectedSection.sectionId, to: section.sectionId, type: "parent" });
+            }
+          }
+        } else {
+          for (const chunk of state.chunksBySection.get(selectedSection.sectionId) || []) {
+            if (!chunk.isHeading && nodeIds.has(chunk.chunkId)) {
+              edges.push({ from: selectedSection.sectionId, to: chunk.chunkId, type: "parent" });
+            }
+          }
+        }
+      }
+
+      for (const node of nodes) {
+        if (node.kind !== "chunk") continue;
+        const next = node.item.nextGlobalChunkId;
+        if (next && nodeIds.has(next)) {
+          edges.push({ from: node.id, to: next, type: "next" });
+        }
+      }
+      return edges;
+    }
+
+    function getChildSections(sectionId) {
+      return state.sectionChildren.get(sectionId || "__root") || [];
+    }
+
+    function getVisibleChildSections(section) {
+      if (!section) return [];
+      return getChildSections(section.sectionId).filter(matchSection);
+    }
+
+    function getVisibleRootSections() {
+      return getChildSections("__root").filter(matchSection);
+    }
+
+    function addWrappedText(textEl, value, maxWidth, maxLines) {
+      const wrappedLines = textEl.__labelLines || wrapLabelLines(value, maxWidth, maxLines || 2);
+      for (let line = 0; line < Math.min(wrappedLines.length, maxLines || wrappedLines.length); line += 1) {
+        const part = wrappedLines[line];
+        if (!part) break;
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        tspan.setAttribute("x", "12");
+        tspan.setAttribute("dy", line === 0 ? "0" : "16");
+        tspan.textContent = part;
+        textEl.appendChild(tspan);
+      }
+      return;
+      const text = String(value || "").replace(/\s+/g, " ").trim() || "(empty)";
+      const chars = Array.from(text);
+      const approxChars = Math.max(8, Math.floor(maxWidth / 12));
+      for (let line = 0; line < maxLines; line += 1) {
+        const part = chars.slice(line * approxChars, (line + 1) * approxChars).join("");
+        if (!part) break;
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        tspan.setAttribute("x", "12");
+        tspan.setAttribute("dy", line === 0 ? "0" : "16");
+        tspan.textContent = line === maxLines - 1 && chars.length > (line + 1) * approxChars
+          ? `${part.slice(0, Math.max(1, part.length - 1))}…`
+          : part;
+        textEl.appendChild(tspan);
+      }
+    }
+
+    function jumpToSourceChunk(node) {
+      if (!node || !node.item) return;
+      const chunkId = node.kind === "section"
+        ? node.item.chunkId
+        : node.kind === "chunk"
+          ? node.item.chunkId
+          : null;
+      if (!chunkId) return;
+      window.parent?.postMessage({
+        type: "deepdoc:jumpToChunk",
+        docId: state.data?.docId || "",
+        chunkId,
+        pageNo: node.item.pageNo || null
+      }, window.location.origin);
+    }
+
+    function selectGraphNode(node) {
+      state.selected = { kind: node.kind, item: node.item };
+      if (state.graphMode === "radial") {
+        startRadialRelayout(radialTargetForNode(node));
+      }
+      if (node.kind === "section") {
+        state.currentSectionId = node.item.sectionId;
+      }
+      if (node.kind === "document") {
+        state.currentSectionId = null;
+      }
+      renderGraph();
+      showSelectionDetail();
+    }
+
+    function onGraphClick(event) {
+      if (state.suppressNextClick) {
+        state.suppressNextClick = false;
+        return;
+      }
+      selectGraphNodeFromPoint(event.clientX, event.clientY);
+    }
+
+    function selectGraphNodeFromPoint(clientX, clientY) {
+      if (!state.renderedNodes.length || !state.viewBox) return;
+      const point = clientToSvgPoint(clientX, clientY);
+      const node = findNearestNode(point);
+      if (node) {
+        selectGraphNode(node);
+      }
+    }
+
+    function findNearestNode(point) {
+      let best = null;
+      let bestScore = Infinity;
+      for (let idx = 0; idx < state.renderedNodes.length; idx += 1) {
+        const node = state.renderedNodes[idx];
+        const inside = point.x >= node.x && point.x <= node.x + node.w && point.y >= node.y && point.y <= node.y + node.h;
+        const center = nodeCenter(node);
+        const dx = Math.max(Math.abs(point.x - center.x) - node.w / 2, 0);
+        const dy = Math.max(Math.abs(point.y - center.y) - node.h / 2, 0);
+        const distance = Math.hypot(dx, dy);
+        if (!inside && distance > 44) continue;
+        const renderPriority = idx * 0.0001;
+        const score = distance - (inside ? 20 : 0) + renderPriority;
+        if (score < bestScore) {
+          best = node;
+          bestScore = score;
+        }
+      }
+      return best;
+    }
+
+    function isActiveNode(node) {
+      if (state.graphMode === "radial") return false;
+      if (node.kind === "document" && state.selected?.kind === "document") return true;
+      return state.selected?.item?.sectionId === node.id || state.selected?.item?.chunkId === node.id;
+    }
+
+    function fitGraph() {
+      if (!state.baseViewBox) return;
+      state.viewBox = { ...state.baseViewBox };
+      applyGraphView();
+    }
+
+    function centerViewOnNode(nodeId, scale) {
+      if (!state.baseViewBox) return;
+      const node = state.renderedNodes.find(item => item.id === nodeId);
+      if (!node) return;
+      const ratio = clamp(scale || 0.62, 0.3, 1);
+      const viewWidth = state.baseViewBox.w * ratio;
+      const viewHeight = state.baseViewBox.h * ratio;
+      const center = nodeCenter(node);
+      state.viewBox = {
+        x: center.x - viewWidth / 2,
+        y: center.y - viewHeight / 2,
+        w: viewWidth,
+        h: viewHeight
+      };
+    }
+
+    function fitFocusedBranch(nodes) {
+      const focused = nodes.filter(isHighlightedBranchNode);
+      if (!focused.length) {
+        applyGraphView();
+        return;
+      }
+      const bounds = focused.reduce((box, node) => ({
+        minX: Math.min(box.minX, node.x),
+        minY: Math.min(box.minY, node.y),
+        maxX: Math.max(box.maxX, node.x + node.w),
+        maxY: Math.max(box.maxY, node.y + node.h)
+      }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+      const pad = 180;
+      state.viewBox = {
+        x: bounds.minX - pad,
+        y: bounds.minY - pad,
+        w: Math.max(520, bounds.maxX - bounds.minX + pad * 2),
+        h: Math.max(420, bounds.maxY - bounds.minY + pad * 2)
+      };
+      applyGraphView();
+    }
+
+    function resetGraphView(width, height) {
+      state.baseViewBox = { x: 0, y: 0, w: width, h: height };
+      state.viewBox = { ...state.baseViewBox };
+    }
+
+    function applyGraphView() {
+      if (!state.viewBox) return;
+      const { x, y, w, h } = state.viewBox;
+      els.graph.setAttribute("viewBox", `${x} ${y} ${w} ${h}`);
+    }
+
+    function zoomGraph(factor, anchor) {
+      if (!state.viewBox) return;
+      const vb = state.viewBox;
+      const point = anchor || { x: vb.x + vb.w / 2, y: vb.y + vb.h / 2 };
+      const nextW = clamp(vb.w * factor, 180, (state.baseViewBox?.w || vb.w) * 2.6);
+      const nextH = clamp(vb.h * factor, 140, (state.baseViewBox?.h || vb.h) * 2.6);
+      const rx = (point.x - vb.x) / vb.w;
+      const ry = (point.y - vb.y) / vb.h;
+      state.viewBox = {
+        x: point.x - nextW * rx,
+        y: point.y - nextH * ry,
+        w: nextW,
+        h: nextH
+      };
+      applyGraphView();
+    }
+
+    function onGraphWheel(event) {
+      if (!state.viewBox) return;
+      event.preventDefault();
+      const point = clientToSvgPoint(event.clientX, event.clientY);
+      zoomGraph(event.deltaY < 0 ? 0.88 : 1.14, point);
+    }
+
+    function onGraphPointerDown(event) {
+      if (!state.viewBox) return;
+      els.graph.setPointerCapture(event.pointerId);
+      els.graph.classList.add("panning");
+      state.pan = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        viewBox: { ...state.viewBox },
+        moved: false
+      };
+    }
+
+    function onGraphPointerMove(event) {
+      if (!state.pan || !state.viewBox || event.pointerId !== state.pan.pointerId) return;
+      const rect = els.graph.getBoundingClientRect();
+      const dx = (event.clientX - state.pan.startX) * (state.pan.viewBox.w / rect.width);
+      const dy = (event.clientY - state.pan.startY) * (state.pan.viewBox.h / rect.height);
+      if (Math.abs(event.clientX - state.pan.startX) > 4 || Math.abs(event.clientY - state.pan.startY) > 4) {
+        state.pan.moved = true;
+      }
+      state.viewBox = {
+        ...state.pan.viewBox,
+        x: state.pan.viewBox.x - dx,
+        y: state.pan.viewBox.y - dy
+      };
+      applyGraphView();
+    }
+
+    function onGraphPointerUp(event) {
+      if (state.pan && event.pointerId === state.pan.pointerId) {
+        state.suppressNextClick = Boolean(state.pan.moved);
+        state.pan = null;
+        els.graph.classList.remove("panning");
+      }
+    }
+
+    function clientToSvgPoint(clientX, clientY) {
+      const rect = els.graph.getBoundingClientRect();
+      const vb = state.viewBox;
+      return {
+        x: vb.x + ((clientX - rect.left) / rect.width) * vb.w,
+        y: vb.y + ((clientY - rect.top) / rect.height) * vb.h
+      };
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function showSelectionDetail() {
+      if (!state.selected) return;
+      if (state.selected.kind === "section") showSectionDetail(state.selected.item);
+      else if (state.selected.kind === "chunk") showChunkDetail(state.selected.item);
+      else showDocumentDetail();
+    }
+
+    function showDocumentDetail() {
+      const data = state.data;
+      els.detailTitle.textContent = "文档";
+      els.detailSub.textContent = data.docName || data.docId || "";
+      els.detailBody.innerHTML = "";
+      appendKv("docId", data.docId);
+      appendKv("pageCount", data.pageCount);
+      appendKv("totalChunks", data.totalChunks);
+      appendKv("sectionCount", data.structure?.sectionCount);
+      appendKv("source", data.sourceChunkPath);
+      appendContent(JSON.stringify(data.structure?.sections?.slice(0, 20) || [], null, 2));
+    }
+
+    function showSectionDetail(section) {
+      const chunks = state.chunksBySection.get(section.sectionId) || [];
+      const childSections = getChildSections(section.sectionId);
+      els.detailTitle.textContent = section.title || section.sectionId;
+      els.detailSub.textContent = `${section.sectionId} · level ${section.level} · page ${section.pageNo}`;
+      els.detailBody.innerHTML = "";
+      appendKv("sectionId", section.sectionId);
+      appendKv("parentId", section.parentId || "");
+      appendKv("level", section.level);
+      appendKv("pageNo", section.pageNo);
+      appendKv("chunkId", section.chunkId);
+      appendKv("childSections", childSections.length);
+      appendKv("chunkCount", chunks.length);
+      appendKv("path", (section.path || []).join(" > "));
+      if (childSections.length) {
+        appendContent(childSections.map(child => `${child.sectionId} · p${child.pageNo} · ${child.title}`).join("\n"));
+      } else {
+        appendContent(chunks.filter(chunk => !chunk.isHeading).slice(0, 12).map(chunk => `${chunk.chunkId} · p${chunk.pageNo} · ${chunk.blockType}\n${chunk.cleanText || ""}`).join("\n\n"));
+      }
+    }
+
+    function showChunkDetail(chunk) {
+      els.detailTitle.textContent = chunk.headingText || chunk.chunkId;
+      els.detailSub.textContent = `${chunk.chunkId} · page ${chunk.pageNo} · ${chunk.blockType}`;
+      els.detailBody.innerHTML = "";
+      appendKv("chunkId", chunk.chunkId);
+      appendKv("globalIndex", chunk.globalIndex);
+      appendKv("pageNo", chunk.pageNo);
+      appendKv("blockType", chunk.blockType);
+      appendKv("isHeading", chunk.isHeading);
+      appendKv("headingLevel", chunk.headingLevel ?? "");
+      appendKv("sectionId", chunk.sectionId || "");
+      appendKv("sectionPath", chunk.sectionPathText || "");
+      appendKv("prevGlobal", chunk.prevGlobalChunkId || "");
+      appendKv("nextGlobal", chunk.nextGlobalChunkId || "");
+
+      const links = document.createElement("div");
+      links.className = "link-row";
+      links.append(
+        relationButton("上一全局", chunk.prevGlobalChunkId),
+        relationButton("下一全局", chunk.nextGlobalChunkId),
+        relationButton("上一同页", chunk.prevSamePageChunkId),
+        relationButton("下一同页", chunk.nextSamePageChunkId),
+        sectionButton(chunk.sectionId)
+      );
+      els.detailBody.appendChild(links);
+      appendContent(chunk.cleanText || chunk.normalizedContent || chunk.content || "(empty)");
+    }
+
+    function appendKv(key, value) {
+      const row = document.createElement("div");
+      row.className = "kv";
+      const k = document.createElement("span");
+      k.textContent = key;
+      const v = document.createElement("span");
+      v.textContent = value === undefined || value === null ? "" : String(value);
+      row.append(k, v);
+      els.detailBody.appendChild(row);
+    }
+
+    function appendContent(value) {
+      const box = document.createElement("div");
+      box.className = "content-box";
+      box.textContent = value || "";
+      els.detailBody.appendChild(box);
+    }
+
+    function relationButton(label, chunkId) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pill";
+      button.textContent = chunkId ? `${label}: ${chunkId}` : `${label}: 无`;
+      button.disabled = !chunkId || !state.chunksById.has(chunkId);
+      button.addEventListener("click", () => {
+        const chunk = state.chunksById.get(chunkId);
+        if (!chunk) return;
+        state.currentSectionId = chunk.sectionId || state.currentSectionId;
+        state.selected = { kind: "chunk", item: chunk };
+        renderAll();
+        showChunkDetail(chunk);
+      });
+      return button;
+    }
+
+    function sectionButton(sectionId) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pill";
+      button.textContent = sectionId ? `章节: ${sectionId}` : "章节: 无";
+      button.disabled = !sectionId || !state.sectionsById.has(sectionId);
+      button.addEventListener("click", () => {
+        const section = state.sectionsById.get(sectionId);
+        if (!section) return;
+        state.currentSectionId = sectionId;
+        state.selected = { kind: "section", item: section };
+        renderAll();
+        showSectionDetail(section);
+      });
+      return button;
+    }
+  </script>
+</body>
+</html>

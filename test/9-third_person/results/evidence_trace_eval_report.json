@@ -1,0 +1,1612 @@
+{
+  "generatedAt": "2026-05-10T18:56:29.887441",
+  "sourceReport": "D:\\AI\\ceate_design\\DeepDoc-main\\test\\9-second_person\\results\\model_param_test_report.json",
+  "testset": "D:\\AI\\ceate_design\\DeepDoc-main\\test\\8-lad_rag_test\\data\\qasper_lad_testset.json",
+  "summary": [
+    {
+      "task_type": "comparison_qa",
+      "total": 6,
+      "structured_valid_rate": 1.0,
+      "citation_exist_rate": 1.0,
+      "trace_complete_rate": 1.0,
+      "claim_supported_rate": 1.0,
+      "avg_support_score": 0.8772,
+      "invalid_citation_count": 0,
+      "missing_citation_rate": 0.0
+    },
+    {
+      "task_type": "dataset_qa",
+      "total": 3,
+      "structured_valid_rate": 0.6667,
+      "citation_exist_rate": 1.0,
+      "trace_complete_rate": 1.0,
+      "claim_supported_rate": 1.0,
+      "avg_support_score": 1.0,
+      "invalid_citation_count": 0,
+      "missing_citation_rate": 0.0
+    },
+    {
+      "task_type": "fact_qa",
+      "total": 6,
+      "structured_valid_rate": 1.0,
+      "citation_exist_rate": 1.0,
+      "trace_complete_rate": 1.0,
+      "claim_supported_rate": 1.0,
+      "avg_support_score": 0.9491,
+      "invalid_citation_count": 0,
+      "missing_citation_rate": 0.0
+    },
+    {
+      "task_type": "method_qa",
+      "total": 3,
+      "structured_valid_rate": 1.0,
+      "citation_exist_rate": 1.0,
+      "trace_complete_rate": 1.0,
+      "claim_supported_rate": 1.0,
+      "avg_support_score": 0.9667,
+      "invalid_citation_count": 0,
+      "missing_citation_rate": 0.0
+    }
+  ],
+  "results": [
+    {
+      "case_id": "qasper_0001",
+      "mode": "stable",
+      "task_type": "comparison_qa",
+      "question": "which multilingual approaches do they compare with?",
+      "answer": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without pretraining BIBREF16.",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without pretraining BIBREF16.",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.8333,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.8333
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0001",
+      "mode": "balanced",
+      "task_type": "comparison_qa",
+      "question": "which multilingual approaches do they compare with?",
+      "answer": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without pretraining BIBREF16.",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without pretraining BIBREF16.",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The paper compares with three multilingual approaches: pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.8333,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.8333
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0001",
+      "mode": "exploratory",
+      "task_type": "comparison_qa",
+      "question": "which multilingual approaches do they compare with?",
+      "answer": "They compare with pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without pretraining BIBREF16.",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without pretraining BIBREF16.",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "They compare with pivoting, multilingual NMT (MNMT), and cross-lingual transfer without pretraining.",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0002",
+      "mode": "stable",
+      "task_type": "comparison_qa",
+      "question": "what are the pivot-based baselines?",
+      "answer": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_6"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Although it is challenging for one model to translate all zero-shot directions between multiple distant language pairs of MultiUN, MLM+BRLM-SA still achieves better performances on Es $\\rightarrow $ Ar and Es $\\rightarrow $ Ru than strong p",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Although it is challenging for one model to translate all zero-shot directions between multiple distant language pairs of MultiUN, MLM+BRLM-SA still achieves better performances on Es $\\rightarrow $ Ar and Es $\\rightarrow $ Ru than strong p",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_6",
+            "page_no": 0,
+            "index": 5,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Pivot-based Method is a common strategy to obtain a source$\\rightarrow $target model by introducing a pivot language. This approach is further divided into pivoting and pivot-synthetic. While the former firstly translates a source language ",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_6"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_6"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.85,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.85
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0002",
+      "mode": "balanced",
+      "task_type": "comparison_qa",
+      "question": "what are the pivot-based baselines?",
+      "answer": "The pivot-based baselines are pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps, using MNMT to translate source to pivot then to target in two separate steps with each step receiving supervised signal of parallel corpora (evidence_2, evidence_4). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_2",
+          "evidence_4",
+          "evidence_6"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Although it is challenging for one model to translate all zero-shot directions between multiple distant language pairs of MultiUN, MLM+BRLM-SA still achieves better performances on Es $\\rightarrow $ Ar and Es $\\rightarrow $ Ru than strong p",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Although it is challenging for one model to translate all zero-shot directions between multiple distant language pairs of MultiUN, MLM+BRLM-SA still achieves better performances on Es $\\rightarrow $ Ar and Es $\\rightarrow $ Ru than strong p",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_6",
+            "page_no": 0,
+            "index": 5,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Pivot-based Method is a common strategy to obtain a source$\\rightarrow $target model by introducing a pivot language. This approach is further divided into pivoting and pivot-synthetic. While the former firstly translates a source language ",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The pivot-based baselines are pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps, using MNMT to translate source to pivot then to target in two separate steps with each step receiving supervised signal of parallel corpora (evidence_2, evidence_4). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+            "chunk_ids": [
+              "evidence_2",
+              "evidence_4",
+              "evidence_6"
+            ],
+            "existing_chunk_ids": [
+              "evidence_2",
+              "evidence_4",
+              "evidence_6"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.8966,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.8966
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0002",
+      "mode": "exploratory",
+      "task_type": "comparison_qa",
+      "question": "what are the pivot-based baselines?",
+      "answer": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_6"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Table TABREF19 and TABREF26 report zero-shot results on Europarl and Multi-UN evaluation sets, respectively. We compare our approaches with related approaches of pivoting, multilingual NMT (MNMT) BIBREF19, and cross-lingual transfer without",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Although it is challenging for one model to translate all zero-shot directions between multiple distant language pairs of MultiUN, MLM+BRLM-SA still achieves better performances on Es $\\rightarrow $ Ar and Es $\\rightarrow $ Ru than strong p",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Although it is challenging for one model to translate all zero-shot directions between multiple distant language pairs of MultiUN, MLM+BRLM-SA still achieves better performances on Es $\\rightarrow $ Ar and Es $\\rightarrow $ Ru than strong p",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_6",
+            "page_no": 0,
+            "index": 5,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "Pivot-based Method is a common strategy to obtain a source$\\rightarrow $target model by introducing a pivot language. This approach is further divided into pivoting and pivot-synthetic. While the former firstly translates a source language ",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The pivot-based baselines include pivoting and pivot-synthetic. Pivoting translates source to pivot then to target in two steps (evidence_1, evidence_2, evidence_4, evidence_6). Pivot-synthetic trains a source→target model with pseudo data generated from source-pivot or pivot-target parallel data (evidence_6).",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_6"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_6"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.85,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.85
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0003",
+      "mode": "stable",
+      "task_type": "dataset_qa",
+      "question": "which datasets did they experiment with?",
+      "answer": "Europarl and MultiUN",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_3",
+          "evidence_4"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_3",
+            "page_no": 0,
+            "index": 2,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "Europarl and MultiUN",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_3",
+              "evidence_4"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_3",
+              "evidence_4"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0003",
+      "mode": "balanced",
+      "task_type": "dataset_qa",
+      "question": "which datasets did they experiment with?",
+      "answer": "Europarl and MultiUN",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_3",
+          "evidence_4"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_3",
+            "page_no": 0,
+            "index": 2,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "Europarl and MultiUN",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_3",
+              "evidence_4"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_3",
+              "evidence_4"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0003",
+      "mode": "exploratory",
+      "task_type": "dataset_qa",
+      "question": "which datasets did they experiment with?",
+      "answer": "Europarl and MultiUN",
+      "trace": {
+        "structured_validation": {
+          "valid": false,
+          "missing_keys": [],
+          "type_errors": [
+            "follow_up_questions must be list"
+          ]
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_3",
+          "evidence_4"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_3",
+            "page_no": 0,
+            "index": 2,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "We evaluate our cross-lingual pre-training based transfer approach against several strong baselines on two public datatsets, Europarl BIBREF31 and MultiUN BIBREF32, which contain multi-parallel evaluation data to assess the zero-shot perfor",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "Europarl and MultiUN",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_3",
+              "evidence_4"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_3",
+              "evidence_4"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0004",
+      "mode": "stable",
+      "task_type": "fact_qa",
+      "question": "what language pairs are explored?",
+      "answer": "The language pairs explored are: French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr), Romanian-English-German (Ro-En-De) for Europarl; and English-Arabic (En-Ar), English-Spanish (En-Es), English-Russian (En-Ru), and zero-shot pairs Arabic-Spanish (Ar-Es), Arabic-Russian (Ar-Ru), Spanish-Arabic (Es-Ar), Spanish-Russian (Es-Ru), Russian-Arabic (Ru-Ar), Russian-Spanish (Ru-Es) for MultiUN.",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "For MultiUN corpus, we use four languages: English (En) is set as the pivot language, which has parallel data with other three languages which do not have parallel data between each other. The three languages are Arabic (Ar), Spanish (Es), ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "The statistics of Europarl and MultiUN corpora are summarized in Table TABREF18. For Europarl corpus, we evaluate on French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr) and Romanian-English-German (Ro-En-De), where English a",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "For MultiUN corpus, we use four languages: English (En) is set as the pivot language, which has parallel data with other three languages which do not have parallel data between each other. The three languages are Arabic (Ar), Spanish (Es), ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "The statistics of Europarl and MultiUN corpora are summarized in Table TABREF18. For Europarl corpus, we evaluate on French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr) and Romanian-English-German (Ro-En-De), where English a",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The language pairs explored are: French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr), Romanian-English-German (Ro-En-De) for Europarl; and English-Arabic (En-Ar), English-Spanish (En-Es), English-Russian (En-Ru), and zero-shot pairs Arabic-Spanish (Ar-Es), Arabic-Russian (Ar-Ru), Spanish-Arabic (Es-Ar), Spanish-Russian (Es-Ru), Russian-Arabic (Ru-Ar), Russian-Spanish (Ru-Es) for MultiUN.",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.9048,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.9048
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0004",
+      "mode": "balanced",
+      "task_type": "fact_qa",
+      "question": "what language pairs are explored?",
+      "answer": "The language pairs explored are: for MultiUN corpus: Arabic-English, Spanish-English, Russian-English, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. For Europarl corpus: French-English, English-Spanish, French-Spanish (zero-shot), German-English, English-French, German-French (zero-shot), Romanian-English, English-German, Romanian-German (zero-shot).",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "For MultiUN corpus, we use four languages: English (En) is set as the pivot language, which has parallel data with other three languages which do not have parallel data between each other. The three languages are Arabic (Ar), Spanish (Es), ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "The statistics of Europarl and MultiUN corpora are summarized in Table TABREF18. For Europarl corpus, we evaluate on French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr) and Romanian-English-German (Ro-En-De), where English a",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "For MultiUN corpus, we use four languages: English (En) is set as the pivot language, which has parallel data with other three languages which do not have parallel data between each other. The three languages are Arabic (Ar), Spanish (Es), ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "The statistics of Europarl and MultiUN corpora are summarized in Table TABREF18. For Europarl corpus, we evaluate on French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr) and Romanian-English-German (Ro-En-De), where English a",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "The language pairs explored are: for MultiUN corpus: Arabic-English, Spanish-English, Russian-English, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. For Europarl corpus: French-English, English-Spanish, French-Spanish (zero-shot), German-English, English-French, German-French (zero-shot), Romanian-English, English-German, Romanian-German (zero-shot).",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.8667,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.8667
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0004",
+      "mode": "exploratory",
+      "task_type": "fact_qa",
+      "question": "what language pairs are explored?",
+      "answer": "MultiUN corpus: English-Arabic, English-Spanish, English-Russian, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. Europarl corpus: French-English-Spanish, German-English-French, Romanian-English-German.",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2",
+          "evidence_4",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "For MultiUN corpus, we use four languages: English (En) is set as the pivot language, which has parallel data with other three languages which do not have parallel data between each other. The three languages are Arabic (Ar), Spanish (Es), ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "The statistics of Europarl and MultiUN corpora are summarized in Table TABREF18. For Europarl corpus, we evaluate on French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr) and Romanian-English-German (Ro-En-De), where English a",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_4",
+            "page_no": 0,
+            "index": 3,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "For MultiUN corpus, we use four languages: English (En) is set as the pivot language, which has parallel data with other three languages which do not have parallel data between each other. The three languages are Arabic (Ar), Spanish (Es), ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "The statistics of Europarl and MultiUN corpora are summarized in Table TABREF18. For Europarl corpus, we evaluate on French-English-Spanish (Fr-En-Es), German-English-French (De-En-Fr) and Romanian-English-German (Ro-En-De), where English a",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "MultiUN corpus: English-Arabic, English-Spanish, English-Russian, and zero-shot pairs Arabic-Spanish, Arabic-Russian, Spanish-Arabic, Spanish-Russian, Russian-Arabic, Russian-Spanish. Europarl corpus: French-English-Spanish, German-English-French, Romanian-English-German.",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2",
+              "evidence_4",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.9231,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.9231
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0005",
+      "mode": "stable",
+      "task_type": "method_qa",
+      "question": "what ner models were evaluated?",
+      "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In this section we describe a number of experiments targeted to compare the performance of popular named entity recognition algorithms on our data. We trained and evaluated Stanford NER, spaCy 2.0, and a recurrent model similar to BIBREF13 ",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+            "chunk_ids": [
+              "evidence_1"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0005",
+      "mode": "balanced",
+      "task_type": "method_qa",
+      "question": "what ner models were evaluated?",
+      "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF) were evaluated.",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_5"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In this section we describe a number of experiments targeted to compare the performance of popular named entity recognition algorithms on our data. We trained and evaluated Stanford NER, spaCy 2.0, and a recurrent model similar to BIBREF13 ",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_5",
+            "page_no": 0,
+            "index": 4,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In this section we describe a number of experiments targeted to compare the performance of popular named entity recognition algorithms on our data. We trained and evaluated Stanford NER, spaCy 2.0, and a recurrent model similar to BIBREF13 ",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF) were evaluated.",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_5"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_5"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 0.9,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 0.9
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0005",
+      "mode": "exploratory",
+      "task_type": "method_qa",
+      "question": "what ner models were evaluated?",
+      "answer": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In this section we describe a number of experiments targeted to compare the performance of popular named entity recognition algorithms on our data. We trained and evaluated Stanford NER, spaCy 2.0, and a recurrent model similar to BIBREF13 ",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "Stanford NER, spaCy 2.0, and a recurrent model (bidirectional LSTM with CRF).",
+            "chunk_ids": [
+              "evidence_1"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0006",
+      "mode": "stable",
+      "task_type": "fact_qa",
+      "question": "what is the source of the news sentences?",
+      "answer": "ilur.am",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In order to evaluate the models trained on generated data, we manually annotated a named entities dataset comprising 53453 tokens and 2566 sentences selected from over 250 news texts from ilur.am. This dataset is comparable in size with the",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In order to evaluate the models trained on generated data, we manually annotated a named entities dataset comprising 53453 tokens and 2566 sentences selected from over 250 news texts from ilur.am.",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "ilur.am",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0006",
+      "mode": "balanced",
+      "task_type": "fact_qa",
+      "question": "what is the source of the news sentences?",
+      "answer": "ilur.am",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In order to evaluate the models trained on generated data, we manually annotated a named entities dataset comprising 53453 tokens and 2566 sentences selected from over 250 news texts from ilur.am. This dataset is comparable in size with the",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In order to evaluate the models trained on generated data, we manually annotated a named entities dataset comprising 53453 tokens and 2566 sentences selected from over 250 news texts from ilur.am.",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "ilur.am",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "qasper_0006",
+      "mode": "exploratory",
+      "task_type": "fact_qa",
+      "question": "what is the source of the news sentences?",
+      "answer": "ilur.am",
+      "trace": {
+        "structured_validation": {
+          "valid": true,
+          "missing_keys": [],
+          "type_errors": []
+        },
+        "cited_chunk_ids": [
+          "evidence_1",
+          "evidence_2"
+        ],
+        "resolved_citations": [
+          {
+            "chunk_id": "evidence_1",
+            "page_no": 0,
+            "index": 0,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In order to evaluate the models trained on generated data, we manually annotated a named entities dataset comprising 53453 tokens and 2566 sentences selected from over 250 news texts from ilur.am. This dataset is comparable in size with the",
+            "exists": true
+          },
+          {
+            "chunk_id": "evidence_2",
+            "page_no": 0,
+            "index": 1,
+            "bbox_px": {},
+            "bbox_norm": {},
+            "section_id": "",
+            "section_path": "QASPER evidence",
+            "heading": "",
+            "content_preview": "In order to evaluate the models trained on generated data, we manually annotated a named entities dataset comprising 53453 tokens and 2566 sentences selected from over 250 news texts from ilur.am.",
+            "exists": true
+          }
+        ],
+        "missing_chunk_ids": [],
+        "claim_traces": [
+          {
+            "claim": "ilur.am",
+            "chunk_ids": [
+              "evidence_1",
+              "evidence_2"
+            ],
+            "existing_chunk_ids": [
+              "evidence_1",
+              "evidence_2"
+            ],
+            "missing_chunk_ids": [],
+            "support_score": 1.0,
+            "support_level": "strong"
+          }
+        ],
+        "consistency": {
+          "citation_exist_rate": 1.0,
+          "trace_complete_rate": 1.0,
+          "claim_supported_rate": 1.0,
+          "invalid_citation_count": 0,
+          "missing_citation": false,
+          "avg_support_score": 1.0
+        }
+      }
+    }
+  ]
+}

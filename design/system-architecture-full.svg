@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1600" viewBox="0 0 2200 1600" role="img" aria-labelledby="title desc">
+  <title id="title">DeepDoc 系统当前架构图详细完整版</title>
+  <desc id="desc">按纵向泳道重排的 DeepDoc 架构图，包含前端、FastAPI 入口、服务层、OCR 与 RAG 编排、统一数据存储和独立日志总线。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f7fbfe"/>
+      <stop offset="100%" stop-color="#edf3f7"/>
+    </linearGradient>
+    <linearGradient id="header" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#143956"/>
+      <stop offset="100%" stop-color="#1f6a72"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#29465b" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4d6676"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f5b78"/>
+    </marker>
+    <style>
+      .title { font: 700 34px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #ffffff; }
+      .subtitle { font: 500 16px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #d7e8f2; }
+      .section-title { font: 700 22px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #18344c; }
+      .card-title { font: 700 18px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #18344c; }
+      .card-body { font: 400 14px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #2d4559; }
+      .small { font: 400 12px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #4d6476; }
+      .tiny { font: 400 11px 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; fill: #5d7283; }
+      .lane { fill: #ffffff; stroke: #c9d7e0; stroke-width: 2; rx: 24; filter: url(#shadow); }
+      .card { fill: #ffffff; stroke: #bccbd6; stroke-width: 1.5; rx: 16; filter: url(#shadow); }
+      .blue { fill: #ebf6fb; stroke: #83b7ca; }
+      .green { fill: #edf8f3; stroke: #92c8a8; }
+      .gold { fill: #fff8e7; stroke: #e0bd71; }
+      .slate { fill: #f5f7fa; stroke: #b7c2ce; }
+      .rose { fill: #fceff0; stroke: #d59ba0; }
+      .hub { fill: #dff0f7; stroke: #5a9fbb; stroke-width: 2; rx: 18; filter: url(#shadow); }
+      .storage { fill: #f3f6f9; stroke: #9fb0be; stroke-width: 1.7; rx: 18; filter: url(#shadow); }
+      .flow { stroke: #4d6676; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .flow-blue { stroke: #0f5b78; stroke-width: 3; fill: none; marker-end: url(#arrowBlue); }
+      .flow-dash { stroke: #6c7f8d; stroke-width: 2.5; fill: none; stroke-dasharray: 8 7; marker-end: url(#arrow); }
+      .flow-log { stroke: #a0555b; stroke-width: 2.5; fill: none; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+      .divider { stroke: #d8e2e9; stroke-width: 1.4; stroke-dasharray: 6 6; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="2200" height="1600" fill="url(#bg)"/>
+  <rect x="0" y="0" width="2200" height="110" fill="url(#header)"/>
+  <text x="48" y="52" class="title">DeepDoc 系统当前架构图详细完整版</text>
+  <text x="48" y="82" class="subtitle">重排版：纵向主干 + 入口汇流 + OCR/RAG 双中枢 + 底部统一存储 + 右侧独立日志总线</text>
+
+  <rect x="32" y="136" width="1728" height="180" class="lane"/>
+  <text x="56" y="168" class="section-title">1. 前端交互层</text>
+
+  <rect x="58" y="192" width="290" height="96" class="card blue"/>
+  <text x="78" y="220" class="card-title">浏览器用户界面</text>
+  <text x="78" y="242" class="card-body">项目列表、PDF 浏览、问答面板</text>
+  <text x="78" y="262" class="card-body">选区高亮、引用定位、结果回显</text>
+
+  <rect x="384" y="192" width="300" height="96" class="card blue"/>
+  <text x="404" y="220" class="card-title">静态前端资源</text>
+  <text x="404" y="242" class="card-body">web/index.html</text>
+  <text x="404" y="262" class="card-body">web/app.js / web/styles.css</text>
+
+  <rect x="720" y="192" width="446" height="96" class="card blue"/>
+  <text x="740" y="220" class="card-title">前端状态</text>
+  <text x="740" y="242" class="card-body">docs / threads / dbThreads / artifacts</text>
+  <text x="740" y="262" class="card-body">selectedChunkItems / qaChunkContext / citedChunkKeys</text>
+
+  <rect x="1202" y="192" width="532" height="96" class="card blue"/>
+  <text x="1222" y="220" class="card-title">前端调用 API</text>
+  <text x="1222" y="242" class="card-body">workspace / now-conversation / upload/pdf / ocr-parse / chunks</text>
+  <text x="1222" y="262" class="card-body">neighbors / vector-index/search / rag-ask / ask-selection</text>
+
+  <rect x="32" y="344" width="1728" height="220" class="lane"/>
+  <text x="56" y="376" class="section-title">2. 应用入口层</text>
+
+  <rect x="372" y="404" width="1048" height="126" class="hub"/>
+  <text x="402" y="436" class="card-title">API Gateway / FastAPI Entry</text>
+  <text x="402" y="460" class="card-body">backend/main.py</text>
+  <text x="402" y="482" class="card-body">统一入口：静态站点挂载、项目与工作区 API、PDF 上传、OCR 解析、chunk 查询、向量索引、RAG/选区问答</text>
+  <text x="402" y="504" class="small">单进程承载前端页面与 API；前端所有业务请求先汇入这里，再分发到服务层与编排层</text>
+
+  <rect x="32" y="592" width="1728" height="316" class="lane"/>
+  <text x="56" y="624" class="section-title">3. 业务服务层</text>
+
+  <rect x="56" y="656" width="264" height="216" class="card green"/>
+  <text x="76" y="684" class="card-title">project_store.py</text>
+  <text x="76" y="706" class="card-body">项目目录结构创建</text>
+  <text x="76" y="726" class="card-body">workspace / overview / quality_report</text>
+  <text x="76" y="746" class="card-body">documents/index.json 维护</text>
+  <text x="76" y="780" class="small">项目级 JSON 读写与目录约定</text>
+
+  <rect x="344" y="656" width="264" height="216" class="card green"/>
+  <text x="364" y="684" class="card-title">chunk_store.py</text>
+  <text x="364" y="706" class="card-body">OCR chunk 标准化</text>
+  <text x="364" y="726" class="card-body">flatten / by-page / detail / neighbors</text>
+  <text x="364" y="746" class="card-body">chunks.json 构建</text>
+  <text x="364" y="780" class="small">为检索、邻居扩展、引用定位提供基础数据</text>
+
+  <rect x="632" y="656" width="264" height="216" class="card green"/>
+  <text x="652" y="684" class="card-title">overview_service.py</text>
+  <text x="652" y="706" class="card-body">抽样首页与标题候选</text>
+  <text x="652" y="726" class="card-body">生成 overview.json</text>
+  <text x="652" y="746" class="card-body">同步文档轻量索引</text>
+  <text x="652" y="780" class="small">优先调用 DeepSeek，失败则降级启发式生成</text>
+
+  <rect x="920" y="656" width="264" height="216" class="card green"/>
+  <text x="940" y="684" class="card-title">session_service.py</text>
+  <text x="940" y="706" class="card-body">session.json / summary.json</text>
+  <text x="940" y="726" class="card-body">会话创建、激活、历史读取</text>
+  <text x="940" y="746" class="card-body">长对话压缩</text>
+  <text x="940" y="780" class="small">按文档维度维护 QA 会话和摘要上下文</text>
+
+  <rect x="1208" y="656" width="264" height="216" class="card green"/>
+  <text x="1228" y="684" class="card-title">qa_service.py</text>
+  <text x="1228" y="706" class="card-body">band 聚合与选区归一化</text>
+  <text x="1228" y="726" class="card-body">chunk context 序列化</text>
+  <text x="1228" y="746" class="card-body">DeepSeek 问答提示词组装</text>
+  <text x="1228" y="780" class="small">承接人工选区问答与 RAG 最终提示词生成</text>
+
+  <rect x="1496" y="656" width="240" height="216" class="card green"/>
+  <text x="1516" y="684" class="card-title">vector_store.py</text>
+  <text x="1516" y="706" class="card-body">rag_500_100 切块</text>
+  <text x="1516" y="726" class="card-body">SentenceTransformer 编码</text>
+  <text x="1516" y="746" class="card-body">FAISS + BM25 混合检索</text>
+  <text x="1516" y="780" class="small">rebuild / update / search</text>
+
+  <rect x="32" y="936" width="1728" height="370" class="lane"/>
+  <text x="56" y="968" class="section-title">4. 编排层与主业务链路</text>
+
+  <rect x="130" y="1010" width="612" height="110" class="hub"/>
+  <text x="160" y="1042" class="card-title">Document Pipeline Hub</text>
+  <text x="160" y="1066" class="card-body">PDF 上传 → 页图渲染 → OCR 解析 → OCR 质量评估 → chunk / overview / vector index</text>
+  <text x="160" y="1090" class="small">upload/pdf、ocr-parse、ocr-evaluate 统一汇流到文档处理主链路</text>
+
+  <rect x="130" y="1152" width="612" height="118" class="card gold"/>
+  <text x="150" y="1180" class="card-title">OCR 主流程</text>
+  <text x="150" y="1202" class="card-body">render_pdf_to_page_images(page_XXXX.png)</text>
+  <text x="150" y="1222" class="card-body">GLM-OCR parse + layout_vis + ocrBlocksByPage</text>
+  <text x="150" y="1242" class="card-body">ocr_quality.evaluate_ocr_quality + 质量报告持久化</text>
+
+  <rect x="802" y="1010" width="612" height="110" class="hub"/>
+  <text x="832" y="1042" class="card-title">QA / RAG Hub</text>
+  <text x="832" y="1066" class="card-body">问答入口汇流：自动检索问答与人工选区问答</text>
+  <text x="832" y="1090" class="small">rag-ask 与 ask-selection 在这里分流到各自上下文拼装方式</text>
+
+  <rect x="802" y="1152" width="292" height="118" class="card gold"/>
+  <text x="822" y="1180" class="card-title">RAG 自动问答</text>
+  <text x="822" y="1202" class="card-body">vector search + retry top_k</text>
+  <text x="822" y="1222" class="card-body">邻居扩展 + overview + 会话上下文</text>
+  <text x="822" y="1242" class="card-body">ask_rag_with_selection → DeepSeek</text>
+
+  <rect x="1122" y="1152" width="292" height="118" class="card gold"/>
+  <text x="1142" y="1180" class="card-title">人工选区问答</text>
+  <text x="1142" y="1202" class="card-body">expand_selected_with_neighbors</text>
+  <text x="1142" y="1222" class="card-body">ranked_chunks + extra_chunks</text>
+  <text x="1142" y="1242" class="card-body">ask_deepseek_with_selection_v2</text>
+
+  <rect x="1452" y="1010" width="284" height="260" class="card gold"/>
+  <text x="1472" y="1038" class="card-title">外部模型与算法</text>
+  <text x="1472" y="1060" class="card-body">GLM-OCR</text>
+  <text x="1472" y="1080" class="card-body">DeepSeek Chat API</text>
+  <text x="1472" y="1100" class="card-body">SentenceTransformer</text>
+  <text x="1472" y="1120" class="card-body">FAISS</text>
+  <text x="1472" y="1140" class="card-body">BM25 + RRF + coverage</text>
+  <text x="1472" y="1160" class="card-body">ocr_quality.py</text>
+  <line x1="1472" y1="1172" x2="1714" y2="1172" class="divider"/>
+  <text x="1472" y="1194" class="small">配置来源</text>
+  <text x="1472" y="1214" class="tiny">backend/.glmocr_api_key</text>
+  <text x="1472" y="1232" class="tiny">backend/.deepseek_api_key</text>
+  <text x="1472" y="1250" class="tiny">环境变量 / 本地模型目录</text>
+
+  <rect x="32" y="1334" width="1728" height="230" class="lane"/>
+  <text x="56" y="1366" class="section-title">5. 统一数据存储</text>
+
+  <rect x="78" y="1412" width="1638" height="120" class="storage"/>
+  <text x="108" y="1442" class="card-title">Project Data Store: data/projects/&lt;project_id&gt;/...</text>
+  <text x="108" y="1466" class="card-body">meta.json | conversations/workspace_state.json | conversations/now_conversation.json</text>
+  <text x="108" y="1488" class="card-body">conversations/sessions/&lt;session_id&gt;/session.json | summary.json | sessions/index.json</text>
+  <text x="108" y="1510" class="card-body">uploads/pdfs | uploads/pdf_pages/&lt;doc_id&gt; | uploads/ocr_blocks/&lt;doc_id&gt;</text>
+  <text x="108" y="1532" class="card-body">documents/&lt;doc_id&gt;/chunks.json | overview.json | quality_report.json | documents/_vector_index/manifest.json + faiss.index</text>
+
+  <rect x="1792" y="136" width="376" height="1428" class="lane"/>
+  <text x="1816" y="168" class="section-title">6. 日志总线</text>
+
+  <rect x="1820" y="218" width="320" height="116" class="card rose"/>
+  <text x="1840" y="246" class="card-title">logging_config.py</text>
+  <text x="1840" y="268" class="card-body">logger = deepdoc</text>
+  <text x="1840" y="288" class="card-body">RotatingFileHandler</text>
+  <text x="1840" y="308" class="card-body">console handler</text>
+
+  <rect x="1820" y="390" width="320" height="128" class="card rose"/>
+  <text x="1840" y="418" class="card-title">日志落点</text>
+  <text x="1840" y="440" class="card-body">log/deepdoc.log</text>
+  <text x="1840" y="460" class="card-body">10MB 轮转，backupCount=5</text>
+  <text x="1840" y="480" class="card-body">用于调试、排障、性能分析</text>
+
+  <rect x="1820" y="574" width="320" height="282" class="card rose"/>
+  <text x="1840" y="602" class="card-title">主要记录点</text>
+  <text x="1840" y="624" class="card-body">main.py: API 编排与异常</text>
+  <text x="1840" y="646" class="card-body">rag/service.py: 检索开始/结束</text>
+  <text x="1840" y="668" class="card-body">retrieval hits / support chunks</text>
+  <text x="1840" y="690" class="card-body">context_source / cited count</text>
+  <text x="1840" y="712" class="card-body">elapsed_ms / model_done</text>
+  <text x="1840" y="734" class="card-body">异常与失败链路</text>
+
+  <rect x="1820" y="920" width="320" height="198" class="card rose"/>
+  <text x="1840" y="948" class="card-title">观测方式</text>
+  <text x="1840" y="970" class="card-body">业务层不强制直连日志文件</text>
+  <text x="1840" y="992" class="card-body">而是通过 logger 旁路记录</text>
+  <text x="1840" y="1014" class="card-body">因此主图中日志线不穿过业务主干</text>
+  <text x="1840" y="1036" class="card-body">只在右侧总线上统一汇聚</text>
+
+  <rect x="1820" y="1174" width="320" height="210" class="card slate"/>
+  <text x="1840" y="1202" class="card-title">图例</text>
+  <line x1="1848" y1="1230" x2="1910" y2="1230" class="flow"/>
+  <text x="1922" y="1235" class="small">主数据流 / 调用链</text>
+  <line x1="1848" y1="1262" x2="1910" y2="1262" class="flow-dash"/>
+  <text x="1922" y="1267" class="small">补充依赖 / 外部能力</text>
+  <line x1="1848" y1="1294" x2="1910" y2="1294" class="flow-log"/>
+  <text x="1922" y="1299" class="small">日志旁路记录</text>
+  <rect x="1848" y="1320" width="22" height="14" class="hub"/>
+  <text x="1884" y="1332" class="small">汇流中枢</text>
+  <rect x="1996" y="1320" width="22" height="14" class="storage"/>
+  <text x="2032" y="1332" class="small">统一存储</text>
+
+  <path d="M 348 240 L 384 240" class="flow-blue"/>
+  <path d="M 684 240 L 720 240" class="flow-blue"/>
+  <path d="M 1166 240 L 1202 240" class="flow-blue"/>
+  <path d="M 1468 288 L 1468 404 L 896 404" class="flow"/>
+  <path d="M 896 288 L 896 404" class="flow"/>
+  <path d="M 203 288 L 203 404 L 372 404" class="flow"/>
+
+  <path d="M 896 530 L 896 620" class="flow"/>
+  <path d="M 896 620 L 188 620 L 188 656" class="flow"/>
+  <path d="M 896 620 L 476 620 L 476 656" class="flow"/>
+  <path d="M 896 620 L 764 620 L 764 656" class="flow"/>
+  <path d="M 896 620 L 1052 620 L 1052 656" class="flow"/>
+  <path d="M 896 620 L 1340 620 L 1340 656" class="flow"/>
+  <path d="M 896 620 L 1616 620 L 1616 656" class="flow"/>
+
+  <path d="M 896 530 L 896 1010" class="flow"/>
+  <path d="M 896 950 L 436 950 L 436 1010" class="flow"/>
+  <path d="M 896 950 L 1108 950 L 1108 1010" class="flow"/>
+
+  <path d="M 436 1120 L 436 1152" class="flow"/>
+  <path d="M 1108 1120 L 1108 1152" class="flow"/>
+  <path d="M 1108 1120 L 1268 1120 L 1268 1152" class="flow"/>
+
+  <path d="M 1616 872 L 1616 1010" class="flow"/>
+  <path d="M 1340 872 L 1340 1152" class="flow"/>
+  <path d="M 1052 872 L 1052 1152" class="flow"/>
+  <path d="M 764 872 L 764 1152 L 822 1152" class="flow"/>
+  <path d="M 476 872 L 476 1152 L 150 1152" class="flow"/>
+  <path d="M 188 872 L 188 1412" class="flow"/>
+  <path d="M 764 872 L 764 1412" class="flow"/>
+  <path d="M 1052 872 L 1052 1412" class="flow"/>
+  <path d="M 1616 872 L 1616 1412" class="flow"/>
+  <path d="M 436 1270 L 436 1412" class="flow"/>
+  <path d="M 1108 1270 L 1108 1412" class="flow"/>
+  <path d="M 1268 1270 L 1268 1412" class="flow"/>
+
+  <path d="M 1452 1064 L 1414 1064" class="flow-dash"/>
+  <path d="M 1452 1100 L 742 1100" class="flow-dash"/>
+  <path d="M 1452 1140 L 1414 1140" class="flow-dash"/>
+  <path d="M 1452 1184 L 1094 1184" class="flow-dash"/>
+  <path d="M 1452 1222 L 1414 1222" class="flow-dash"/>
+
+  <path d="M 1420 448 L 1820 448" class="flow-log"/>
+  <path d="M 1108 1010 L 1820 1010" class="flow-log"/>
+  <path d="M 436 1010 L 1820 1010" class="flow-log"/>
+  <path d="M 1616 656 L 1820 656" class="flow-log"/>
+  <path d="M 188 656 L 1820 656" class="flow-log"/>
+
+  <path d="M 1980 334 L 1980 390" class="flow-log"/>
+  <path d="M 1980 518 L 1980 574" class="flow-log"/>
+
+</svg>
