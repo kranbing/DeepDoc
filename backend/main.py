@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -50,6 +50,12 @@ from backend.services.lad_store import (
     read_lad_chunks,
     read_preferred_lad_chunks,
     save_lad_artifacts,
+)
+from backend.services.kg_store import (
+    ensure_project_kg,
+    read_project_kg,
+    render_project_kg_html,
+    update_project_kg_from_qa,
 )
 from backend.services.overview_service import ensure_document_overview, upsert_document_overview
 from backend.services.project_store import (
@@ -119,6 +125,7 @@ def ensure_project_layout(project_id: str) -> Path:
     (p / "uploads" / "ocr_blocks").mkdir(parents=True, exist_ok=True)
     (p / "uploads" / "databases").mkdir(parents=True, exist_ok=True)
     (p / "outputs").mkdir(parents=True, exist_ok=True)
+    (p / "kg").mkdir(parents=True, exist_ok=True)
     return p
 
 
@@ -218,6 +225,7 @@ def _default_process_status() -> Dict[str, Any]:
             "ocr": {"status": "pending", "progress": 0, "message": "等待 OCR"},
             "chunk": {"status": "pending", "progress": 0, "message": "等待 chunk"},
             "lad": {"status": "pending", "progress": 0, "message": "等待 LAD"},
+            "kg": {"status": "pending", "progress": 0, "message": "等待问答拓展"},
         },
         "updatedAt": _utc_now(),
     }
@@ -981,6 +989,23 @@ def get_document_lad_chunk_json(project_id: str, doc_id: str) -> Dict[str, Any]:
     return lad_payload
 
 
+@app.get("/api/projects/{project_id}/kg/graph.json")
+def get_project_kg_json(project_id: str) -> Dict[str, Any]:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    return ensure_project_kg(pdir, project_id)
+
+
+@app.get("/api/projects/{project_id}/kg/graph.html")
+def get_project_kg_page(project_id: str) -> HTMLResponse:
+    pdir = DATA_PROJECTS / project_id
+    if not pdir.is_dir() or not (pdir / "meta.json").is_file():
+        raise HTTPException(status_code=404, detail="项目不存在")
+    payload = read_project_kg(pdir, project_id)
+    return HTMLResponse(render_project_kg_html(payload))
+
+
 @app.get("/api/projects/{project_id}/docs/{doc_id}/chunks/{chunk_id}")
 def get_document_chunk(project_id: str, doc_id: str, chunk_id: str, radius: int = 1) -> Dict[str, Any]:
     pdir = DATA_PROJECTS / project_id
@@ -1451,6 +1476,20 @@ def ask_selection(project_id: str, doc_id: str, body: AskSelectionBody) -> Dict[
         question,
         result,
     )
+    try:
+        update_project_kg_from_qa(
+            pdir,
+            project_id,
+            doc_id=doc_id,
+            doc_name=str(doc.get("name") or doc_id),
+            session_id=str(session.get("id") or ""),
+            question=question,
+            result=result,
+            task_type=task_route.task_type,
+            retrieval_mode=retrieval_mode,
+        )
+    except Exception:
+        logger.exception("project kg update failed | project_id=%s | doc_id=%s", project_id, doc_id)
     compacted = compact_session_if_needed(ROOT, pdir, session)
     now_conv["activeDocId"] = doc_id
     now_conv["activeSessionId"] = str(session.get("id") or "")
@@ -1574,6 +1613,7 @@ def _run_doc_process_job(project_id: str, doc_id: str) -> None:
                     "ocr": {"status": "running", "progress": 20, "message": "OCR 解析中"},
                     "chunk": {"status": "pending", "progress": 0, "message": "等待 OCR 完成"},
                     "lad": {"status": "pending", "progress": 0, "message": "等待 chunk 完成"},
+                    "kg": {"status": "pending", "progress": 0, "message": "等待问答拓展"},
                 },
             },
         )
@@ -1694,6 +1734,22 @@ def _run_doc_process_job(project_id: str, doc_id: str) -> None:
                 "progress": 100,
                 "stages": {
                     "lad": {"status": "done", "progress": 100, "message": "LAD/索引后台处理完成"},
+                    "kg": {"status": "running", "progress": 40, "message": "初始化项目级 KG"},
+                },
+            },
+        )
+        doc["processStatus"] = status
+        _replace_workspace_doc(pdir, doc_id, doc)
+        ensure_project_kg(pdir, project_id)
+        status = _set_process_status(
+            project_id,
+            doc_id,
+            {
+                "status": "done",
+                "phase": "done",
+                "progress": 100,
+                "stages": {
+                    "kg": {"status": "done", "progress": 100, "message": "KG 等待问答拓展"},
                 },
             },
         )

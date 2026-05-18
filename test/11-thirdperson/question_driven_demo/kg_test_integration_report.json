@@ -1,0 +1,157 @@
+[
+  {
+    "qaId": "kg_test_01",
+    "question": "如果我要生成一张 DeepDoc 技术路线图，图谱能提供哪些节点和关系？",
+    "expectedDecision": "merge",
+    "actualDecision": "merge",
+    "isReasonable": true,
+    "newNodeCandidates": [
+      "technical_roadmap"
+    ],
+    "reusedNodeCandidates": [],
+    "newEdgeCandidates": [
+      "chart_generation::produces::technical_roadmap",
+      "technical_roadmap::uses::question_driven_kg"
+    ],
+    "structuralNodeCandidates": [],
+    "rationale": "测试问答能复用已有节点，并新增少量与生成任务或 LAD-RAG 相关的语义关系，适合合入项目级图谱。",
+    "evidence": [
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0003_c002",
+        "pageNo": 3,
+        "sectionId": "sec_0003",
+        "sectionTitle": "Abstract",
+        "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0010_c001",
+        "pageNo": 10,
+        "sectionId": "sec_0016",
+        "sectionTitle": "第2章 国内外研究现状",
+        "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0010_c002",
+        "pageNo": 10,
+        "sectionId": "sec_0016",
+        "sectionTitle": "第2章 国内外研究现状",
+        "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0010_c004",
+        "pageNo": 10,
+        "sectionId": "sec_0018",
+        "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+        "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+      }
+    ]
+  },
+  {
+    "qaId": "kg_test_02",
+    "question": "用户追问 LAD-RAG 与传统 RAG 的区别时，是否应该新增图谱节点？",
+    "expectedDecision": "merge",
+    "actualDecision": "merge",
+    "isReasonable": true,
+    "newNodeCandidates": [
+      "lad_rag"
+    ],
+    "reusedNodeCandidates": [],
+    "newEdgeCandidates": [
+      "lad_rag::uses::lad",
+      "lad_rag::uses::rag",
+      "lad_rag::reduces::context_fragmentation",
+      "lad_rag::compared_with::traditional_rag"
+    ],
+    "structuralNodeCandidates": [],
+    "rationale": "测试问答能复用已有节点，并新增少量与生成任务或 LAD-RAG 相关的语义关系，适合合入项目级图谱。",
+    "evidence": [
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0010_c001",
+        "pageNo": 10,
+        "sectionId": "sec_0016",
+        "sectionTitle": "第2章 国内外研究现状",
+        "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0024_c004",
+        "pageNo": 24,
+        "sectionId": "sec_0061",
+        "sectionTitle": "4.3 工作量",
+        "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0025_c002",
+        "pageNo": 25,
+        "sectionId": "sec_0063",
+        "sectionTitle": "（一）模型训练成本",
+        "textPreview": "成本优化策略："
+      }
+    ]
+  },
+  {
+    "qaId": "kg_test_03",
+    "question": "生成项目总结文档时，图谱是否应该引入章节和 chunk 作为主节点？",
+    "expectedDecision": "reject_structural_nodes",
+    "actualDecision": "reject_structural_nodes",
+    "isReasonable": true,
+    "newNodeCandidates": [
+      "section_nodes",
+      "chunk_nodes"
+    ],
+    "reusedNodeCandidates": [],
+    "newEdgeCandidates": [
+      "report_generation::should_not_use_as_main_node::section_nodes",
+      "report_generation::should_not_use_as_main_node::chunk_nodes"
+    ],
+    "structuralNodeCandidates": [
+      "section_nodes",
+      "chunk_nodes"
+    ],
+    "rationale": "测试输入试图把章节或 chunk 作为主图谱节点；这会让问题驱动 KG 退化成结构图，应拒绝进入主图，只保留为证据。",
+    "evidence": [
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0036_c001",
+        "pageNo": 36,
+        "sectionId": "sec_0089",
+        "sectionTitle": "6.2.2 成员分工表",
+        "textPreview": "## 6.2.2 成员分工表"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0038_c002"
+      },
+      {
+        "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+        "docId": "pdf_fdbd9e01",
+        "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+        "chunkId": "p0038_c004"
+      }
+    ]
+  }
+]

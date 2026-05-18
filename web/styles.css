@@ -196,7 +196,7 @@ body {
 }
 
 .doc-process-progress.is-view-switcher .doc-process-fill {
-  width: calc(100% / 3) !important;
+  width: calc(100% / 4) !important;
   transform: translateX(calc(var(--view-index) * 100%));
   background: linear-gradient(90deg, #4a6fa5, #14b8a6);
 }

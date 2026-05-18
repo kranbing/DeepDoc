@@ -89,10 +89,22 @@ function rebuildPdfDocDerivedFields() {
     if (d.isPdf && Array.isArray(d.pdfPageImages)) {
       d.pdfNumPages = d.pdfPageImages.length;
     }
-    if (d.isPdf && d.ocrParsed && d.pdfViewMode !== "parsed" && d.pdfViewMode !== "original") {
+    if (
+      d.isPdf &&
+      d.ocrParsed &&
+      d.pdfViewMode !== "parsed" &&
+      d.pdfViewMode !== "original" &&
+      d.pdfViewMode !== "graph"
+    ) {
       d.pdfViewMode = "parsed";
     }
   }
+}
+
+function normalizeDocumentPdfViewMode(doc) {
+  if (!doc?.isPdf || doc.pdfViewMode !== "kg") return doc?.pdfViewMode || "original";
+  doc.pdfViewMode = doc.ladReady ? "graph" : doc.ocrParsed ? "parsed" : "original";
+  return doc.pdfViewMode;
 }
 
 function buildOcrBlockImageUrl(doc, filename) {
@@ -949,8 +961,8 @@ function isPdfParsedView(doc) {
 function updateDocumentStatusBarVisibility(doc = getSelectedDoc()) {
   const top = document.querySelector(".doc-top");
   if (!top) return;
-  const hideForGraph = !!(state.viewMode === "document" && doc?.isPdf && doc.pdfViewMode === "graph");
-  top.hidden = hideForGraph;
+  const hideForEmbed = !!(state.viewMode === "document" && doc?.isPdf && doc.pdfViewMode === "graph");
+  top.hidden = hideForEmbed;
 }
 
 function updateParseOcrButton() {
@@ -1002,11 +1014,12 @@ function renderProcessStatus(processStatus) {
   const progress = Math.max(0, Math.min(100, Number(processStatus?.progress || 0)));
   if (fill) fill.style.width = `${progress}%`;
   const stages = processStatus?.stages || {};
-  const labels = { ocr: "OCR", chunk: "CHUNK", lad: "LAD" };
+  const labels = { ocr: "OCR", chunk: "CHUNK", lad: "LAD", kg: "KG" };
   [
     ["ocr", $("#stageOcr")],
     ["chunk", $("#stageChunk")],
     ["lad", $("#stageLad")],
+    ["kg", $("#stageKg")],
   ].forEach(([key, el]) => {
     if (!el) return;
     const status = stages?.[key]?.status || "pending";
@@ -1020,28 +1033,30 @@ function renderProcessStatus(processStatus) {
 
 function renderViewSwitcher(doc) {
   const wrapper = $("#docProcessProgress");
-  const mode = doc?.pdfViewMode || "original";
+  const mode = normalizeDocumentPdfViewMode(doc);
   const order = ["original", "parsed", "graph"];
   const labels = {
     original: "Original",
     parsed: "Parsed",
     graph: "Graph",
+    kg: "KG",
   };
   if (wrapper) {
     wrapper.classList.add("is-view-switcher");
     wrapper.style.setProperty("--view-index", String(Math.max(0, order.indexOf(mode))));
   }
   const fill = $("#docProcessFill");
-  if (fill) fill.style.width = "33.3333%";
+  if (fill) fill.style.width = "25%";
   [
     ["original", $("#stageOcr")],
     ["parsed", $("#stageChunk")],
     ["graph", $("#stageLad")],
+    ["kg", $("#stageKg")],
   ].forEach(([key, button]) => {
     if (!button) return;
     button.textContent = labels[key];
     button.classList.remove("is-running", "is-done", "is-error");
-    button.classList.toggle("is-active", mode === key);
+    button.classList.toggle("is-active", key !== "kg" && mode === key);
   });
 }
 
@@ -1687,6 +1702,7 @@ function mergeProcessedDoc(updatedDoc, processStatus) {
   if (doc.ocrParsed && doc.pdfViewMode !== "original" && doc.pdfViewMode !== "graph") {
     doc.pdfViewMode = "parsed";
   }
+  normalizeDocumentPdfViewMode(doc);
   const afterMode = doc.pdfViewMode || "";
   const afterChunkReady =
     Array.isArray(doc?.ocrBlocksByPage) &&
@@ -1738,8 +1754,30 @@ function pollDocProcessStatus(docId) {
   void tick();
 }
 
+function openProjectKnowledgeGraph() {
+  if (!state.currentProjectId || !isDiskWorkspaceProject()) {
+    alert("请先进入一个本地项目");
+    return;
+  }
+  const url = `${API_BASE}/api/projects/${encodeURIComponent(state.currentProjectId)}/kg/graph.html`;
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  if (!opened) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+}
+
 function setDocumentPdfViewMode(mode) {
   const doc = getSelectedDoc();
+  if (mode === "kg") {
+    openProjectKnowledgeGraph();
+    return;
+  }
   if (!doc?.isPdf) return;
   doc.pdfViewMode = mode;
   clearChunkSelection();
@@ -1925,6 +1963,7 @@ function renderDocumentContinuous() {
   const pagesWrap = $("#pages");
 
   document.documentElement.style.setProperty("--zoom", String(state.zoom));
+  normalizeDocumentPdfViewMode(doc);
   updateDocumentStatusBarVisibility(doc);
 
   if (doc && doc.isPdf) {
@@ -2987,11 +3026,15 @@ function setupEventHandlers() {
   if (btnParseOcr) {
     btnParseOcr.addEventListener("click", () => void handleParseOcrClick());
   }
-  ["stageOcr", "stageChunk", "stageLad"].forEach((id) => {
+  ["stageOcr", "stageChunk", "stageLad", "stageKg"].forEach((id) => {
     $(`#${id}`)?.addEventListener("click", (event) => {
-      const doc = getSelectedDoc();
       const target = event.currentTarget;
       const mode = target?.dataset?.viewMode;
+      if (mode === "kg") {
+        openProjectKnowledgeGraph();
+        return;
+      }
+      const doc = getSelectedDoc();
       const ready =
         doc?.isPdf &&
         doc.ocrParsed &&

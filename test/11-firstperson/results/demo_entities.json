@@ -1,0 +1,688 @@
+[
+  {
+    "name": "F1",
+    "type": "Metric",
+    "description": "",
+    "confidence": 0.85,
+    "source": "rule_known_metric",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p000",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0000",
+    "source_chunk_ids": [
+      "1603.09631_s000_p000"
+    ]
+  },
+  {
+    "name": "Introduction",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p000",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0001",
+    "source_chunk_ids": [
+      "1603.09631_s000_p000"
+    ]
+  },
+  {
+    "name": "In Section",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.5,
+    "source": "rule_capitalized",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0002",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Dialog Simulation",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0003",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Dataset Collection Process",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0004",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Dataset Properties",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0005",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Interactive Learning Evaluation",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0006",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Future Work",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0007",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Motivation",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0008",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Dialog policies",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0009",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Conclusion",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s000_p003",
+    "source_section": "Introduction",
+    "id": "ent_1603.09631_0010",
+    "source_chunk_ids": [
+      "1603.09631_s000_p003"
+    ]
+  },
+  {
+    "name": "Motivation",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s001_p000",
+    "source_section": "Motivation",
+    "id": "ent_1603.09631_0011",
+    "source_chunk_ids": [
+      "1603.09631_s001_p000"
+    ]
+  },
+  {
+    "name": "accuracy",
+    "type": "Metric",
+    "description": "",
+    "confidence": 0.85,
+    "source": "rule_known_metric",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s001_p001",
+    "source_section": "Motivation",
+    "id": "ent_1603.09631_0012",
+    "source_chunk_ids": [
+      "1603.09631_s001_p001"
+    ]
+  },
+  {
+    "name": "wer",
+    "type": "Metric",
+    "description": "",
+    "confidence": 0.85,
+    "source": "rule_known_metric",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s001_p001",
+    "source_section": "Motivation",
+    "id": "ent_1603.09631_0013",
+    "source_chunk_ids": [
+      "1603.09631_s001_p001"
+    ]
+  },
+  {
+    "name": "Dialog policies",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s002_p000",
+    "source_section": "Dialog policies",
+    "id": "ent_1603.09631_0014",
+    "source_chunk_ids": [
+      "1603.09631_s002_p000"
+    ]
+  },
+  {
+    "name": "Dialog Simulation",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s003_p000",
+    "source_section": "Dialog Simulation",
+    "id": "ent_1603.09631_0015",
+    "source_chunk_ids": [
+      "1603.09631_s003_p000"
+    ]
+  },
+  {
+    "name": "Dataset Collection Process",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s004_p000",
+    "source_section": "Dataset Collection Process",
+    "id": "ent_1603.09631_0016",
+    "source_chunk_ids": [
+      "1603.09631_s004_p000"
+    ]
+  },
+  {
+    "name": "CrowdFlower",
+    "type": "Method",
+    "description": "Acronym: CF",
+    "confidence": 0.9,
+    "source": "rule_paren_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s004_p001",
+    "source_section": "Dataset Collection Process",
+    "id": "ent_1603.09631_0017",
+    "source_chunk_ids": [
+      "1603.09631_s004_p001"
+    ]
+  },
+  {
+    "name": "CF",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.7,
+    "source": "rule_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s004_p001",
+    "source_section": "Dataset Collection Process",
+    "id": "ent_1603.09631_0018",
+    "source_chunk_ids": [
+      "1603.09631_s004_p001"
+    ]
+  },
+  {
+    "name": "Acknowledgments",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s004_p002",
+    "source_section": "Dataset Collection Process",
+    "id": "ent_1603.09631_0019",
+    "source_chunk_ids": [
+      "1603.09631_s004_p002"
+    ]
+  },
+  {
+    "name": " explanation (see Section",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_chinese_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s004_p002",
+    "source_section": "Dataset Collection Process",
+    "id": "ent_1603.09631_0020",
+    "source_chunk_ids": [
+      "1603.09631_s004_p002"
+    ]
+  },
+  {
+    "name": "Question Paraphrasing",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s005_p000",
+    "source_section": "Question Paraphrasing",
+    "id": "ent_1603.09631_0021",
+    "source_chunk_ids": [
+      "1603.09631_s005_p000"
+    ]
+  },
+  {
+    "name": "Question Explanation",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s006_p000",
+    "source_section": "Question Explanation",
+    "id": "ent_1603.09631_0022",
+    "source_chunk_ids": [
+      "1603.09631_s006_p000"
+    ]
+  },
+  {
+    "name": "Question Answer",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s007_p000",
+    "source_section": "Question Answer",
+    "id": "ent_1603.09631_0023",
+    "source_chunk_ids": [
+      "1603.09631_s007_p000"
+    ]
+  },
+  {
+    "name": "Annotation",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s008_p000",
+    "source_section": "Annotation",
+    "id": "ent_1603.09631_0024",
+    "source_chunk_ids": [
+      "1603.09631_s008_p000"
+    ]
+  },
+  {
+    "name": "Natural Language Understanding (NLU",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s009_p000",
+    "source_section": "Natural Language Understanding (NLU)",
+    "id": "ent_1603.09631_0025",
+    "source_chunk_ids": [
+      "1603.09631_s009_p000"
+    ]
+  },
+  {
+    "name": "wikipedia",
+    "type": "Dataset",
+    "description": "",
+    "confidence": 0.85,
+    "source": "rule_known_dataset",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s009_p006",
+    "source_section": "Natural Language Understanding (NLU)",
+    "id": "ent_1603.09631_0026",
+    "source_chunk_ids": [
+      "1603.09631_s009_p006"
+    ]
+  },
+  {
+    "name": "Dataset Properties",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s010_p000",
+    "source_section": "Dataset Properties",
+    "id": "ent_1603.09631_0027",
+    "source_chunk_ids": [
+      "1603.09631_s010_p000"
+    ]
+  },
+  {
+    "name": "Natural Language Understanding",
+    "type": "Method",
+    "description": "Acronym: NLU",
+    "confidence": 0.9,
+    "source": "rule_paren_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s010_p002",
+    "source_section": "Dataset Properties",
+    "id": "ent_1603.09631_0028",
+    "source_chunk_ids": [
+      "1603.09631_s010_p002"
+    ]
+  },
+  {
+    "name": "Natural Language Understanding (NLU",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s010_p002",
+    "source_section": "Dataset Properties",
+    "id": "ent_1603.09631_0029",
+    "source_chunk_ids": [
+      "1603.09631_s010_p002"
+    ]
+  },
+  {
+    "name": "Brad Pitt",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.5,
+    "source": "rule_capitalized",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s010_p004",
+    "source_section": "Dataset Properties",
+    "id": "ent_1603.09631_0030",
+    "source_chunk_ids": [
+      "1603.09631_s010_p004"
+    ]
+  },
+  {
+    "name": "Kelly Atwood",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.5,
+    "source": "rule_capitalized",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s010_p004",
+    "source_section": "Dataset Properties",
+    "id": "ent_1603.09631_0031",
+    "source_chunk_ids": [
+      "1603.09631_s010_p004"
+    ]
+  },
+  {
+    "name": "Interactive Learning Evaluation",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s011_p000",
+    "source_section": "Interactive Learning Evaluation",
+    "id": "ent_1603.09631_0032",
+    "source_chunk_ids": [
+      "1603.09631_s011_p000"
+    ]
+  },
+  {
+    "name": "Efficiency Score",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s011_p001",
+    "source_section": "Interactive Learning Evaluation",
+    "id": "ent_1603.09631_0033",
+    "source_chunk_ids": [
+      "1603.09631_s011_p001"
+    ]
+  },
+  {
+    "name": "Answer Extraction Accuracy",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.6,
+    "source": "rule_capitalized,rule_quoted",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s011_p001",
+    "source_section": "Interactive Learning Evaluation",
+    "id": "ent_1603.09631_0034",
+    "source_chunk_ids": [
+      "1603.09631_s011_p001"
+    ]
+  },
+  {
+    "name": "Efficiency Score",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s012_p000",
+    "source_section": "Efficiency Score",
+    "id": "ent_1603.09631_0035",
+    "source_chunk_ids": [
+      "1603.09631_s012_p000"
+    ]
+  },
+  {
+    "name": "Answer Extraction Accuracy",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s013_p000",
+    "source_section": "Answer Extraction Accuracy",
+    "id": "ent_1603.09631_0036",
+    "source_chunk_ids": [
+      "1603.09631_s013_p000"
+    ]
+  },
+  {
+    "name": "Future Work",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s014_p000",
+    "source_section": "Future Work",
+    "id": "ent_1603.09631_0037",
+    "source_chunk_ids": [
+      "1603.09631_s014_p000"
+    ]
+  },
+  {
+    "name": "Conclusion",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s015_p000",
+    "source_section": "Conclusion",
+    "id": "ent_1603.09631_0038",
+    "source_chunk_ids": [
+      "1603.09631_s015_p000"
+    ]
+  },
+  {
+    "name": "SA",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.7,
+    "source": "rule_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s015_p001",
+    "source_section": "Conclusion",
+    "id": "ent_1603.09631_0039",
+    "source_chunk_ids": [
+      "1603.09631_s015_p001"
+    ]
+  },
+  {
+    "name": "Creative Commons",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.5,
+    "source": "rule_capitalized",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s015_p001",
+    "source_section": "Conclusion",
+    "id": "ent_1603.09631_0040",
+    "source_chunk_ids": [
+      "1603.09631_s015_p001"
+    ]
+  },
+  {
+    "name": "SVV",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.7,
+    "source": "rule_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0041",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "GAUK",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.7,
+    "source": "rule_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0042",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "LINDAT",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.7,
+    "source": "rule_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0043",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "CLARIN",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.7,
+    "source": "rule_acronym",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0044",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "Czech Republic",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.5,
+    "source": "rule_capitalized",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0045",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "Charles University",
+    "type": "Concept",
+    "description": "",
+    "confidence": 0.5,
+    "source": "rule_capitalized",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0046",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "arc",
+    "type": "Dataset",
+    "description": "",
+    "confidence": 0.85,
+    "source": "rule_known_dataset",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0047",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  },
+  {
+    "name": "Acknowledgments",
+    "type": "Section",
+    "description": "",
+    "confidence": 1.0,
+    "source": "rule_section",
+    "source_doc_id": "1603.09631",
+    "source_chunk_id": "1603.09631_s016_p000",
+    "source_section": "Acknowledgments",
+    "id": "ent_1603.09631_0048",
+    "source_chunk_ids": [
+      "1603.09631_s016_p000"
+    ]
+  }
+]

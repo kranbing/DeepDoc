@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepDoc - 知识图谱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;background:#0a0e17;color:#c9d1d9;overflow:hidden;height:100vh}
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* Top bar */
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:48px;background:#111827;border-bottom:1px solid #1e293b;flex-shrink:0;z-index:10}
+#topbar h1{font-size:16px;color:#60a5fa;font-weight:700;letter-spacing:1px}
+#tabs{display:flex;gap:2px}
+#tabs button{padding:8px 20px;background:transparent;border:none;color:#94a3b8;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+#tabs button:hover{color:#e2e8f0}
+#tabs button.active{color:#60a5fa;border-bottom-color:#60a5fa}
+#search-box{padding:6px 14px;background:#0f172a;border:1px solid #1e293b;color:#e2e8f0;border-radius:8px;font-size:12px;width:220px}
+#search-box:focus{outline:none;border-color:#60a5fa}
+
+/* Main area */
+#main{flex:1;display:flex;overflow:hidden}
+
+/* Sidebar */
+#sidebar{width:280px;background:#111827;border-right:1px solid #1e293b;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+#sidebar-content{flex:1;overflow-y:auto;padding:12px 14px}
+.section-title{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px}
+.section-title:first-child{margin-top:0}
+
+/* Legend */
+.leg-item{display:flex;align-items:center;padding:4px 8px;font-size:12px;cursor:pointer;border-radius:6px;margin:1px 0;transition:background .12s;user-select:none}
+.leg-item:hover{background:#1e293b}
+.leg-item.off{opacity:.3}
+.leg-dot{width:10px;height:10px;border-radius:50%;margin-right:8px;flex-shrink:0}
+.leg-cnt{color:#64748b;margin-left:auto;font-size:10px}
+
+/* Entity list in sidebar */
+.ent-item{padding:6px 10px;font-size:12px;cursor:pointer;border-radius:6px;margin:1px 0;display:flex;align-items:center;gap:8px;transition:background .12s}
+.ent-item:hover{background:#1e293b}
+.ent-item.selected{background:#1e3a5f;border:1px solid #2563eb}
+.ent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ent-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ent-badge{font-size:9px;color:#64748b;background:#1e293b;padding:1px 6px;border-radius:10px}
+
+/* Canvas area */
+#canvas-wrap{flex:1;position:relative;background:#0a0e17}
+canvas{display:block}
+#tooltip{position:absolute;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;font-size:12px;pointer-events:none;display:none;z-index:20;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+#tooltip .tt-name{font-weight:600;color:#60a5fa;margin-bottom:3px}
+#tooltip .tt-meta{color:#94a3b8;font-size:11px;margin-bottom:4px}
+#tooltip .tt-desc{color:#e2e8f0;font-size:11px;line-height:1.5}
+
+/* Detail panel */
+#detail{position:absolute;top:16px;right:16px;width:340px;background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px;display:none;z-index:15;max-height:calc(100vh - 80px);overflow-y:auto;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#detail h2{font-size:15px;color:#60a5fa;margin-bottom:8px}
+#detail .dr{margin:4px 0;line-height:1.5}
+#detail .dl{color:#64748b;font-weight:500}
+#detail .close{position:absolute;top:12px;right:14px;cursor:pointer;color:#64748b;font-size:18px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+#detail .close:hover{color:#e2e8f0;background:#1e293b}
+.nb-item{font-size:11px;padding:3px 0 3px 8px;display:flex;align-items:center;gap:4px;cursor:pointer;border-radius:4px}
+.nb-item:hover{background:#1e293b}
+.nb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* Heatmap */
+#heatmap-wrap{padding:8px 0}
+#heatmap{border-radius:8px}
+
+/* Loading */
+#loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#64748b}
+#loading .sp{width:40px;height:40px;border:3px solid #1e293b;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Zoom ctrl */
+#zoom-ctrl{position:absolute;bottom:16px;left:16px;display:flex;flex-direction:column;gap:4px;z-index:5}
+#zoom-ctrl button{width:34px;height:34px;background:#111827;border:1px solid #1e293b;color:#e2e8f0;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+#zoom-ctrl button:hover{background:#1e293b;border-color:#60a5fa}
+
+/* Stats bar */
+#stats-bar{display:flex;gap:16px;align-items:center}
+.stat-pill{font-size:11px;color:#94a3b8;background:#0f172a;padding:3px 10px;border-radius:12px}
+.stat-pill b{color:#60a5fa}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <h1>知识图谱</h1>
+    <div id="tabs">
+      <button class="active" data-view="sunburst">文档结构</button>
+      <button data-view="entity">实体关系</button>
+      <button data-view="dashboard">实体总览</button>
+    </div>
+    <div id="stats-bar"></div>
+    <input type="text" id="search-box" placeholder="搜索实体... (Ctrl+K)">
+  </div>
+  <div id="main">
+    <div id="sidebar">
+      <div id="sidebar-content"></div>
+    </div>
+    <div id="canvas-wrap">
+      <canvas id="cv"></canvas>
+      <div id="loading"><div class="sp"></div><div>正在加载知识图谱...</div></div>
+      <div id="detail"><span class="close" onclick="closeDetail()">&times;</span><div id="detail-body"></div></div>
+      <div id="tooltip"></div>
+      <div id="zoom-ctrl">
+        <button onclick="doZoom(1.4)">+</button>
+        <button onclick="doZoom(0.7)">−</button>
+        <button onclick="fitView()" title="适配视图">⬜</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ CONSTANTS ============
+const COLORS={Document:"#3b82f6",Section:"#22c55e",Chunk:"#475569",Method:"#ef4444",Dataset:"#f97316",Metric:"#eab308",Concept:"#06b6d4",Task:"#a855f7",Tool:"#ec4899",Author:"#78716c",Organization:"#94a3b8"};
+const TYPE_CN={Document:"文档",Section:"章节",Chunk:"文本块",Method:"方法/模型",Dataset:"数据集",Metric:"评估指标",Concept:"概念/术语",Task:"任务",Tool:"工具/框架",Author:"作者",Organization:"机构"};
+const REL_CN={CONTAINS:"包含",PROPOSES:"提出",USES:"使用",EVALUATES_ON:"评估于",ACHIEVES:"达到",BASED_ON:"基于",BELONGS_TO:"所属章节",DEPENDS_ON:"依赖",COMPARES_WITH:"对比",PART_OF:"属于"};
+const REL_COLORS={CONTAINS:"#475569",COMPARES_WITH:"#3b82f6",ACHIEVES:"#22c55e",PROPOSES:"#ef4444",USES:"#f97316",EVALUATES_ON:"#eab308",BELONGS_TO:"#8b5cf6"};
+
+// ============ STATE ============
+const canvas=document.getElementById('cv');
+const ctx=canvas.getContext('2d');
+let W,H;
+let allNodes=[],allEdges=[],nodeMap={};
+let currentView='sunburst';
+let cam={x:0,y:0,zoom:1};
+let dragging=null,panning=false,panStart={x:0,y:0,camX:0,camY:0};
+let hovered=null,selected=null,selectedEntity=null;
+let searchText='';
+
+// Sunburst state
+let sunburstTree=null,sunburstSectors=[],hoveredSector=null;
+
+// Entity graph state
+let entityNodes=[],entityEdges=[];
+let entSimAlpha=1;
+
+const DATA_URL=window.location.origin+'/api/kg/graph.json';
+
+// ============ INIT ============
+async function init(){
+  try{
+    const r=await fetch(DATA_URL,{cache:'no-store'});
+    if(!r.ok)throw new Error(r.status);
+    const data=await r.json();
+    document.getElementById('loading').style.display='none';
+    buildData(data);
+    // Wait a frame for layout to settle (especially in iframe)
+    requestAnimationFrame(()=>{
+      resize();
+      buildUI();
+      switchView('sunburst');
+      requestAnimationFrame(loop);
+    });
+  }catch(e){
+    document.getElementById('loading').innerHTML='<div style="color:#ef4444">加载失败: '+e.message+'</div>';
+  }
+}
+
+function buildData(data){
+  const rawNodes=data.nodes||[];
+  const rawEdges=data.edges||[];
+  const nids=new Set(rawNodes.map(n=>n.id));
+  allEdges=rawEdges.filter(e=>nids.has(e.source_id)&&nids.has(e.target_id));
+  allNodes=rawNodes.map(n=>({...n,_adj:[]}));
+  nodeMap={};
+  allNodes.forEach(n=>{nodeMap[n.id]=n;});
+  allEdges.forEach(e=>{
+    if(nodeMap[e.source_id])nodeMap[e.source_id]._adj.push(e);
+    if(nodeMap[e.target_id])nodeMap[e.target_id]._adj.push(e);
+  });
+  // Compute degree (all edges)
+  allNodes.forEach(n=>{n.degree=n._adj.length;});
+}
+
+function resize(){
+  const g=document.getElementById('canvas-wrap');
+  W=Math.max(g.clientWidth,100);H=Math.max(g.clientHeight,100);
+  canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  // Recalculate layout if sunburst view is active
+  if(currentView==='sunburst'&&sunburstTree){computeSunburstLayout();}
+}
+window.addEventListener('resize',resize);
+
+// ============ UI ============
+function buildUI(){
+  // Stats
+  const tc={};
+  allNodes.forEach(n=>{tc[n.type]=(tc[n.type]||0)+1;});
+  const entityCount=Object.entries(tc).filter(([t])=>!['Chunk','Section','Document'].includes(t)).reduce((s,[,c])=>s+c,0);
+  document.getElementById('stats-bar').innerHTML=
+    `<span class="stat-pill">节点 <b>${allNodes.length}</b></span>`+
+    `<span class="stat-pill">关系 <b>${allEdges.length}</b></span>`+
+    `<span class="stat-pill">实体 <b>${entityCount}</b></span>`;
+
+  // Tab switching
+  document.querySelectorAll('#tabs button').forEach(btn=>{
+    btn.addEventListener('click',()=>switchView(btn.dataset.view));
+  });
+
+  // Search
+  const sb=document.getElementById('search-box');
+  sb.addEventListener('input',function(){
+    searchText=this.value.toLowerCase();
+    onSearch();
+  });
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();sb.focus();}
+    if(e.key==='Escape'){sb.value='';searchText='';onSearch();closeDetail();}
+  });
+}
+
+function switchView(view){
+  currentView=view;
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  cam={x:0,y:0,zoom:1};
+  selected=null;hovered=null;
+  closeDetail();
+
+  if(view==='sunburst'){buildSunburst();buildSunburstSidebar();}
+  else if(view==='entity'){buildEntityGraph();buildEntitySidebar();}
+  else if(view==='dashboard'){buildDashboardSidebar();}
+}
+
+function onSearch(){
+  if(currentView==='sunburst'){buildSunburstSidebar();}
+  else if(currentView==='entity'){buildEntitySidebar();}
+  else if(currentView==='dashboard'){buildEntitySidebar();}
+}
+
+// ============ SUNBURST VIEW ============
+function buildSunburst(){
+  // Build tree: Document → Sections → Chunks
+  // Only use structural sections (section_* prefix) which have hierarchy
+  const docNode=allNodes.find(n=>n.type==='Document');
+  const sections=allNodes.filter(n=>n.type==='Section'&&n.id.startsWith('section_'));
+  const chunks=allNodes.filter(n=>n.type==='Chunk');
+
+  // Build section hierarchy using parentId
+  const secMap={};
+  sections.forEach(s=>{secMap[s.id]=s;s._children=[];s._chunks=[];});
+  chunks.forEach(c=>{
+    const secId=c.sectionId?'section_'+c.sectionId:null;
+    if(secId&&secMap[secId])secMap[secId]._chunks.push(c);
+  });
+
+  // Build tree
+  const roots=[];
+  sections.forEach(s=>{
+    const pId=s.parentId?'section_'+s.parentId:null;
+    if(pId&&secMap[pId]){
+      secMap[pId]._children.push(s);
+    }else{
+      roots.push(s);
+    }
+  });
+
+  sunburstTree={node:docNode,children:roots.map(s=>buildSunburstNode(s)),chunks:[]};
+  computeSunburstLayout();
+}
+
+function buildSunburstNode(sec){
+  return{
+    node:sec,
+    children:sec._children.map(s=>buildSunburstNode(s)),
+    chunks:sec._chunks
+  };
+}
+
+function computeSunburstLayout(){
+  sunburstSectors=[];
+  if(!sunburstTree)return;
+
+  const cx=0,cy=0;
+  const maxR=Math.min(W,H)*0.42;
+
+  // Count total leaves for proportional sizing
+  function countLeaves(tree){
+    if(!tree.children||!tree.children.length)return 1+tree.chunks.length;
+    let c=tree.chunks.length;
+    tree.children.forEach(ch=>{c+=countLeaves(ch);});
+    return Math.max(c,1);
+  }
+
+  const totalLeaves=countLeaves(sunburstTree);
+  let globalAngle=0;
+
+  function layoutNode(tree,depth,startAngle,endAngle){
+    const node=tree.node;
+    const innerR=depth*maxR/4+30;
+    const outerR=(depth+1)*maxR/4+30;
+    const midAngle=(startAngle+endAngle)/2;
+
+    sunburstSectors.push({
+      node,depth,startAngle,endAngle,innerR,outerR,midAngle,
+      cx,cy,
+      isLeaf:!tree.children||!tree.children.length
+    });
+
+    // Layout children
+    if(tree.children&&tree.children.length){
+      let angle=startAngle;
+      tree.children.forEach(child=>{
+        const childLeaves=countLeaves(child);
+        const span=(childLeaves/totalLeaves)*(endAngle-startAngle);
+        layoutNode(child,depth+1,angle,angle+span);
+        angle+=span;
+      });
+    }
+
+    // Layout chunks as thin outer ring
+    if(tree.chunks&&tree.chunks.length){
+      let angle=startAngle;
+      const chunkSpan=(tree.chunks.length/totalLeaves)*(endAngle-startAngle);
+      const chunkInnerR=outerR+5;
+      const chunkOuterR=outerR+15;
+      tree.chunks.forEach((chunk,i)=>{
+        const a=angle+(i/tree.chunks.length)*chunkSpan;
+        sunburstSectors.push({
+          node:chunk,depth:depth+1,startAngle:a,endAngle:a+chunkSpan/tree.chunks.length,
+          innerR:chunkInnerR,outerR:chunkOuterR,midAngle:a,
+          cx,cy,isLeaf:true,isChunk:true
+        });
+      });
+    }
+  }
+
+  // Start layout from children of root (skip document center)
+  let angle=-Math.PI/2;
+  sunburstTree.children.forEach(child=>{
+    const leaves=countLeaves(child);
+    const span=(leaves/totalLeaves)*Math.PI*2;
+    layoutNode(child,1,angle,angle+span);
+    angle+=span;
+  });
+}
+
+function drawSunburst(){
+  const cx=W/2+cam.x,cy=H/2+cam.y;
+
+  if(!sunburstSectors.length){
+    // No data yet - show placeholder
+    ctx.font='14px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='#64748b';ctx.fillText('正在构建文档结构...',cx,cy);
+    return;
+  }
+
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.scale(cam.zoom,cam.zoom);
+
+  const q=searchText;
+
+  sunburstSectors.forEach(sec=>{
+    const matchSearch=!q||sec.node.name.toLowerCase().includes(q);
+    const isHover=sec.node===hovered;
+    const isSel=sec.node===selected;
+    const isPath=hoveredSector&&isAncestor(sec,hoveredSector);
+
+    const alpha=(!q||matchSearch)?1:0.15;
+
+    // Get color
+    let color;
+    if(sec.node.type==='Section'){
+      const hue=(sec.startAngle/(Math.PI*2)*360+120)%360;
+      color=`hsl(${hue},55%,${isHover||isSel?55:40}%)`;
+    }else if(sec.node.type==='Chunk'){
+      color=isHover?'#64748b':'#334155';
+    }else{
+      color=COLORS[sec.node.type]||'#64748b';
+    }
+
+    ctx.globalAlpha=alpha;
+    ctx.beginPath();
+    ctx.arc(sec.cx,sec.cy,sec.outerR,sec.startAngle,sec.endAngle);
+    ctx.arc(sec.cx,sec.cy,sec.innerR,sec.endAngle,sec.startAngle,true);
+    ctx.closePath();
+    ctx.fillStyle=color;
+    ctx.fill();
+
+    if(isSel||isPath){
+      ctx.strokeStyle='#60a5fa';ctx.lineWidth=2;ctx.stroke();
+    }else if(isHover){
+      ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1.5;ctx.stroke();
+    }
+
+    // Label for sections (if arc is wide enough)
+    const arcLen=(sec.endAngle-sec.startAngle)*((sec.innerR+sec.outerR)/2);
+    if(!sec.isChunk&&arcLen>30&&cam.zoom>0.5){
+      const labelR=(sec.innerR+sec.outerR)/2;
+      const lx=sec.cx+Math.cos(sec.midAngle)*labelR;
+      const ly=sec.cy+Math.sin(sec.midAngle)*labelR;
+      const fontSize=Math.max(8,Math.min(12,10/cam.zoom*0.7));
+      ctx.font=`500 ${fontSize}px -apple-system,'Microsoft YaHei',sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      const label=sec.node.name.length>12?sec.node.name.substring(0,11)+'…':sec.node.name;
+      ctx.save();
+      ctx.translate(lx,ly);
+      let rot=sec.midAngle;
+      if(rot>Math.PI/2&&rot<Math.PI*1.5)rot+=Math.PI;
+      ctx.rotate(rot);
+      ctx.fillStyle='#e2e8f0';
+      ctx.fillText(label,0,0);
+      ctx.restore();
+    }
+  });
+
+  // Center: Document node
+  ctx.globalAlpha=1;
+  ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);
+  ctx.fillStyle=COLORS.Document;ctx.fill();
+  ctx.font='700 11px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#fff';ctx.fillText('文档',0,0);
+
+  ctx.restore();
+}
+
+function isAncestor(sec,desc){
+  // Check if sec is an ancestor of desc in the sector list (by depth)
+  if(sec.depth>=desc.depth)return false;
+  return desc.startAngle>=sec.startAngle&&desc.endAngle<=sec.endAngle;
+}
+
+function sunburstHitTest(sx,sy){
+  const w=screenToWorld(sx,sy);
+  const d=Math.sqrt(w.x*w.x+w.y*w.y);
+  const angle=Math.atan2(w.y,w.x);
+  const normAngle=angle<0?angle+Math.PI*2:angle;
+
+  for(let i=sunburstSectors.length-1;i>=0;i--){
+    const s=sunburstSectors[i];
+    const na=normAngle;
+    let sa=s.startAngle%(Math.PI*2);if(sa<0)sa+=Math.PI*2;
+    let ea=s.endAngle%(Math.PI*2);if(ea<0)ea+=Math.PI*2;
+    if(d>=s.innerR&&d<=s.outerR){
+      if(sa<=ea?na>=sa&&na<=ea:na>=sa||na<=ea)return s.node;
+    }
+  }
+  // Center hit
+  if(d<18)return allNodes.find(n=>n.type==='Document');
+  return null;
+}
+
+function buildSunburstSidebar(){
+  const sc=document.getElementById('sidebar-content');
+  const q=searchText;
+  let html='<div class="section-title">文档结构</div>';
+
+  // Section tree
+  const sections=allNodes.filter(n=>n.type==='Section');
+  const roots=[];
+  const secMap={};
+  sections.forEach(s=>{secMap[s.id]=s;});
+  sections.forEach(s=>{
+    const pId=s.parentId?'section_'+s.parentId:null;
+    if(!pId||!secMap[pId])roots.push(s);
+  });
+
+  function renderSec(sec,depth){
+    const match=!q||sec.name.toLowerCase().includes(q);
+    if(q&&!match&&!hasMatchingChild(sec))return'';
+    const indent=depth*12;
+    const chunkCount=allNodes.filter(n=>n.type==='Chunk'&&n.sectionId===sec.id.replace('section_','')).length;
+    let h=`<div class="ent-item" style="padding-left:${8+indent}px" onclick="selectFromSidebar('${sec.id}')">`+
+      `<div class="ent-dot" style="background:${COLORS.Section}"></div>`+
+      `<div class="ent-name">${sec.name.length>30?sec.name.substring(0,28)+'…':sec.name}</div>`+
+      (chunkCount?`<span class="ent-badge">${chunkCount}</span>`:'')+
+      `</div>`;
+    // Children
+    const children=sections.filter(s=>s.parentId===sec.id.replace('section_',''));
+    children.forEach(c=>{h+=renderSec(c,depth+1);});
+    return h;
+  }
+
+  function hasMatchingChild(sec){
+    const children=sections.filter(s=>s.parentId===sec.id.replace('section_',''));
+    return children.some(c=>c.name.toLowerCase().includes(q)||hasMatchingChild(c));
+  }
+
+  roots.forEach(r=>{html+=renderSec(r,0);});
+
+  sc.innerHTML=html;
+}
+
+// ============ ENTITY GRAPH VIEW ============
+let expandedSet=new Set(); // IDs of expanded nodes
+let graphNodeMap={}; // nodes currently in the graph
+let seedNodeIds=new Set(); // IDs of initial connected entities (always visible)
+
+function isSeedNode(id){return seedNodeIds.has(id);}
+
+function buildEntityGraph(){
+  // Start with connected entity nodes (non-CONTAINS edges)
+  const nonContains=allEdges.filter(e=>e.relation!=='CONTAINS');
+  const connectedIds=new Set();
+  nonContains.forEach(e=>{connectedIds.add(e.source_id);connectedIds.add(e.target_id);});
+
+  const startNodes=allNodes.filter(n=>connectedIds.has(n.id));
+  seedNodeIds=new Set(startNodes.map(n=>n.id));
+  expandedSet=new Set(startNodes.map(n=>n.id));
+
+  entityNodes=startNodes.map(n=>{
+    const r=n.type==='Method'?14:n.type==='Metric'?10:n.type==='Task'?10:8;
+    const angle=Math.random()*Math.PI*2;
+    const dist=50+Math.random()*200;
+    return{...n,x:Math.cos(angle)*dist,y:Math.sin(angle)*dist,vx:0,vy:0,radius:r};
+  });
+
+  graphNodeMap={};
+  entityNodes.forEach(n=>{graphNodeMap[n.id]=n;});
+
+  rebuildEntityEdges();
+  entSimAlpha=1;
+}
+
+function expandGraphNode(nodeId){
+  if(expandedSet.has(nodeId))return;
+  expandedSet.add(nodeId);
+  const srcNode=graphNodeMap[nodeId]||nodeMap[nodeId];
+  if(!srcNode)return;
+
+  const entityTypes=['Method','Dataset','Metric','Concept','Task','Tool','Author','Organization'];
+
+  // Find peer entities via:
+  // 1. Direct entity-to-entity edges (non-CONTAINS)
+  // 2. Shared source_chunk_ids (entities from the same text chunks)
+  // 3. Shared source_section
+
+  const peerEntityIds=new Set();
+
+  // Direct entity neighbors via edges
+  allEdges.forEach(e=>{
+    let otherId=null;
+    if(e.source_id===nodeId)otherId=e.target_id;
+    if(e.target_id===nodeId)otherId=e.source_id;
+    if(otherId&&otherId!==nodeId&&!graphNodeMap[otherId]){
+      const other=nodeMap[otherId];
+      if(other&&entityTypes.includes(other.type)){
+        peerEntityIds.add(otherId);
+      }
+    }
+  });
+
+  // Entities sharing the same chunks
+  const srcChunks=srcNode.source_chunk_ids||[];
+  if(srcChunks.length){
+    allNodes.forEach(n=>{
+      if(n.id===nodeId||graphNodeMap[n.id])return;
+      if(!entityTypes.includes(n.type))return;
+      const nChunks=n.source_chunk_ids||[];
+      if(nChunks.some(c=>srcChunks.includes(c))){
+        peerEntityIds.add(n.id);
+      }
+    });
+  }
+
+  // Entities sharing the same section
+  const srcSection=srcNode.source_section;
+  if(srcSection){
+    allNodes.forEach(n=>{
+      if(n.id===nodeId||graphNodeMap[n.id])return;
+      if(!entityTypes.includes(n.type))return;
+      if(n.source_section===srcSection){
+        peerEntityIds.add(n.id);
+      }
+    });
+  }
+
+  // Add peer entities to graph
+  const baseAngle=Math.atan2(srcNode.y||0,srcNode.x||0);
+  let added=0;
+  const totalNew=peerEntityIds.size;
+
+  peerEntityIds.forEach(nid=>{
+    if(graphNodeMap[nid])return;
+    const n=nodeMap[nid];
+    if(!n)return;
+    const angle=baseAngle+(added-totalNew/2)*0.4;
+    const dist=140+added*12;
+    const graphNode={
+      ...n,
+      x:(srcNode.x||0)+Math.cos(angle)*dist,
+      y:(srcNode.y||0)+Math.sin(angle)*dist,
+      vx:0,vy:0,
+      radius:n.type==='Method'?12:n.type==='Metric'?9:n.type==='Task'?9:7
+    };
+    entityNodes.push(graphNode);
+    graphNodeMap[nid]=graphNode;
+    added++;
+  });
+
+  // Add the source section as a context node (prefer structural sections)
+  if(srcSection){
+    const secNode=allNodes.find(n=>n.type==='Section'&&n.id.startsWith('section_')&&n.name===srcSection&&!graphNodeMap[n.id])
+      ||allNodes.find(n=>n.type==='Section'&&n.name===srcSection&&!graphNodeMap[n.id]);
+    if(secNode){
+      const angle=baseAngle+Math.PI;
+      const dist=200;
+      const graphNode={
+        ...secNode,
+        x:(srcNode.x||0)+Math.cos(angle)*dist,
+        y:(srcNode.y||0)+Math.sin(angle)*dist,
+        vx:0,vy:0,
+        radius:5
+      };
+      entityNodes.push(graphNode);
+      graphNodeMap[secNode.id]=graphNode;
+    }
+  }
+
+  rebuildEntityEdges();
+  entSimAlpha=0.8;
+  buildEntitySidebar();
+}
+
+function collapseGraphNode(nodeId){
+  if(!expandedSet.has(nodeId))return;
+  expandedSet.delete(nodeId);
+
+  // Keep seed nodes (initial connected entities) and any node that's still
+  // reachable from an expanded node
+  const seedIds=new Set();
+  const nonContains=allEdges.filter(e=>e.relation!=='CONTAINS');
+  nonContains.forEach(e=>{seedIds.add(e.source_id);seedIds.add(e.target_id);});
+
+  // Build set of nodes to keep:
+  // 1. All seed nodes
+  // 2. All expanded nodes
+  // 3. All neighbors of expanded nodes
+  const keepIds=new Set(seedIds);
+  expandedSet.forEach(eid=>{
+    keepIds.add(eid);
+    allEdges.forEach(e=>{
+      if(e.source_id===eid)keepIds.add(e.target_id);
+      if(e.target_id===eid)keepIds.add(e.source_id);
+    });
+  });
+
+  entityNodes=entityNodes.filter(n=>keepIds.has(n.id));
+  graphNodeMap={};
+  entityNodes.forEach(n=>{graphNodeMap[n.id]=n;});
+  rebuildEntityEdges();
+  buildEntitySidebar();
+}
+
+function rebuildEntityEdges(){
+  const visIds=new Set(entityNodes.map(n=>n.id));
+  entityEdges=allEdges.filter(e=>visIds.has(e.source_id)&&visIds.has(e.target_id));
+
+  // Add synthetic BELONGS_TO edges from entities to their source sections (if section is visible)
+  const visSections=entityNodes.filter(n=>n.type==='Section');
+  if(visSections.length){
+    const secNameMap={};
+    visSections.forEach(s=>{secNameMap[s.name]=s.id;});
+    entityNodes.forEach(n=>{
+      if(!['Method','Dataset','Metric','Concept','Task','Tool','Author','Organization'].includes(n.type))return;
+      if(!n.source_section)return;
+      const secId=secNameMap[n.source_section];
+      if(secId&&!entityEdges.some(e=>e.source_id===n.id&&e.target_id===secId&&e.relation==='BELONGS_TO')){
+        entityEdges.push({source_id:n.id,target_id:secId,relation:'BELONGS_TO',confidence:0.9});
+      }
+    });
+  }
+}
+
+function drawEntityGraph(){
+  ctx.save();
+  ctx.translate(W/2+cam.x,H/2+cam.y);
+  ctx.scale(cam.zoom,cam.zoom);
+
+  const q=searchText;
+
+  // Tick physics
+  if(entSimAlpha>0.005){
+    // Center gravity
+    entityNodes.forEach(n=>{
+      n.vx+=(0-n.x)*0.0003;n.vy+=(0-n.y)*0.0003;
+    });
+    // Collision
+    for(let i=0;i<entityNodes.length;i++){
+      for(let j=i+1;j<entityNodes.length;j++){
+        const a=entityNodes[i],b=entityNodes[j];
+        let dx=b.x-a.x,dy=b.y-a.y;
+        let d2=dx*dx+dy*dy;
+        const minD=a.radius+b.radius+20;
+        if(d2<minD*minD){
+          d2=Math.max(d2,1);const d=Math.sqrt(d2);
+          const f=(minD-d)/d*0.5;
+          if(a!==dragging){a.vx-=dx*f;a.vy-=dy*f;}
+          if(b!==dragging){b.vx+=dx*f;b.vy+=dy*f;}
+        }
+      }
+    }
+    // Link spring
+    entityEdges.forEach(e=>{
+      const s=graphNodeMap[e.source_id],t=graphNodeMap[e.target_id];
+      if(!s||!t)return;
+      let dx=t.x-s.x,dy=t.y-s.y;
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      const f=(d-150)*0.003;
+      if(s!==dragging){s.vx+=dx/d*f;s.vy+=dy/d*f;}
+      if(t!==dragging){t.vx-=dx/d*f;t.vy-=dy/d*f;}
+    });
+    // Type clustering
+    const byType={};
+    entityNodes.forEach(n=>{if(!byType[n.type])byType[n.type]=[];byType[n.type].push(n);});
+    const keys=Object.keys(byType);
+    for(let i=0;i<keys.length;i++){
+      for(let j=i+1;j<keys.length;j++){
+        const ga=byType[keys[i]],gb=byType[keys[j]];
+        let cx1=0,cy1=0,cx2=0,cy2=0;
+        ga.forEach(n=>{cx1+=n.x;cy1+=n.y;});gb.forEach(n=>{cx2+=n.x;cy2+=n.y;});
+        cx1/=ga.length;cy1/=ga.length;cx2/=gb.length;cy2/=gb.length;
+        let dx=cx2-cx1,dy=cy2-cy1;
+        const d=Math.sqrt(dx*dx+dy*dy)||1;
+        const f=0.05/d;
+        ga.forEach(n=>{if(n!==dragging){n.vx-=dx*f;n.vy-=dy*f;}});
+        gb.forEach(n=>{if(n!==dragging){n.vx+=dx*f;n.vy+=dy*f;}});
+      }
+    }
+    // Apply
+    entityNodes.forEach(n=>{
+      if(n===dragging)return;
+      n.vx*=0.82;n.vy*=0.82;
+      n.x+=n.vx*entSimAlpha;n.y+=n.vy*entSimAlpha;
+    });
+    entSimAlpha*=0.996;
+  }
+
+  // Draw edges
+  entityEdges.forEach(e=>{
+    const s=graphNodeMap[e.source_id],t=graphNodeMap[e.target_id];
+    if(!s||!t)return;
+    const dim=q&&!s.name.toLowerCase().includes(q)&&!t.name.toLowerCase().includes(q);
+    const isHov=hovered&&(e.source_id===hovered.id||e.target_id===hovered.id);
+    const isSel=selected&&(e.source_id===selected.id||e.target_id===selected.id);
+
+    const mx=(s.x+t.x)/2,my=(s.y+t.y)/2;
+    const dx=t.x-s.x,dy=t.y-s.y;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const curve=len*0.15;
+    const nx=-dy/len*curve,ny=dx/len*curve;
+
+    ctx.beginPath();
+    ctx.moveTo(s.x,s.y);
+    ctx.quadraticCurveTo(mx+nx,my+ny,t.x,t.y);
+
+    const relColor=REL_COLORS[e.relation]||'#475569';
+    if(dim){ctx.strokeStyle='rgba(30,41,59,0.2)';ctx.lineWidth=0.5;}
+    else if(isSel||isHov){ctx.strokeStyle=relColor+'dd';ctx.lineWidth=3;}
+    else{ctx.strokeStyle=relColor+'66';ctx.lineWidth=1.5;}
+    ctx.stroke();
+
+    // Edge label
+    if(!dim&&(isSel||isHov||cam.zoom>0.8)){
+      const labelX=mx+nx*0.5,labelY=my+ny*0.5;
+      const fontSize=Math.max(8,Math.min(11,9/cam.zoom*0.7));
+      ctx.font=`500 ${fontSize}px -apple-system,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=relColor+'99';
+      ctx.fillText(REL_CN[e.relation]||e.relation,labelX,labelY);
+    }
+  });
+
+  // Draw nodes
+  entityNodes.forEach(n=>{
+    const dim=q&&!n.name.toLowerCase().includes(q);
+    if(dim){ctx.globalAlpha=0.15;}
+
+    const c=COLORS[n.type]||'#64748b';
+    if(n===selected){
+      ctx.beginPath();ctx.arc(n.x,n.y,n.radius+8,0,Math.PI*2);
+      ctx.fillStyle='rgba(59,130,246,0.12)';ctx.fill();
+    }
+    ctx.beginPath();ctx.arc(n.x,n.y,n.radius,0,Math.PI*2);
+    ctx.fillStyle=c;ctx.fill();
+    if(n===selected){ctx.strokeStyle='#60a5fa';ctx.lineWidth=3;ctx.stroke();}
+    else if(n===hovered){ctx.strokeStyle='#e2e8f0';ctx.lineWidth=2;ctx.stroke();}
+
+    // Label
+    const showLabel=cam.zoom>0.4||n===hovered||n===selected;
+    if(showLabel&&!dim){
+      const fontSize=Math.max(9,Math.min(13,11/cam.zoom*0.7));
+      ctx.font=`600 ${fontSize}px -apple-system,'Microsoft YaHei',sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='bottom';
+      const label=n.name.length>16?n.name.substring(0,14)+'…':n.name;
+      ctx.fillStyle='rgba(10,14,23,0.85)';ctx.fillText(label,n.x+1,n.y-n.radius-5);
+      ctx.fillStyle='#e2e8f0';ctx.fillText(label,n.x,n.y-n.radius-6);
+    }
+
+    // Expand/collapse indicator
+    const _entTypes=['Method','Dataset','Metric','Concept','Task','Tool','Author','Organization'];
+    const hasUnshownNeighbors=n._adj&&n._adj.some(e=>{
+      const other=e.source_id===n.id?e.target_id:e.source_id;
+      return !graphNodeMap[other];
+    });
+    // Also check for peer entities via shared chunks/sections
+    const hasPeerEntities=!expandedSet.has(n.id)&&!isSeedNode(n.id)&&(()=>{
+      const srcChunks=n.source_chunk_ids||[];
+      const srcSec=n.source_section;
+      return allNodes.some(p=>{
+        if(p.id===n.id||graphNodeMap[p.id])return false;
+        if(!_entTypes.includes(p.type))return false;
+        const pChunks=p.source_chunk_ids||[];
+        if(srcChunks.length&&pChunks.some(c=>srcChunks.includes(c)))return true;
+        if(srcSec&&p.source_section===srcSec)return true;
+        return false;
+      });
+    })();
+    if((hasUnshownNeighbors||hasPeerEntities)&&!expandedSet.has(n.id)){
+      // Small "+" badge
+      const bx=n.x+n.radius*0.7,by=n.y-n.radius*0.7;
+      ctx.beginPath();ctx.arc(bx,by,6,0,Math.PI*2);
+      ctx.fillStyle='#1e293b';ctx.fill();
+      ctx.strokeStyle='#60a5fa';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.font='700 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#60a5fa';ctx.fillText('+',bx,by);
+    }else if(expandedSet.has(n.id)&&!isSeedNode(n.id)){
+      // Small "−" badge for expanded non-seed nodes
+      const bx=n.x+n.radius*0.7,by=n.y-n.radius*0.7;
+      ctx.beginPath();ctx.arc(bx,by,6,0,Math.PI*2);
+      ctx.fillStyle='#1e293b';ctx.fill();
+      ctx.strokeStyle='#94a3b8';ctx.lineWidth=1;ctx.stroke();
+      ctx.font='700 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#94a3b8';ctx.fillText('−',bx,by);
+    }else if(isSeedNode(n.id)){
+      // Small star badge for seed nodes
+      const bx=n.x+n.radius*0.7,by=n.y-n.radius*0.7;
+      ctx.beginPath();ctx.arc(bx,by,6,0,Math.PI*2);
+      ctx.fillStyle='#1e293b';ctx.fill();
+      ctx.strokeStyle='#f59e0b';ctx.lineWidth=1;ctx.stroke();
+      ctx.font='700 8px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#f59e0b';ctx.fillText('★',bx,by);
+    }
+
+    ctx.globalAlpha=1;
+  });
+
+  ctx.restore();
+}
+
+function entityHitTest(sx,sy){
+  const w=screenToWorld(sx,sy);
+  for(let i=entityNodes.length-1;i>=0;i--){
+    const n=entityNodes[i];
+    const dx=w.x-n.x,dy=w.y-n.y;
+    if(dx*dx+dy*dy<(n.radius+6)*(n.radius+6))return n;
+  }
+  return null;
+}
+
+function buildEntitySidebar(){
+  const sc=document.getElementById('sidebar-content');
+  const q=searchText;
+  const entityTypes=['Method','Dataset','Metric','Concept','Task','Tool','Author','Organization'];
+
+  let html='<div class="section-title">实体关系图</div>';
+  html+='<div style="font-size:11px;color:#64748b;margin-bottom:6px">点击节点展开关联实体 · 再次点击收起</div>';
+  html+=`<div style="font-size:11px;color:#60a5fa;margin-bottom:8px">图中节点: ${entityNodes.length} · 已展开: ${expandedSet.size}</div>`;
+  html+='<div style="font-size:10px;color:#475569;margin-bottom:8px;line-height:1.6">';
+  html+='★ 核心节点(固定) ◉ 已展开 ◎ 图中可收起<br>○ 可展开 · 孤立实体</div>';
+
+  entityTypes.forEach(t=>{
+    const ns=allNodes.filter(n=>n.type===t);
+    if(!ns.length)return;
+    const matchNs=ns.filter(n=>!q||n.name.toLowerCase().includes(q));
+    if(q&&!matchNs.length)return;
+    html+=`<div class="section-title">${TYPE_CN[t]||t} (${ns.length})</div>`;
+    (q?matchNs:ns).sort((a,b)=>(b._adj?b._adj.length:0)-(a._adj?a._adj.length:0)).slice(0,40).forEach(n=>{
+      const inGraph=!!graphNodeMap[n.id];
+      const isExpanded=expandedSet.has(n.id);
+      const isSeed=isSeedNode(n.id);
+      const adjCount=n._adj?n._adj.length:0;
+      const indicator=inGraph?(isSeed?'★':isExpanded?'◉':'◎'):(adjCount>0?'○':'·');
+      const opacity=inGraph?'1':'0.5';
+      const bg=inGraph?(selected&&selected.id===n.id?'background:#1e3a5f;border:1px solid #2563eb;':''):'';
+      html+=`<div class="ent-item" style="opacity:${opacity};${bg}" onclick="entitySidebarClick('${n.id}')">`+
+        `<div style="width:14px;text-align:center;font-size:10px;color:${inGraph?'#60a5fa':'#475569'}">${indicator}</div>`+
+        `<div class="ent-dot" style="background:${COLORS[n.type]}"></div>`+
+        `<div class="ent-name">${n.name.length>24?n.name.substring(0,22)+'…':n.name}</div>`+
+        `<span class="ent-badge">${adjCount}</span></div>`;
+    });
+  });
+
+  sc.innerHTML=html;
+}
+
+function entitySidebarClick(id){
+  const n=nodeMap[id];
+  if(!n)return;
+  if(graphNodeMap[id]){
+    // Already in graph — toggle expand/collapse or select
+    const isSeed=isSeedNode(id);
+    if(expandedSet.has(id)&&!isSeed){
+      collapseGraphNode(id);
+    }else if(!expandedSet.has(id)){
+      expandGraphNode(id);
+    }
+    selected=n;
+    showDetailForNode(n);
+  }else{
+    // Not in graph — add it and expand
+    addNodeToGraph(id);
+    expandGraphNode(id);
+    selected=graphNodeMap[id]||n;
+    showDetailForNode(selected);
+  }
+}
+
+function addNodeToGraph(nodeId){
+  if(graphNodeMap[nodeId])return;
+  const n=nodeMap[nodeId];
+  if(!n)return;
+  const graphNode={
+    ...n,
+    x:(Math.random()-0.5)*300,
+    y:(Math.random()-0.5)*300,
+    vx:0,vy:0,
+    radius:n.type==='Method'?14:n.type==='Metric'?10:n.type==='Task'?10:8
+  };
+  entityNodes.push(graphNode);
+  graphNodeMap[nodeId]=graphNode;
+}
+
+// ============ DASHBOARD VIEW ============
+function buildDashboardSidebar(){
+  const sc=document.getElementById('sidebar-content');
+  const q=searchText;
+  const entityTypes=['Method','Dataset','Metric','Concept','Task','Tool','Author','Organization'];
+
+  let html='<div class="section-title">实体总览</div>';
+
+  entityTypes.forEach(t=>{
+    const ns=allNodes.filter(n=>n.type===t&&(!q||n.name.toLowerCase().includes(q)));
+    if(!ns.length)return;
+    html+=`<div class="section-title">${TYPE_CN[t]||t} (${ns.length})</div>`;
+    ns.sort((a,b)=>b.degree-a.degree).slice(0,30).forEach(n=>{
+      const sel=selectedEntity&&selectedEntity.id===n.id;
+      html+=`<div class="ent-item${sel?' selected':''}" onclick="selectDashboardEntity('${n.id}')">`+
+        `<div class="ent-dot" style="background:${COLORS[n.type]}"></div>`+
+        `<div class="ent-name">${n.name.length>28?n.name.substring(0,26)+'…':n.name}</div>`+
+        `<span class="ent-badge">${n.degree}</span></div>`;
+    });
+  });
+
+  sc.innerHTML=html;
+}
+
+function selectDashboardEntity(id){
+  selectedEntity=nodeMap[id]||null;
+  buildDashboardSidebar();
+  drawDashboardDetail();
+}
+
+function drawDashboardDetail(){
+  if(!selectedEntity){closeDetail();return;}
+  const n=selectedEntity;
+  const p=document.getElementById('detail'),b=document.getElementById('detail-body');
+  const neighbors=[];
+  allEdges.forEach(e=>{
+    if(e.source_id===n.id){const t=nodeMap[e.target_id];if(t)neighbors.push({name:t.name,type:t.type,rel:e.relation,dir:'→',id:t.id});}
+    if(e.target_id===n.id){const s=nodeMap[e.source_id];if(s)neighbors.push({name:s.name,type:s.type,rel:e.relation,dir:'←',id:s.id});}
+  });
+
+  let h=`<h2>${n.name}</h2>`;
+  h+=`<div class="dr"><span class="dl">类型:</span> ${TYPE_CN[n.type]||n.type}</div>`;
+  h+=`<div class="dr"><span class="dl">关联数:</span> ${n.degree}</div>`;
+  if(n.description)h+=`<div class="dr"><span class="dl">描述:</span> ${n.description}</div>`;
+  if(n.source_doc_id)h+=`<div class="dr"><span class="dl">来源:</span> ${n.source_doc_id}</div>`;
+
+  // Related sections
+  const relatedSecs=allEdges.filter(e=>(e.source_id===n.id||e.target_id===n.id)&&e.relation==='CONTAINS')
+    .map(e=>{const sid=e.source_id===n.id?e.target_id:e.source_id;return nodeMap[sid];})
+    .filter(x=>x&&x.type==='Section');
+  if(relatedSecs.length){
+    h+=`<div class="dr" style="margin-top:6px"><span class="dl">所在章节:</span></div>`;
+    relatedSecs.slice(0,5).forEach(s=>{
+      h+=`<div style="font-size:11px;padding-left:8px;color:#94a3b8">· ${s.name}</div>`;
+    });
+  }
+
+  if(neighbors.length){
+    h+=`<div class="dr" style="margin-top:8px"><span class="dl">关联节点 (${neighbors.length}):</span></div>`;
+    neighbors.slice(0,20).forEach(nb=>{
+      const c=COLORS[nb.type]||'#64748b';
+      h+=`<div class="nb-item" onclick="selectDashboardEntity('${nb.id}')"><div class="nb-dot" style="background:${c}"></div>${nb.dir} [${REL_CN[nb.rel]||nb.rel}] ${nb.name.length>25?nb.name.substring(0,23)+'…':nb.name}</div>`;
+    });
+  }
+  b.innerHTML=h;p.style.display='block';
+}
+
+function drawDashboard(){
+  // Draw heatmap of entity type relationships
+  ctx.save();
+  ctx.translate(W/2+cam.x,H/2+cam.y);
+  ctx.scale(cam.zoom,cam.zoom);
+
+  const entityTypes=['Method','Dataset','Metric','Concept','Task','Tool'];
+  const n=entityTypes.length;
+  const cellSize=60;
+  const startX=-(n*cellSize)/2;
+  const startY=-(n*cellSize)/2-20;
+
+  // Title
+  ctx.font='700 14px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#60a5fa';ctx.fillText('实体类型关系矩阵',0,startY-30);
+
+  // Build matrix
+  const matrix=Array.from({length:n},()=>Array(n).fill(0));
+  allEdges.forEach(e=>{
+    if(e.relation==='CONTAINS')return;
+    const si=entityTypes.indexOf(nodeMap[e.source_id]?.type);
+    const ti=entityTypes.indexOf(nodeMap[e.target_id]?.type);
+    if(si>=0&&ti>=0){matrix[si][ti]++;matrix[ti][si]++;}
+  });
+
+  const maxVal=Math.max(1,...matrix.flat());
+
+  // Draw cells
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n;j++){
+      const val=matrix[i][j];
+      const intensity=val/maxVal;
+      const x=startX+j*cellSize;
+      const y=startY+i*cellSize;
+
+      ctx.fillStyle=val===0?'#1e293b':`rgba(59,130,246,${0.1+intensity*0.8})`;
+      ctx.fillRect(x+1,y+1,cellSize-2,cellSize-2);
+
+      if(val>0){
+        ctx.font='600 13px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillStyle='#e2e8f0';ctx.fillText(val,x+cellSize/2,y+cellSize/2);
+      }
+    }
+  }
+
+  // Row/col labels
+  ctx.font='500 11px -apple-system,sans-serif';ctx.fillStyle='#94a3b8';
+  entityTypes.forEach((t,i)=>{
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(TYPE_CN[t]||t,startX-8,startY+i*cellSize+cellSize/2);
+    ctx.save();
+    ctx.translate(startX+i*cellSize+cellSize/2,startY-8);
+    ctx.rotate(-Math.PI/4);
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(TYPE_CN[t]||t,0,0);
+    ctx.restore();
+  });
+
+  ctx.restore();
+}
+
+// ============ MAIN LOOP ============
+function loop(){
+  ctx.save();
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  ctx.clearRect(0,0,W,H);
+  try{
+    if(currentView==='sunburst')drawSunburst();
+    else if(currentView==='entity')drawEntityGraph();
+    else if(currentView==='dashboard')drawDashboard();
+  }catch(e){
+    console.error('Draw error:',e);
+    ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillStyle='#ef4444';
+    ctx.fillText('渲染出错: '+e.message,W/2,H/2);
+  }
+  ctx.restore();
+  requestAnimationFrame(loop);
+}
+
+// ============ INTERACTION ============
+function screenToWorld(sx,sy){return{x:(sx-W/2-cam.x)/cam.zoom,y:(sy-H/2-cam.y)/cam.zoom};}
+
+function hitTest(sx,sy){
+  if(currentView==='sunburst')return sunburstHitTest(sx,sy);
+  if(currentView==='entity')return entityHitTest(sx,sy);
+  return null;
+}
+
+canvas.addEventListener('mousedown',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const sx=e.clientX-rect.left,sy=e.clientY-rect.top;
+  const hit=hitTest(sx,sy);
+  if(hit){dragging=hit;dragging._fixed=true;}
+  else{panning=true;panStart={x:e.clientX,y:e.clientY,camX:cam.x,camY:cam.y};}
+});
+
+canvas.addEventListener('mousemove',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const sx=e.clientX-rect.left,sy=e.clientY-rect.top;
+  if(dragging){
+    if(currentView==='entity'){
+      const w=screenToWorld(sx,sy);
+      dragging.x=w.x;dragging.y=w.y;dragging.vx=0;dragging.vy=0;
+      entSimAlpha=Math.max(entSimAlpha,0.1);
+    }
+  }else if(panning){
+    cam.x=panStart.camX+(e.clientX-panStart.x);
+    cam.y=panStart.camY+(e.clientY-panStart.y);
+  }else{
+    const hit=hitTest(sx,sy);
+    hovered=hit;
+    canvas.style.cursor=hit?'pointer':'default';
+
+    // Update sunburst hovered sector
+    if(currentView==='sunburst'&&hit){
+      hoveredSector=sunburstSectors.find(s=>s.node===hit)||null;
+    }else{hoveredSector=null;}
+
+    // Tooltip
+    const tt=document.getElementById('tooltip');
+    if(hit){
+      tt.style.display='block';
+      tt.style.left=(e.clientX+16)+'px';tt.style.top=(e.clientY-8)+'px';
+      let h=`<div class="tt-name">${hit.name}</div>`;
+      h+=`<div class="tt-meta">${TYPE_CN[hit.type]||hit.type}`;
+      if(hit.degree!==undefined)h+=` · 关联 ${hit.degree}`;
+      h+=`</div>`;
+      if(hit.description)h+=`<div class="tt-desc">${hit.description}</div>`;
+      tt.innerHTML=h;
+    }else{tt.style.display='none';}
+  }
+});
+
+canvas.addEventListener('mouseup',e=>{
+  if(dragging){
+    if(!panning){
+      selected=dragging;
+      if(currentView==='entity'){
+        // Toggle expand/collapse on click
+        const isSeed=isSeedNode(dragging.id);
+        if(expandedSet.has(dragging.id)&&!isSeed){
+          collapseGraphNode(dragging.id);
+        }else if(!expandedSet.has(dragging.id)){
+          expandGraphNode(dragging.id);
+        }
+        showDetailForNode(dragging);
+      }else if(currentView==='dashboard'){
+        selectedEntity=dragging;
+        buildDashboardSidebar();
+        drawDashboardDetail();
+      }else{
+        showDetailForNode(dragging);
+      }
+    }
+    if(dragging._fixed)dragging._fixed=false;
+    dragging=null;
+  }
+  panning=false;
+});
+
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  cam.zoom=Math.max(0.1,Math.min(10,cam.zoom*(e.deltaY>0?0.9:1.1)));
+},{passive:false});
+
+canvas.addEventListener('dblclick',()=>fitView());
+
+function selectFromSidebar(id){
+  const n=nodeMap[id];
+  if(!n)return;
+  selected=n;
+  showDetailForNode(n);
+  if(currentView==='entity'){
+    // If node is in graph, pan to it
+    const gn=graphNodeMap[id];
+    if(gn){
+      cam.x=-gn.x*cam.zoom;cam.y=-gn.y*cam.zoom;
+    }
+  }
+}
+
+function showDetailForNode(n){
+  if(currentView==='dashboard'){drawDashboardDetail();return;}
+  const p=document.getElementById('detail'),b=document.getElementById('detail-body');
+  const neighbors=[];
+  allEdges.forEach(e=>{
+    if(e.source_id===n.id){const t=nodeMap[e.target_id];if(t)neighbors.push({name:t.name,type:t.type,rel:e.relation,dir:'→',id:t.id});}
+    if(e.target_id===n.id){const s=nodeMap[e.source_id];if(s)neighbors.push({name:s.name,type:s.type,rel:e.relation,dir:'←',id:s.id});}
+  });
+  let h=`<h2>${n.name}</h2>`;
+  h+=`<div class="dr"><span class="dl">类型:</span> ${TYPE_CN[n.type]||n.type}</div>`;
+  if(n.degree!==undefined)h+=`<div class="dr"><span class="dl">关联数:</span> ${n.degree}</div>`;
+  if(n.description)h+=`<div class="dr"><span class="dl">描述:</span> ${n.description}</div>`;
+  if(neighbors.length){
+    h+=`<div class="dr" style="margin-top:8px"><span class="dl">关联 (${neighbors.length}):</span></div>`;
+    neighbors.slice(0,25).forEach(nb=>{
+      const c=COLORS[nb.type]||'#64748b';
+      h+=`<div class="nb-item" onclick="selectFromSidebar('${nb.id}')"><div class="nb-dot" style="background:${c}"></div>${nb.dir} [${REL_CN[nb.rel]||nb.rel}] ${nb.name.length>28?nb.name.substring(0,26)+'…':nb.name}</div>`;
+    });
+  }
+  b.innerHTML=h;p.style.display='block';
+}
+
+function closeDetail(){document.getElementById('detail').style.display='none';selected=null;}
+function doZoom(f){cam.zoom=Math.max(0.1,Math.min(10,cam.zoom*f));}
+function fitView(){
+  if(currentView==='sunburst'){
+    cam={x:0,y:0,zoom:Math.min(W,H)/(Math.min(W,H)*0.9)};
+  }else if(currentView==='entity'){
+    if(!entityNodes.length)return;
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    entityNodes.forEach(n=>{minX=Math.min(minX,n.x-n.radius);maxX=Math.max(maxX,n.x+n.radius);minY=Math.min(minY,n.y-n.radius);maxY=Math.max(maxY,n.y+n.radius);});
+    const pad=60;
+    cam.zoom=Math.min(W/(maxX-minX+pad*2),H/(maxY-minY+pad*2),3);
+    cam.x=-(minX+maxX)/2*cam.zoom;cam.y=-(minY+maxY)/2*cam.zoom;
+  }else{cam={x:0,y:0,zoom:1};}
+}
+
+init();
+</script>
+</body>
+</html>

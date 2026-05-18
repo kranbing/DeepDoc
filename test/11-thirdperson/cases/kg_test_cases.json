@@ -1,0 +1,109 @@
+{
+  "description": "Knowledge Graph test cases for validation",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": "TC-01",
+      "name": "Entity extraction from single chunk",
+      "description": "Extract entities from a known chunk about NMT",
+      "input_chunk": {
+        "chunkId": "1912.01214_s000_p000",
+        "docId": "1912.01214",
+        "content": "Although Neural Machine Translation (NMT) has dominated recent research on translation tasks, NMT heavily relies on large-scale parallel data, resulting in poor performance on low-resource or zero-resource language pairs.",
+        "sectionTitle": "Introduction"
+      },
+      "expected_entities": [
+        {"name": "Neural Machine Translation", "type": "Method"},
+        {"name": "NMT", "type": "Method"},
+        {"name": "translation", "type": "Task"}
+      ],
+      "expected_min_entity_count": 2
+    },
+    {
+      "id": "TC-02",
+      "name": "Relation extraction from co-occurring entities",
+      "description": "Extract relations between entities in the same section",
+      "input_entities": [
+        {"name": "BERT", "type": "Method"},
+        {"name": "question answering", "type": "Task"},
+        {"name": "SQuAD", "type": "Dataset"}
+      ],
+      "input_context": "BERT achieves state-of-the-art results on SQuAD for question answering.",
+      "expected_relations": [
+        {"source": "BERT", "target": "SQuAD", "relation": "EVALUATES_ON"},
+        {"source": "BERT", "target": "question answering", "relation": "USES"}
+      ],
+      "expected_min_relation_count": 1
+    },
+    {
+      "id": "TC-03",
+      "name": "Entity deduplication",
+      "description": "Merge duplicate entities with different surface forms",
+      "input_entities": [
+        {"name": "BERT", "type": "Method"},
+        {"name": "bert", "type": "Method"},
+        {"name": "Bert", "type": "Method"},
+        {"name": "Bidirectional Encoder Representations from Transformers", "type": "Method"}
+      ],
+      "expected_output_count": 1,
+      "expected_canonical_name": "BERT"
+    },
+    {
+      "id": "TC-04",
+      "name": "Noise entity filtering",
+      "description": "Remove short, empty, or meaningless entities",
+      "input_entities": [
+        {"name": "a", "type": "Concept"},
+        {"name": "the", "type": "Concept"},
+        {"name": "", "type": "Concept"},
+        {"name": "  ", "type": "Concept"},
+        {"name": "NMT", "type": "Method"},
+        {"name": "is", "type": "Concept"}
+      ],
+      "expected_output_count": 1,
+      "expected_surviving": ["NMT"]
+    },
+    {
+      "id": "TC-05",
+      "name": "JSON store read/write",
+      "description": "Write graph to JSON and read it back",
+      "input_graph": {
+        "nodes": [
+          {"id": "m1", "type": "Method", "name": "BERT"},
+          {"id": "d1", "type": "Dataset", "name": "SQuAD"}
+        ],
+        "edges": [
+          {"source_id": "m1", "target_id": "d1", "relation": "EVALUATES_ON"}
+        ]
+      },
+      "expected_roundtrip": true
+    },
+    {
+      "id": "TC-06",
+      "name": "One-hop query",
+      "description": "Query one-hop neighbors of a node",
+      "input_node_name": "BERT",
+      "expected_min_neighbors": 1
+    },
+    {
+      "id": "TC-07",
+      "name": "Two-entity path query",
+      "description": "Check if path exists between two entities",
+      "input_source": "BERT",
+      "input_target": "SQuAD",
+      "expected_path_found": true
+    },
+    {
+      "id": "TC-08",
+      "name": "Full pipeline integration",
+      "description": "Run full pipeline on a single document and verify output",
+      "input_doc_id": "1603.09631",
+      "expected_outputs": {
+        "min_entities": 5,
+        "min_relations": 2,
+        "graph_json_exists": true,
+        "html_preview_exists": true
+      }
+    }
+  ]
+}

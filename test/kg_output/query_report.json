@@ -1,0 +1,73 @@
+{
+  "graph_summary": {
+    "total_nodes": 723,
+    "total_edges": 514,
+    "node_types": {
+      "Chunk": 381,
+      "Section": 213,
+      "Concept": 101,
+      "Method": 19,
+      "Metric": 4,
+      "Task": 2,
+      "Dataset": 2,
+      "Document": 1
+    },
+    "edge_types": {
+      "CONTAINS": 489,
+      "COMPARES_WITH": 23,
+      "ACHIEVES": 2
+    },
+    "density": 0.0009846630115362659
+  },
+  "search_BERT": {
+    "count": 1,
+    "top": [
+      {
+        "name": "BERT",
+        "type": "Method"
+      }
+    ]
+  },
+  "search_Transformer": {
+    "count": 2,
+    "top": [
+      {
+        "name": "End Transformer",
+        "type": "Concept"
+      },
+      {
+        "name": "Modal Transformers",
+        "type": "Concept"
+      }
+    ]
+  },
+  "search_NMT": {
+    "count": 0,
+    "top": []
+  },
+  "search_attention": {
+    "count": 1,
+    "top": [
+      {
+        "name": "Pattern Recognition",
+        "type": "Concept"
+      }
+    ]
+  },
+  "one_hop": {
+    "entity": "检索增强生成（RAG）",
+    "neighbor_count": 6
+  },
+  "path_query": {
+    "source": "检索增强生成（RAG）",
+    "target": "race",
+    "direct": false,
+    "paths": 0
+  },
+  "candidates_question_answering": {
+    "count": 1
+  },
+  "candidates_machine_translation": {
+    "count": 0
+  }
+}

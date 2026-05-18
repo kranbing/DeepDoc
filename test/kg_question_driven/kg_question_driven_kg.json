@@ -1,0 +1,2954 @@
+{
+  "metadata": {
+    "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+    "sourceDocId": "pdf_fdbd9e01",
+    "sourceDocName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+    "mode": "question_driven_incremental_kg",
+    "structuralPolicy": "Section/Chunk are evidence only, not main graph nodes.",
+    "generatedAt": "2026-05-18T08:24:29",
+    "trainQaCount": 10,
+    "nodeCount": 37,
+    "edgeCount": 36
+  },
+  "nodes": [
+    {
+      "id": "user_question",
+      "type": "Interaction",
+      "label": "用户问题",
+      "aliases": [],
+      "sourceQaIds": [
+        "system"
+      ],
+      "evidence": [],
+      "confidence": 0.75
+    },
+    {
+      "id": "deepdoc",
+      "type": "System",
+      "label": "DeepDoc",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_01"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c005",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "本项目的实施将在企业服务、教育教学以及社会价值三个层面产生积极影响。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c008"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "unstructured_document_problem",
+      "type": "Problem",
+      "label": "非结构化文档理解困难",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_01"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c005",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "本项目的实施将在企业服务、教育教学以及社会价值三个层面产生积极影响。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c008"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "knowledge_service_platform",
+      "type": "Capability",
+      "label": "知识服务平台",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_01"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c005",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "本项目的实施将在企业服务、教育教学以及社会价值三个层面产生积极影响。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c008"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "document_parsing",
+      "type": "Capability",
+      "label": "文档解析",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "layout_aware_retrieval",
+      "type": "Method",
+      "label": "布局感知检索",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "rag",
+      "type": "Method",
+      "label": "检索增强生成",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "knowledge_graph",
+      "type": "Method",
+      "label": "知识图谱",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "content_generation",
+      "type": "Capability",
+      "label": "内容生成",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "traditional_rag",
+      "type": "Method",
+      "label": "传统 RAG",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "flat_chunking",
+      "type": "Problem",
+      "label": "扁平切块",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "context_fragmentation",
+      "type": "Problem",
+      "label": "上下文碎片化",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "long_document_qa",
+      "type": "Task",
+      "label": "长文档问答",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "lad",
+      "type": "Method",
+      "label": "布局感知文档块 LAD",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "document_structure",
+      "type": "Concept",
+      "label": "文档结构",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "semantic_boundary",
+      "type": "Concept",
+      "label": "语义边界",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "retrieval_precision",
+      "type": "Metric",
+      "label": "检索精度",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "project_memory",
+      "type": "Capability",
+      "label": "项目级知识记忆",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_05"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "cross_document_qa",
+      "type": "Task",
+      "label": "跨文档问答",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_05"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "semantic_relation",
+      "type": "Concept",
+      "label": "语义关系",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_05"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "evidence_traceability",
+      "type": "Capability",
+      "label": "证据溯源",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_06"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c001",
+          "pageNo": 36,
+          "sectionId": "sec_0089",
+          "sectionTitle": "6.2.2 成员分工表",
+          "textPreview": "## 6.2.2 成员分工表"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "source_chunk",
+      "type": "Evidence",
+      "label": "来源 chunk",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_06"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c001",
+          "pageNo": 36,
+          "sectionId": "sec_0089",
+          "sectionTitle": "6.2.2 成员分工表",
+          "textPreview": "## 6.2.2 成员分工表"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "hallucination_risk",
+      "type": "Problem",
+      "label": "幻觉风险",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_06"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c001",
+          "pageNo": 36,
+          "sectionId": "sec_0089",
+          "sectionTitle": "6.2.2 成员分工表",
+          "textPreview": "## 6.2.2 成员分工表"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "chart_generation",
+      "type": "Task",
+      "label": "图表生成",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "report_generation",
+      "type": "Task",
+      "label": "文档生成",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "deliverable",
+      "type": "Concept",
+      "label": "交付物",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "enterprise_scenario",
+      "type": "Scenario",
+      "label": "企业场景",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "contract_review",
+      "type": "Task",
+      "label": "合同审查",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "knowledge_asset",
+      "type": "Concept",
+      "label": "知识资产",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "multi_source_integration",
+      "type": "Capability",
+      "label": "多源资料整合",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "education_scenario",
+      "type": "Scenario",
+      "label": "教育场景",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "literature_reading",
+      "type": "Task",
+      "label": "文献研读",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "course_knowledge_graph",
+      "type": "Task",
+      "label": "课程知识图谱",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "learning_path",
+      "type": "Concept",
+      "label": "学习路径",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "question_driven_kg",
+      "type": "Method",
+      "label": "问题驱动知识图谱",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "full_document_graph",
+      "type": "Method",
+      "label": "一次性全文图谱",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.75
+    },
+    {
+      "id": "cognitive_noise",
+      "type": "Problem",
+      "label": "认知噪声",
+      "aliases": [],
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.75
+    }
+  ],
+  "edges": [
+    {
+      "id": "deepdoc::solves::unstructured_document_problem",
+      "source": "deepdoc",
+      "relation": "solves",
+      "target": "unstructured_document_problem",
+      "sourceQaIds": [
+        "kg_train_01"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c005",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "本项目的实施将在企业服务、教育教学以及社会价值三个层面产生积极影响。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c008"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::provides::knowledge_service_platform",
+      "source": "deepdoc",
+      "relation": "provides",
+      "target": "knowledge_service_platform",
+      "sourceQaIds": [
+        "kg_train_01"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c005",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "本项目的实施将在企业服务、教育教学以及社会价值三个层面产生积极影响。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c008"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::uses::document_parsing",
+      "source": "deepdoc",
+      "relation": "uses",
+      "target": "document_parsing",
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::uses::layout_aware_retrieval",
+      "source": "deepdoc",
+      "relation": "uses",
+      "target": "layout_aware_retrieval",
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::uses::rag",
+      "source": "deepdoc",
+      "relation": "uses",
+      "target": "rag",
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::uses::knowledge_graph",
+      "source": "deepdoc",
+      "relation": "uses",
+      "target": "knowledge_graph",
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::supports::content_generation",
+      "source": "deepdoc",
+      "relation": "supports",
+      "target": "content_generation",
+      "sourceQaIds": [
+        "kg_train_02"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0009_c007"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "traditional_rag::has_limitation::flat_chunking",
+      "source": "traditional_rag",
+      "relation": "has_limitation",
+      "target": "flat_chunking",
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "flat_chunking::causes::context_fragmentation",
+      "source": "flat_chunking",
+      "relation": "causes",
+      "target": "context_fragmentation",
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "context_fragmentation::harms::long_document_qa",
+      "source": "context_fragmentation",
+      "relation": "harms",
+      "target": "long_document_qa",
+      "sourceQaIds": [
+        "kg_train_03"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c001",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "随着深度学习技术的快速发展，视觉文档理解领域取得了显著进展，从早期的基于图卷积的方法到端到端模型，再到近年来的预训练大模型，研究范式不断演进。同时，文字识别作为文档理解的基础支撑技术，其检测与识别方法的精度也在持续提升。文档布局分析则为理解文档结构提供了重要依据。近年来，随着大语言模型的兴起，基于检索增强生成（RAG）的文档问答系统成为研究热点，为知识密集型任务提供了新的解决方案。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "lad::preserves::document_structure",
+      "source": "lad",
+      "relation": "preserves",
+      "target": "document_structure",
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "lad::preserves::semantic_boundary",
+      "source": "lad",
+      "relation": "preserves",
+      "target": "semantic_boundary",
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "lad::improves::retrieval_precision",
+      "source": "lad",
+      "relation": "improves",
+      "target": "retrieval_precision",
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "lad::compared_with::flat_chunking",
+      "source": "lad",
+      "relation": "compared_with",
+      "target": "flat_chunking",
+      "sourceQaIds": [
+        "kg_train_04"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c004",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "<div align=\"center\">  表4-3工作模块任务安排表  </div>"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c002",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "成本优化策略："
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0025_c004",
+          "pageNo": 25,
+          "sectionId": "sec_0063",
+          "sectionTitle": "（一）模型训练成本",
+          "textPreview": "$ \\textcircled{2} $采用LoRA等高效微调技术，训练时长压缩 50%以上"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "knowledge_graph::acts_as::project_memory",
+      "source": "knowledge_graph",
+      "relation": "acts_as",
+      "target": "project_memory",
+      "sourceQaIds": [
+        "kg_train_05"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "knowledge_graph::supports::cross_document_qa",
+      "source": "knowledge_graph",
+      "relation": "supports",
+      "target": "cross_document_qa",
+      "sourceQaIds": [
+        "kg_train_05"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "knowledge_graph::stores::semantic_relation",
+      "source": "knowledge_graph",
+      "relation": "stores",
+      "target": "semantic_relation",
+      "sourceQaIds": [
+        "kg_train_05"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "evidence_traceability::uses::source_chunk",
+      "source": "evidence_traceability",
+      "relation": "uses",
+      "target": "source_chunk",
+      "sourceQaIds": [
+        "kg_train_06"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c001",
+          "pageNo": 36,
+          "sectionId": "sec_0089",
+          "sectionTitle": "6.2.2 成员分工表",
+          "textPreview": "## 6.2.2 成员分工表"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "evidence_traceability::reduces::hallucination_risk",
+      "source": "evidence_traceability",
+      "relation": "reduces",
+      "target": "hallucination_risk",
+      "sourceQaIds": [
+        "kg_train_06"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c001",
+          "pageNo": 36,
+          "sectionId": "sec_0089",
+          "sectionTitle": "6.2.2 成员分工表",
+          "textPreview": "## 6.2.2 成员分工表"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "knowledge_graph::requires::evidence_traceability",
+      "source": "knowledge_graph",
+      "relation": "requires",
+      "target": "evidence_traceability",
+      "sourceQaIds": [
+        "kg_train_06"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c001",
+          "pageNo": 36,
+          "sectionId": "sec_0089",
+          "sectionTitle": "6.2.2 成员分工表",
+          "textPreview": "## 6.2.2 成员分工表"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0036_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "content_generation::includes::chart_generation",
+      "source": "content_generation",
+      "relation": "includes",
+      "target": "chart_generation",
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "content_generation::includes::report_generation",
+      "source": "content_generation",
+      "relation": "includes",
+      "target": "report_generation",
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "chart_generation::produces::deliverable",
+      "source": "chart_generation",
+      "relation": "produces",
+      "target": "deliverable",
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "report_generation::produces::deliverable",
+      "source": "report_generation",
+      "relation": "produces",
+      "target": "deliverable",
+      "sourceQaIds": [
+        "kg_train_07"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c004",
+          "pageNo": 10,
+          "sectionId": "sec_0018",
+          "sectionTitle": "2.1.1 基于图卷积的视觉文档理解",
+          "textPreview": "## 2.1.1 基于图卷积的视觉文档理解"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c002"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::applies_to::enterprise_scenario",
+      "source": "deepdoc",
+      "relation": "applies_to",
+      "target": "enterprise_scenario",
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "enterprise_scenario::needs::contract_review",
+      "source": "enterprise_scenario",
+      "relation": "needs",
+      "target": "contract_review",
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "enterprise_scenario::needs::knowledge_asset",
+      "source": "enterprise_scenario",
+      "relation": "needs",
+      "target": "knowledge_asset",
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::supports::multi_source_integration",
+      "source": "deepdoc",
+      "relation": "supports",
+      "target": "multi_source_integration",
+      "sourceQaIds": [
+        "kg_train_08"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0007_c007",
+          "pageNo": 7,
+          "sectionId": "sec_0010",
+          "sectionTitle": "1.3 实际意义",
+          "textPreview": "对教育用户而言，本项目能够加速科研进程，帮助学生快速理解文献核心内容、自动梳理研究脉络、生成文献综述，将科研人员从重复性的文献筛选中解放出来；通过构建课程知识图谱，将教材、讲义、论文等学习资源有机连接，实现个性化知识推荐与关联学习，帮助学生建立整体认知；每个回答均可溯源至原始文档的具体段落，"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c003"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "deepdoc::applies_to::education_scenario",
+      "source": "deepdoc",
+      "relation": "applies_to",
+      "target": "education_scenario",
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "education_scenario::needs::literature_reading",
+      "source": "education_scenario",
+      "relation": "needs",
+      "target": "literature_reading",
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "education_scenario::needs::course_knowledge_graph",
+      "source": "education_scenario",
+      "relation": "needs",
+      "target": "course_knowledge_graph",
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "course_knowledge_graph::organizes::learning_path",
+      "source": "course_knowledge_graph",
+      "relation": "organizes",
+      "target": "learning_path",
+      "sourceQaIds": [
+        "kg_train_09"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0003_c002",
+          "pageNo": 3,
+          "sectionId": "sec_0003",
+          "sectionTitle": "Abstract",
+          "textPreview": "Keywords: Visual Document Understanding; Knowledge Graph; RAG; Multimodal LLM; Knowledge Service"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0034_c006"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0038_c004"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "question_driven_kg::expands_by::user_question",
+      "source": "question_driven_kg",
+      "relation": "expands_by",
+      "target": "user_question",
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "question_driven_kg::filters::cognitive_noise",
+      "source": "question_driven_kg",
+      "relation": "filters",
+      "target": "cognitive_noise",
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "full_document_graph::causes::cognitive_noise",
+      "source": "full_document_graph",
+      "relation": "causes",
+      "target": "cognitive_noise",
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    },
+    {
+      "id": "question_driven_kg::compared_with::full_document_graph",
+      "source": "question_driven_kg",
+      "relation": "compared_with",
+      "target": "full_document_graph",
+      "sourceQaIds": [
+        "kg_train_10"
+      ],
+      "evidence": [
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0010_c002",
+          "pageNo": 10,
+          "sectionId": "sec_0016",
+          "sectionTitle": "第2章 国内外研究现状",
+          "textPreview": "本章将从视觉文档理解、文字识别方法、文档布局分析以及RAG检索问答四个维度，系统梳理国内外研究现状，分析各技术路线的发展脉络、主要成果及现有局限，为本项目的研究奠定理论基础。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0024_c006",
+          "pageNo": 24,
+          "sectionId": "sec_0061",
+          "sectionTitle": "4.3 工作量",
+          "textPreview": "综上，14周开发周期虽紧张，但通过合理的任务分解与并行策略，在6人团队配置下具备可执行性。"
+        },
+        {
+          "projectId": "6cf73d20-55fb-43c6-987e-efc088417ca9",
+          "docId": "pdf_fdbd9e01",
+          "docName": "DeepDoc-文档理解与多源数据整合的知识服务平台.pdf",
+          "chunkId": "p0032_c009"
+        }
+      ],
+      "confidence": 0.72
+    }
+  ],
+  "buildLog": [
+    {
+      "qaId": "kg_train_01",
+      "question": "DeepDoc 这个项目要解决的核心问题是什么？",
+      "addedNodeCandidates": 3,
+      "addedEdgeCandidates": 2
+    },
+    {
+      "qaId": "kg_train_02",
+      "question": "DeepDoc 的整体技术路线包括哪些关键能力？",
+      "addedNodeCandidates": 5,
+      "addedEdgeCandidates": 5
+    },
+    {
+      "qaId": "kg_train_03",
+      "question": "为什么普通 RAG 对长文档效果不好？",
+      "addedNodeCandidates": 4,
+      "addedEdgeCandidates": 3
+    },
+    {
+      "qaId": "kg_train_04",
+      "question": "LAD 或布局感知机制相比传统 chunk 的价值是什么？",
+      "addedNodeCandidates": 4,
+      "addedEdgeCandidates": 4
+    },
+    {
+      "qaId": "kg_train_05",
+      "question": "知识图谱在 DeepDoc 中承担什么作用？",
+      "addedNodeCandidates": 3,
+      "addedEdgeCandidates": 3
+    },
+    {
+      "qaId": "kg_train_06",
+      "question": "DeepDoc 如何保证回答可追溯？",
+      "addedNodeCandidates": 3,
+      "addedEdgeCandidates": 3
+    },
+    {
+      "qaId": "kg_train_07",
+      "question": "平台为什么需要支持自动生成图表或文档？",
+      "addedNodeCandidates": 3,
+      "addedEdgeCandidates": 4
+    },
+    {
+      "qaId": "kg_train_08",
+      "question": "企业场景下 DeepDoc 的典型用途是什么？",
+      "addedNodeCandidates": 4,
+      "addedEdgeCandidates": 4
+    },
+    {
+      "qaId": "kg_train_09",
+      "question": "教育场景下知识图谱有什么价值？",
+      "addedNodeCandidates": 4,
+      "addedEdgeCandidates": 4
+    },
+    {
+      "qaId": "kg_train_10",
+      "question": "问题驱动图谱和一次性全文图谱有什么区别？",
+      "addedNodeCandidates": 3,
+      "addedEdgeCandidates": 4
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "raw_count": 174,
+    "cleaned_count": 49,
+    "removed_count": 125,
+    "dedup_rate": 0.718,
+    "raw_type_distribution": {
+      "Metric": 61,
+      "Concept": 59,
+      "Section": 50,
+      "Method": 2,
+      "Dataset": 2
+    },
+    "cleaned_type_distribution": {
+      "Concept": 25,
+      "Section": 17,
+      "Metric": 3,
+      "Method": 2,
+      "Dataset": 2
+    },
+    "raw_source_distribution": {
+      "rule_known_metric": 61,
+      "rule_section": 50,
+      "rule_capitalized": 18,
+      "rule_quoted": 16,
+      "rule_chinese_quoted": 13,
+      "rule_acronym": 12,
+      "rule_paren_acronym": 2,
+      "rule_known_dataset": 2
+    },
+    "cleaned_source_distribution": {
+      "rule_section": 17,
+      "rule_capitalized,rule_quoted": 7,
+      "rule_capitalized": 6,
+      "rule_acronym": 6,
+      "rule_quoted": 5,
+      "rule_known_metric": 3,
+      "rule_paren_acronym": 2,
+      "rule_known_dataset": 2,
+      "rule_chinese_quoted": 1
+    }
+  },
+  "relations": {
+    "raw_count": 67,
+    "cleaned_count": 67,
+    "removed_count": 0,
+    "type_distribution": {
+      "CONTAINS": 67
+    }
+  }
+}
